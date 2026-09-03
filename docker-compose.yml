@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Service 1: Chơi Game (Interactive Console)
+  game:
+    image: rpg-engine:game
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: rpg_engine_game
+    stdin_open: true  # Cho phép tương tác bàn phím (cin/stdin)
+    tty: true         # Bật TTY terminal cho Console UI
+    command: ./build/rpg_engine
+
+  # Service 2: Chạy Unit Tests
+  test:
+    image: rpg-engine:test
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: rpg_engine_tests
+    command: ctest --test-dir build --output-on-failure
+
+  # Service 3: Môi trường Development (Mount mã nguồn thực tế)
+  dev:
+    image: rpg-engine:dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: rpg_engine_dev
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+    command: /bin/bash
