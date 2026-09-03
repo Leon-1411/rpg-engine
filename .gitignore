@@ -1,0 +1,88 @@
+# ==========================================
+# Build directories & CMake output
+# ==========================================
+build/
+bin/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CMakeGraphVizOptions.cmake
+CTestTestfile.cmake
+Makefile
+*.dir/
+
+# ==========================================
+# Executables & Binary artifacts
+# ==========================================
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+
+# ==========================================
+# Debugging & Symbol files
+# ==========================================
+*.pdb
+*.ilk
+*.idb
+*.exp
+*.dSYM/
+
+# ==========================================
+# IDE & Editor files
+# ==========================================
+# Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.user
+*.suo
+
+# CLion / JetBrains
+.idea/
+cmake-build-*/
+
+# Language server & precompiled headers
+.cache/
+compile_commands.json
+*.gch
+*.pch
+
+# ==========================================
+# Project specific (Saves & Logs)
+# ==========================================
+saves/*.json
+!saves/.gitkeep
+*.log
+
+# ==========================================
+# OS Junk & Temporary files
+# ==========================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+*.swp
+*~
+
+# ==========================================
+# Sensitive files
+# ==========================================
+*.env
+*.key
+*.pem
