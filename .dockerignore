@@ -1,0 +1,23 @@
+# Docker build context exclusions
+.git
+.gitignore
+.vs/
+.vscode/
+.idea/
+build/
+bin/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.exe
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+saves/*.json
+!saves/.gitkeep

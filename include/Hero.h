@@ -34,6 +34,7 @@ public:
     virtual void heal(int amount);
     virtual void restoreMp(int amount);
     virtual void addExp(int amount);
+    virtual void levelUp();
 
     // Status checks
     bool isAlive() const;

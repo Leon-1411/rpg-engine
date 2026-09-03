@@ -45,6 +45,16 @@ void Hero::addExp(int amount) {
     }
 }
 
+void Hero::levelUp() {
+    level++;
+    maxHp += 15;
+    maxMp += 5;
+    attack += 3;
+    defense += 1;
+    hp = maxHp;
+    mp = maxMp;
+}
+
 bool Hero::isAlive() const {
     return hp > 0;
 }
