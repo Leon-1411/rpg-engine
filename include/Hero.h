@@ -45,6 +45,7 @@ public:
     HeroClass getHeroClass() const;
     int getLevel() const;
     int getExp() const;
+    int getExpToNextLevel() const;
     int getHp() const;
     int getMaxHp() const;
     int getMp() const;
@@ -56,4 +57,13 @@ public:
     void setMp(int value);
     void setLevel(int value);
     void setExp(int value);
+    void setMaxHp(int value);
+    void setMaxMp(int value);
+    void setAttack(int value);
+    void setDefense(int value);
+
+    void increaseMaxHp(int amount);
+    void increaseMaxMp(int amount);
+    void increaseAttack(int amount);
+    void increaseDefense(int amount);
 };
