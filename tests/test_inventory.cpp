@@ -12,8 +12,8 @@ int main() {
     assert(inv.addItem(wpn) == true);
     assert(inv.getItemCount() == 2);
 
-    Hero hero("Tester", HeroClass::WARRIOR, 100, 20, 10, 5);
-    hero.takeDamage(40); // HP = 65
+    Hero hero("Tester", HeroClass::WARRIOR, 100, 10, 5);
+    hero.takeDamage(35); // 100 - 35 = 65
     assert(hero.getHp() == 65);
 
     // Use potion at index 0

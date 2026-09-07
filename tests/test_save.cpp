@@ -4,7 +4,7 @@
 
 int main() {
     SaveManager manager;
-    Hero hero("SavedHero", HeroClass::WARRIOR, 100, 20, 10, 5);
+    Hero hero("SavedHero", HeroClass::WARRIOR);
     StoryGraph story;
 
     assert(manager.saveGame(1, hero, story) == true);

@@ -11,10 +11,11 @@ struct GameState {
     int exp;
     int hp;
     int maxHp;
-    int mp;
-    int maxMp;
     int attack;
     int defense;
+    int armorPenetration;
+    float critChance;
+    float critDamage;
     std::string currentStoryNodeId;
 };
 
