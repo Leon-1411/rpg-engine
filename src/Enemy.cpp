@@ -37,5 +37,6 @@ int Enemy::getAttack() const { return attack; }
 int Enemy::getDefense() const { return defense; }
 int Enemy::getExpReward() const { return expReward; }
 int Enemy::getGoldReward() const { return goldReward; }
+std::string Enemy::getSpecialSkillName() const { return ""; }
 
 void Enemy::setHp(int value) { hp = std::clamp(value, 0, maxHp); }

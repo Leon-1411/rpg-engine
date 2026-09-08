@@ -1,0 +1,50 @@
+{
+  "goblin": {
+    "name": "Goblin",
+    "type": "MINION",
+    "minionType": "GOBLIN",
+    "hp": 60,
+    "attack": 12,
+    "defense": 5,
+    "expReward": 40,
+    "goldReward": 10,
+    "description": "A small, cunning creature that strikes quickly from the shadows.",
+    "specialSkill": "Quick Strike"
+  },
+  "skeleton": {
+    "name": "Skeleton Warrior",
+    "type": "MINION",
+    "minionType": "SKELETON",
+    "hp": 80,
+    "attack": 18,
+    "defense": 8,
+    "expReward": 65,
+    "goldReward": 20,
+    "description": "An undead soldier wielding a rusty sword with relentless determination.",
+    "specialSkill": "Bone Pierce"
+  },
+  "orc": {
+    "name": "Orc Berserker",
+    "type": "MINION",
+    "minionType": "ORC",
+    "hp": 120,
+    "attack": 25,
+    "defense": 12,
+    "expReward": 100,
+    "goldReward": 35,
+    "description": "A muscular beast fueled by bloodlust, hitting harder when enraged.",
+    "specialSkill": "Heavy Slam"
+  },
+  "dark_knight": {
+    "name": "Dark Knight",
+    "type": "MINION",
+    "minionType": "DARK_KNIGHT",
+    "hp": 160,
+    "attack": 32,
+    "defense": 18,
+    "expReward": 150,
+    "goldReward": 60,
+    "description": "A fallen warrior encased in cursed armor, wielding dark magic.",
+    "specialSkill": "Shadow Slash"
+  }
+}

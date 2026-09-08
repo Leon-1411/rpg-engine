@@ -6,6 +6,7 @@
 
 #include "Hero.h"
 #include "Enemy.h"
+#include "Minion.h"
 #include "Item.h"
 #include "Inventory.h"
 #include "CombatEngine.h"
@@ -35,11 +36,23 @@ int main() {
     StoryNode current = story.getCurrentNode();
     std::cout << "\n[Story Node: " << current.id << "]\n" << current.text << "\n";
 
-    // 4. Initialize Enemy & Combat Engine (Nhật & Lợi)
-    Enemy minion("Goblin Scout", EnemyType::MINION, 40, 12, 3, 50, 15);
-    minion.displayStats();
+    // 4. Initialize Minion & Combat Engine from JSON (Nhật & Lợi)
+    std::cout << "\n[Loading Minions from data/enemies.json]\n";
+    auto loadedMinions = MinionFactory::loadAllFromJson("data/enemies.json");
+    for (const auto& m : loadedMinions) {
+        std::cout << " - Loaded: " << m->getName() << " [" << minionTypeToString(m->getMinionType())
+                  << "] (HP: " << m->getHp() << ", ATK: " << m->getAttack()
+                  << ", DEF: " << m->getDefense() << ")\n";
+    }
 
-    CombatEngine combat(player, minion);
+    auto minion = MinionFactory::createFromJson("goblin", "data/enemies.json");
+    if (!minion) {
+        minion = std::make_shared<Goblin>();
+    }
+    std::cout << "\nEncountered an enemy:\n";
+    minion->displayStats();
+
+    CombatEngine combat(player, *minion);
     combat.startBattle();
     
     // Simulate a battle turn

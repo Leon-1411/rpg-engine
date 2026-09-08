@@ -11,6 +11,7 @@ include_directories(include)
 set(SOURCES
     src/Hero.cpp
     src/Enemy.cpp
+    src/Minion.cpp
     src/Item.cpp
     src/Inventory.cpp
     src/CombatEngine.cpp
