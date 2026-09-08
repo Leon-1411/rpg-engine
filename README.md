@@ -60,3 +60,44 @@ cmake --build build
 cd build
 ctest --output-on-failure
 ```
+
+---
+
+## 🐳 Hướng dẫn Chạy bằng Docker & Docker Compose
+
+Nếu máy bạn chưa cài sẵn CMake hoặc C++ Toolchain, bạn có thể build và chạy toàn bộ ứng dụng qua Docker.
+
+### 1. Yêu cầu tiên quyết
+- Đã cài đặt [Docker Desktop](https://www.docker.com/products/docker-desktop/) và đang khởi chạy.
+- Trên Windows: đảm bảo WSL2 backend đã được cài đặt (`wsl --install`).
+
+### 2. Build Docker Images
+Biên dịch các stage `builder` và `runner`:
+```bash
+docker compose build
+```
+
+### 3. Chơi Game (Interactive Console UI)
+Khởi chạy console game có tương tác bàn phím (lưu dữ liệu tự động vào thư mục `./saves` trên máy thật):
+```bash
+docker compose run --rm game
+```
+> **Lưu ý:** Sử dụng `run --rm` thay vì `docker compose up` để kết nối trực tiếp bàn phím (stdin/TTY) cho việc nhập liệu trong game.
+
+### 4. Chạy toàn bộ Unit Tests
+```bash
+docker compose run --rm test
+```
+
+### 5. Mở môi trường Development (C++ Toolchain trong Linux)
+Mount toàn bộ mã nguồn vào container để dev, biên dịch và debug trực tiếp:
+```bash
+docker compose run --rm dev
+```
+Trong môi trường container, bạn có thể trực tiếp gõ các lệnh như:
+```bash
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+./build/rpg_engine
+```
+

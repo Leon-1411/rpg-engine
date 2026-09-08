@@ -4,8 +4,9 @@ project(rpg_engine VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include directory
+# Include directories
 include_directories(include)
+include_directories(include/ui)
 
 # Source files for core library/game
 set(SOURCES
@@ -16,6 +17,11 @@ set(SOURCES
     src/CombatEngine.cpp
     src/StoryGraph.cpp
     src/SaveManager.cpp
+    src/ui/ConsoleUI.cpp
+    src/ui/ASCIIArt.cpp
+    src/ui/MainMenu.cpp
+    src/ui/BattleUI.cpp
+    src/ui/InventoryUI.cpp
 )
 
 # Core engine static library

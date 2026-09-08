@@ -67,6 +67,7 @@ compile_commands.json
 # ==========================================
 saves/*.json
 !saves/.gitkeep
+saves_test/
 *.log
 
 # ==========================================
