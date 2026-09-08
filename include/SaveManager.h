@@ -4,6 +4,17 @@
 #include "StoryGraph.h"
 #include <string>
 
+struct SavedItemRecord {
+    std::string id;
+    std::string name;
+    std::string description;
+    int type; // 0: WEAPON, 1: ARMOR, 2: POTION
+    int statValue;
+    int quantity;
+    bool isEquippedWeapon;
+    bool isEquippedArmor;
+};
+
 struct GameState {
     std::string heroName;
     HeroClass heroClass;
@@ -16,7 +27,13 @@ struct GameState {
     int attack;
     int defense;
     std::string currentStoryNodeId;
+
+    // Trạng thái mảng Inventory
+    std::vector<SavedItemRecord> inventoryItems;
+    int equippedWeaponIndex = -1;
+    int equippedArmorIndex = -1;
 };
+
 
 class SaveManager {
 private:

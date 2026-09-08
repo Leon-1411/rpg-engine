@@ -28,7 +28,13 @@ int main() {
     Item sword("wpn_01", "Iron Sword", "Sharp blade", ItemType::WEAPON, 10);
     inv.addItem(potion);
     inv.addItem(sword);
+    inv.equipWeapon(1); // Equip Iron Sword
     inv.listItems();
+
+    // Give player equipment in hero inventory
+    player.getInventory().addItem(sword);
+    player.getInventory().equipWeapon(0);
+
 
     // 3. Initialize Story Graph (Nghĩa)
     StoryGraph story;

@@ -76,7 +76,24 @@ int Hero::getMaxMp() const { return maxMp; }
 int Hero::getAttack() const { return attack; }
 int Hero::getDefense() const { return defense; }
 
+Inventory& Hero::getInventory() {
+    return inventory;
+}
+
+const Inventory& Hero::getInventory() const {
+    return inventory;
+}
+
+int Hero::getEffectiveAttack() const {
+    return attack + inventory.getEquippedWeaponBonus();
+}
+
+int Hero::getEffectiveDefense() const {
+    return defense + inventory.getEquippedArmorBonus();
+}
+
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
 void Hero::setLevel(int value) { level = value; }
 void Hero::setExp(int value) { exp = value; }
+
