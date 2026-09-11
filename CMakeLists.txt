@@ -4,18 +4,30 @@ project(rpg_engine VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include directory
+# Include directories
 include_directories(include)
+include_directories(include/ui)
 
 # Source files for core library/game
 set(SOURCES
     src/Hero.cpp
+    src/Warrior.cpp
+    src/Mage.cpp
+    src/Ranger.cpp
+    src/LevelSystem.cpp
     src/Enemy.cpp
+    src/Minion.cpp
+    src/BossMonster.cpp
     src/Item.cpp
     src/Inventory.cpp
     src/CombatEngine.cpp
     src/StoryGraph.cpp
     src/SaveManager.cpp
+    src/ui/ConsoleUI.cpp
+    src/ui/ASCIIArt.cpp
+    src/ui/MainMenu.cpp
+    src/ui/BattleUI.cpp
+    src/ui/InventoryUI.cpp
 )
 
 # Core engine static library
@@ -34,4 +46,5 @@ foreach(TEST_SRC ${TEST_FILES})
     add_executable(${TEST_NAME} ${TEST_SRC})
     target_link_libraries(${TEST_NAME} PRIVATE rpg_core)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    set_tests_properties(${TEST_NAME} PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 endforeach()
