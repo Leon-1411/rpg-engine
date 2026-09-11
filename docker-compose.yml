@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Service 1: Chơi Game (Interactive Console)
   game:
@@ -12,7 +10,7 @@ services:
     stdin_open: true  # Cho phép tương tác bàn phím (cin/stdin)
     tty: true         # Bật TTY terminal cho Console UI
     volumes:
-      - ./saves:/app/saves
+      - ./saves:/app/saves  # Đồng bộ file lưu game (Save Slots) về máy host
     command: ./build/rpg_engine
 
   # Service 2: Chạy Unit Tests

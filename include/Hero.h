@@ -33,18 +33,21 @@ public:
     virtual void takeDamage(int damage);
     virtual void heal(int amount);
     virtual void restoreMp(int amount);
-    virtual void addExp(int amount);
+    virtual bool addExp(int amount);
     virtual void levelUp();
 
     // Status checks
     bool isAlive() const;
     void displayStats() const;
+    virtual std::string getSkillName(int skillIndex) const;
+    virtual void displaySkills() const;
 
     // Getters & Setters
     std::string getName() const;
     HeroClass getHeroClass() const;
     int getLevel() const;
     int getExp() const;
+    int getExpToNextLevel() const;
     int getHp() const;
     int getMaxHp() const;
     int getMp() const;
@@ -56,4 +59,13 @@ public:
     void setMp(int value);
     void setLevel(int value);
     void setExp(int value);
+    void setMaxHp(int value);
+    void setMaxMp(int value);
+    void setAttack(int value);
+    void setDefense(int value);
+
+    void increaseMaxHp(int amount);
+    void increaseMaxMp(int amount);
+    void increaseAttack(int amount);
+    void increaseDefense(int amount);
 };
