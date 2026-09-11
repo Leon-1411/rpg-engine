@@ -11,6 +11,10 @@ include_directories(include/ui)
 # Source files for core library/game
 set(SOURCES
     src/Hero.cpp
+    src/Warrior.cpp
+    src/Mage.cpp
+    src/Ranger.cpp
+    src/LevelSystem.cpp
     src/Enemy.cpp
     src/Item.cpp
     src/Inventory.cpp
