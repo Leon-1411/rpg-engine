@@ -72,13 +72,22 @@ int CombatEngine::calculateDamage(int attackerAttack, int defenderDefense) const
 
 void CombatEngine::processEnemyTurn() {
     int enemyAction = enemy.chooseAction();
-    if (enemyAction == 1) {
+    if (enemyAction == 2) {
+        std::string skillName = enemy.getSpecialSkillName();
+        if (skillName.empty()) skillName = "Special Skill";
+        int skillDmg = static_cast<int>(enemy.getAttack() * 1.4);
+        int displayDmg = calculateDamage(skillDmg, hero.getEffectiveDefense());
+        hero.takeDamage(skillDmg);
+        std::cout << enemy.getName() << " unleashes [" << skillName << "] on "
+                  << hero.getName() << " for " << displayDmg << " damage!\n";
+    } else {
         // Truyền raw attack; Hero::takeDamage tự áp getEffectiveDefense() bên trong
         int rawAtk     = enemy.getAttack();
         int displayDmg = calculateDamage(rawAtk, hero.getEffectiveDefense()); // chỉ để log
         hero.takeDamage(rawAtk);
         std::cout << enemy.getName() << " attacks " << hero.getName()
                   << " for " << displayDmg << " damage!\n";
+    }
     }
 }
 

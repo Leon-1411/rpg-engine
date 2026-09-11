@@ -3,6 +3,7 @@
 #include "Hero.h"
 #include "StoryGraph.h"
 #include <string>
+#include <vector>
 
 struct SavedItemRecord {
     std::string id;
@@ -38,6 +39,7 @@ struct GameState {
 class SaveManager {
 private:
     std::string saveDirectory;
+    std::string getSlotFilePath(int slot) const;
 
 public:
     explicit SaveManager(const std::string& saveDir = "saves/");
@@ -47,4 +49,6 @@ public:
     bool loadGame(int slot, Hero& hero, StoryGraph& story);
     bool slotExists(int slot) const;
     bool deleteSlot(int slot);
+    std::vector<int> getExistingSlots() const;
+    std::string getSaveDirectory() const;
 };
