@@ -11,6 +11,8 @@ services:
     container_name: rpg_engine_game
     stdin_open: true  # Cho phép tương tác bàn phím (cin/stdin)
     tty: true         # Bật TTY terminal cho Console UI
+    volumes:
+      - ./saves:/app/saves
     command: ./build/rpg_engine
 
   # Service 2: Chạy Unit Tests

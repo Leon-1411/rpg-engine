@@ -12,6 +12,7 @@ set(SOURCES
     src/Hero.cpp
     src/Enemy.cpp
     src/Minion.cpp
+    src/BossMonster.cpp
     src/Item.cpp
     src/Inventory.cpp
     src/CombatEngine.cpp
@@ -35,4 +36,5 @@ foreach(TEST_SRC ${TEST_FILES})
     add_executable(${TEST_NAME} ${TEST_SRC})
     target_link_libraries(${TEST_NAME} PRIVATE rpg_core)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    set_tests_properties(${TEST_NAME} PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 endforeach()

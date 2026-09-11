@@ -7,6 +7,7 @@
 #include "Hero.h"
 #include "Enemy.h"
 #include "Minion.h"
+#include "BossMonster.h"
 #include "Item.h"
 #include "Inventory.h"
 #include "CombatEngine.h"
@@ -61,7 +62,28 @@ int main() {
         combat.executeTurn(1); // Hero attacks again
     }
 
-    // 5. Save Manager Test (Phong)
+    // 5. Initialize Boss & Demonstrate Enrage + Healing Mechanic
+    std::cout << "\n[Loading Boss from data/enemies.json]\n";
+    auto boss = BossFactory::createFromJson("dragon_lord", "data/enemies.json");
+    if (!boss) {
+        boss = std::make_shared<BossMonster>();
+    }
+    boss->displayStats();
+
+    // Create high-level hero to battle the boss
+    Hero raidBossHero("Grand Paladin", HeroClass::WARRIOR, 600, 150, 150, 30);
+    CombatEngine bossCombat(raidBossHero, *boss);
+    bossCombat.startBattle();
+
+    // Turn 1
+    bossCombat.executeTurn(1);
+
+    // Simulate boss HP dropping below 30% to demonstrate Enrage & slight healing
+    std::cout << "\n>>> Inflicting heavy blow to boss to test < 30% HP Enrage mechanic...\n";
+    boss->setHp(120); // 120 / 525 = 22.8% < 30%
+    bossCombat.executeTurn(1); // Triggers enrage +50% ATK/DEF and slight HP regen on boss turn
+
+    // 6. Save Manager Test (Phong)
     SaveManager saveMgr;
     saveMgr.saveGame(1, player, story);
 

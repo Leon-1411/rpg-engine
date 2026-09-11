@@ -46,5 +46,17 @@
     "goldReward": 60,
     "description": "A fallen warrior encased in cursed armor, wielding dark magic.",
     "specialSkill": "Shadow Slash"
+  },
+  "dragon_lord": {
+    "name": "Dragon Lord",
+    "type": "BOSS",
+    "hp": 525,
+    "attack": 105,
+    "defense": 50,
+    "expReward": 450,
+    "goldReward": 150,
+    "description": "Ancient dread sovereign with crushing power and fiery fury, 5x stronger than regular minions.",
+    "specialSkill": "Infernal Cataclysm",
+    "healAmount": 25
   }
 }

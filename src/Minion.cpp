@@ -242,6 +242,10 @@ std::vector<std::shared_ptr<Minion>> MinionFactory::loadAllFromJson(const std::s
         nlohmann::json data;
         file >> data;
         for (auto& [key, value] : data.items()) {
+            std::string type = value.value("type", "MINION");
+            if (type == "BOSS") {
+                continue;
+            }
             minions.push_back(createFromJsonObject(key, value));
         }
     } catch (const std::exception& e) {
