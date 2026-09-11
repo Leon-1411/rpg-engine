@@ -104,7 +104,6 @@ bool Inventory::useItem(int index, Hero& hero) {
     if (index < 0 || index >= static_cast<int>(items.size())) {
         return false;
     }
-
     auto item = items[index];
     if (item->getType() == ItemType::POTION) {
         auto potion = std::dynamic_pointer_cast<Potion>(item);
@@ -120,6 +119,7 @@ bool Inventory::useItem(int index, Hero& hero) {
             removeItem(index);
             return true;
         }
+    }
     }
     return false;
 }
