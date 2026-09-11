@@ -27,7 +27,8 @@ public:
     virtual int chooseAction(); // Returns action type (1: Normal attack, 2: Special skill, etc.)
     virtual void takeDamage(int damage);
     bool isAlive() const;
-    void displayStats() const;
+    virtual void displayStats() const;
+    virtual std::string getSpecialSkillName() const;
 
     // Getters & Setters
     std::string getName() const;
