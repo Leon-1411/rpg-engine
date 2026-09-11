@@ -52,6 +52,10 @@ int main() {
     inv.equipWeapon(1);
     inv.equipArmor(2);
 
+    // Give player equipment in hero inventory
+    player.getInventory().addItem(sword);
+    player.getInventory().equipWeapon(0);
+
     InventoryUI invUI;
     invUI.renderInventory(inv);
     ConsoleUI::printSuccess("Khởi tạo Túi đồ và trang bị thành công!");

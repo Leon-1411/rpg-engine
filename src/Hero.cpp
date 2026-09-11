@@ -26,7 +26,8 @@ bool Hero::useSkill(int skillIndex, int& outDamage) {
 }
 
 void Hero::takeDamage(int damage) {
-    int effectiveDamage = std::max(1, damage - defense);
+    // D\u00f9ng getEffectiveDefense() \u0111\u1ec3 c\u1ed9ng d\u1ed3n bonus Armor \u0111ang trang b\u1ecb
+    int effectiveDamage = std::max(1, damage - getEffectiveDefense());
     hp = std::max(0, hp - effectiveDamage);
 }
 
@@ -78,6 +79,22 @@ int Hero::getMp() const { return mp; }
 int Hero::getMaxMp() const { return maxMp; }
 int Hero::getAttack() const { return attack; }
 int Hero::getDefense() const { return defense; }
+
+Inventory& Hero::getInventory() {
+    return inventory;
+}
+
+const Inventory& Hero::getInventory() const {
+    return inventory;
+}
+
+int Hero::getEffectiveAttack() const {
+    return attack + inventory.getEquippedWeaponBonus();
+}
+
+int Hero::getEffectiveDefense() const {
+    return defense + inventory.getEquippedArmorBonus();
+}
 
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }

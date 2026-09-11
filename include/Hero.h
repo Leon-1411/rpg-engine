@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "Inventory.h"
 
 enum class HeroClass {
     WARRIOR,
@@ -22,6 +23,7 @@ protected:
     int maxMp;
     int attack;
     int defense;
+    Inventory inventory;
 
 public:
     Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense);
@@ -55,6 +57,12 @@ public:
     int getAttack() const;
     int getDefense() const;
 
+    // Inventory & Equipment bonuses
+    Inventory& getInventory();
+    const Inventory& getInventory() const;
+    int getEffectiveAttack() const;
+    int getEffectiveDefense() const;
+
     void setHp(int value);
     void setMp(int value);
     void setLevel(int value);
@@ -69,3 +77,4 @@ public:
     void increaseAttack(int amount);
     void increaseDefense(int amount);
 };
+

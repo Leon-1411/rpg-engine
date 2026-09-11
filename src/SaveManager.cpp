@@ -1,6 +1,6 @@
 /**
  * @file SaveManager.cpp
- * @brief Implement SaveManager class methods with nlohmann/json serialization.
+ * @brief Implement SaveManager class methods with nlohmann/json serialization & Inventory persistence.
  * @author Phong
  */
 
@@ -30,6 +30,7 @@ std::string SaveManager::getSaveDirectory() const {
 }
 
 bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
+bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
     std::error_code ec;
     if (!fs::exists(saveDirectory, ec)) {
         fs::create_directories(saveDirectory, ec);
@@ -50,6 +51,28 @@ bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) 
         j["attack"] = hero.getAttack();
         j["defense"] = hero.getDefense();
         j["currentStoryNodeId"] = story.getCurrentNode().id;
+
+        // Save Inventory items & equipment indices
+        const Inventory& inv = hero.getInventory();
+        j["equippedWeaponIndex"] = inv.getEquippedWeaponIndex();
+        j["equippedArmorIndex"] = inv.getEquippedArmorIndex();
+
+        json itemsJson = json::array();
+        const auto& items = inv.getItems();
+        for (size_t i = 0; i < items.size(); ++i) {
+            json itemJ;
+            itemJ["id"] = items[i]->getId();
+            itemJ["name"] = items[i]->getName();
+            itemJ["description"] = items[i]->getDescription();
+            itemJ["type"] = static_cast<int>(items[i]->getType());
+            itemJ["statValue"] = items[i]->getStatValue();
+            auto potion = std::dynamic_pointer_cast<Potion>(items[i]);
+            itemJ["quantity"] = potion ? potion->getQuantity() : 1;
+            itemJ["isEquippedWeapon"] = (static_cast<int>(i) == inv.getEquippedWeaponIndex());
+            itemJ["isEquippedArmor"] = (static_cast<int>(i) == inv.getEquippedArmorIndex());
+            itemsJson.push_back(itemJ);
+        }
+        j["inventory"] = itemsJson;
 
         std::ofstream outFile(filePath);
         if (!outFile.is_open()) {
@@ -97,11 +120,42 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
             story.moveToNode(nodeId);
         }
 
+        // Restore inventory items
+        if (j.contains("inventory") && j["inventory"].is_array()) {
+            Inventory& inv = hero.getInventory();
+            inv.clear();
+            for (const auto& itemJ : j["inventory"]) {
+                std::string id = itemJ.value("id", "");
+                std::string name = itemJ.value("name", "");
+                std::string desc = itemJ.value("description", "");
+                ItemType type = static_cast<ItemType>(itemJ.value("type", 0));
+                int statVal = itemJ.value("statValue", 0);
+                int qty = itemJ.value("quantity", 1);
+
+                if (type == ItemType::POTION) {
+                    Item potion(id, name, desc, type, statVal, qty);
+                    inv.addItem(potion);
+                } else {
+                    Item equip(id, name, desc, type, statVal);
+                    inv.addItem(equip);
+                }
+            }
+            if (j.contains("equippedWeaponIndex")) {
+                int wIdx = j["equippedWeaponIndex"].get<int>();
+                if (wIdx >= 0) inv.equipWeapon(wIdx);
+            }
+            if (j.contains("equippedArmorIndex")) {
+                int aIdx = j["equippedArmorIndex"].get<int>();
+                if (aIdx >= 0) inv.equipArmor(aIdx);
+            }
+        }
+
         return true;
     } catch (const std::exception& e) {
         std::cerr << "[SaveManager] Exception during load: " << e.what() << "\n";
         return false;
     }
+}
 }
 
 bool SaveManager::slotExists(int slot) const {
