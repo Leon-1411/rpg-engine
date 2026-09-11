@@ -5,6 +5,7 @@
  */
 
 #include "Hero.h"
+#include "LevelSystem.h"
 #include <algorithm>
 #include <cstdlib>
 
@@ -59,7 +60,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
-    : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp),
+    : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(50), maxMp(50),
       attack(attack), defense(defense), armorPenetration(armorPen),
       critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
@@ -72,6 +73,28 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
         case HeroClass::RANGER:  maxCooldowns = {2, 1, 5}; break;
         case HeroClass::MAGE:    maxCooldowns = {1, 3, 5}; break;
     }
+}
+
+Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense,
+           int armorPen, float critChance, float critDamage, bool ignoreArmor)
+    : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(mp), maxMp(mp),
+      attack(attack), defense(defense), armorPenetration(armorPen),
+      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
+      readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
+      skillCooldowns({0, 0, 0}),
+      isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
+      poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {
+    
+    switch (heroClass) {
+        case HeroClass::WARRIOR: maxCooldowns = {1, 1, 5}; break;
+        case HeroClass::RANGER:  maxCooldowns = {2, 1, 5}; break;
+        case HeroClass::MAGE:    maxCooldowns = {1, 3, 5}; break;
+    }
+}
+
+bool Hero::useSkill(int skillIndex, int& outDamage) {
+    std::string msg;
+    return useSkill(skillIndex, outDamage, msg);
 }
 
 
@@ -178,7 +201,9 @@ bool Hero::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
 
 void Hero::takeDamage(int damage) {
     if (damage <= 0) return;
-    hp = std::max(0, hp - damage);
+    // Dùng getEffectiveDefense() để cộng dồn bonus Armor đang trang bị
+    int effectiveDamage = std::max(1, damage - getEffectiveDefense());
+    hp = std::max(0, hp - effectiveDamage);
 }
 
 void Hero::heal(int amount) {
@@ -186,20 +211,16 @@ void Hero::heal(int amount) {
     hp = std::min(maxHp, hp + amount);
 }
 
-void Hero::addExp(int amount) {
-    exp += amount;
-    if (exp >= level * 100) {
-        exp -= level * 100;
-        levelUp();
-    }
+void Hero::restoreMp(int amount) {
+    mp = std::min(maxMp, mp + amount);
+}
+
+bool Hero::addExp(int amount) {
+    return LevelSystem::addExp(*this, amount);
 }
 
 void Hero::levelUp() {
-    level++;
-    maxHp += 15;
-    attack += 3;
-    defense += 2;
-    hp = maxHp;
+    LevelSystem::levelUp(*this);
 }
 
 void Hero::reduceCooldowns() {
@@ -251,6 +272,7 @@ void Hero::resetCombatStances() {
 void Hero::lockSkills(int turns) {
     skillLockTurns = turns;
 }
+}
 
 bool Hero::isAlive() const {
     return hp > 0;
@@ -258,7 +280,8 @@ bool Hero::isAlive() const {
 
 void Hero::displayStats() const {
     std::cout << "--- " << name << " [" << getHeroClassName() << "] (Level " << level << ") ---\n"
-              << "HP: " << hp << "/" << maxHp << " | ATK: " << attack << " | DEF: " << defense << "\n"
+              << "HP: " << hp << "/" << maxHp << " | MP: " << mp << "/" << maxMp << " | ATK: " << attack << " | DEF: " << defense 
+              << " | EXP: " << exp << "/" << getExpToNextLevel() << "\n"
               << "Penetration: " << (ignoreArmor ? "IGNORE ALL" : std::to_string(armorPenetration))
               << " | Crit: " << static_cast<int>(critChance * 100) << "% (+"
               << static_cast<int>(critDamage * 100) << "%)";
@@ -267,6 +290,13 @@ void Hero::displayStats() const {
     }
     std::cout << "\nSkills CD: [1] " << skillCooldowns[0] << " turns | [2] " << skillCooldowns[1]
               << " turns | [3] " << skillCooldowns[2] << " turns\n";
+}
+
+void Hero::displaySkills() const {
+    std::cout << "[Skills for " << getHeroClassName() << "]\n";
+    for (int i = 1; i <= 3; ++i) {
+        std::cout << "  " << i << ". " << getSkillName(i) << " (CD: " << maxCooldowns[i-1] << " turns)\n";
+    }
 }
 
 std::string Hero::getName() const { return name; }
@@ -283,6 +313,7 @@ std::string Hero::getHeroClassName() const {
 
 int Hero::getLevel() const { return level; }
 int Hero::getExp() const { return exp; }
+int Hero::getExpToNextLevel() const { return LevelSystem::getExpRequiredForLevel(level); }
 int Hero::getHp() const { return hp; }
 int Hero::getMaxHp() const { return maxHp; }
 int Hero::getAttack() const { return attack; }
@@ -305,6 +336,22 @@ void Hero::setIsEvading(bool value) { isEvading = value; }
 bool Hero::getIsDefending() const { return isDefending; }
 void Hero::setIsDefending(bool value) { isDefending = value; }
 int Hero::getSkillLockTurns() const { return skillLockTurns; }
+
+Inventory& Hero::getInventory() {
+    return inventory;
+}
+
+const Inventory& Hero::getInventory() const {
+    return inventory;
+}
+
+int Hero::getEffectiveAttack() const {
+    return attack + inventory.getEquippedWeaponBonus();
+}
+
+int Hero::getEffectiveDefense() const {
+    return defense + inventory.getEquippedArmorBonus();
+}
 
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setLevel(int value) { level = value; }
@@ -369,3 +416,16 @@ void Hero::clearStatusEffects() {
     regenTurns = 0;
     regenPerTurn = 0;
 }
+
+int Hero::getMp() const { return mp; }
+int Hero::getMaxMp() const { return maxMp; }
+void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
+void Hero::setMaxHp(int value) { maxHp = std::max(1, value); hp = std::min(hp, maxHp); }
+void Hero::setMaxMp(int value) { maxMp = std::max(0, value); mp = std::min(mp, maxMp); }
+void Hero::setAttack(int value) { attack = std::max(0, value); }
+void Hero::setDefense(int value) { defense = std::max(0, value); }
+
+void Hero::increaseMaxHp(int amount) { maxHp += amount; }
+void Hero::increaseMaxMp(int amount) { maxMp += amount; }
+void Hero::increaseAttack(int amount) { attack += amount; }
+void Hero::increaseDefense(int amount) { defense += amount; }

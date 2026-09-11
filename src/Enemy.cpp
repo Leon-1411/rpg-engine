@@ -111,6 +111,7 @@ float Enemy::getCritChance() const { return critChance; }
 float Enemy::getCritDamage() const { return critDamage; }
 int Enemy::getExpReward() const { return expReward; }
 int Enemy::getGoldReward() const { return goldReward; }
+std::string Enemy::getSpecialSkillName() const { return ""; }
 
 void Enemy::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 

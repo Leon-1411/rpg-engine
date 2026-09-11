@@ -48,7 +48,8 @@ public:
     virtual void takeDamage(int damage);
     virtual void heal(int amount);
     bool isAlive() const;
-    void displayStats() const;
+    virtual void displayStats() const;
+    virtual std::string getSpecialSkillName() const;
 
     // Poison mechanisms (Suffering poison)
     void applyPoison(int turns, int damagePerTurn);

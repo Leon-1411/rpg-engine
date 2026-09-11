@@ -118,7 +118,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 
     // 1. Player action
     if (actionChoice == 1) { // Normal Attack
-        DamageResult res = calculateDamage(hero.getAttack(), hero.getCritChance(), hero.getCritDamage(),
+        DamageResult res = calculateDamage(hero.getEffectiveAttack(), hero.getCritChance(), hero.getCritDamage(),
                                            hero.getArmorPenetration(), enemy.getDefense(), hero.isIgnoreArmor());
         enemy.takeDamage(res.damage);
         if (res.isCrit) {
@@ -227,6 +227,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 }
 
 void CombatEngine::processEnemyTurn() {
+<<<<<<< HEAD
     std::cout << "\n[Enemy Turn - " << enemy.getName() << "]\n";
     if (!enemy.isAlive()) return;
 
@@ -308,6 +309,7 @@ void CombatEngine::processEnemyTurn() {
         }
 
         hero.resetCombatStances();
+    }
     }
 }
 
