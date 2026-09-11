@@ -13,27 +13,37 @@ Inventory::Inventory(int capacity)
 
 bool Inventory::addItem(const Item& item) {
     if (item.getType() == ItemType::POTION) {
+        // Dùng dynamic_cast để đọc qty và isMana thực tế từ Potion subclass
+        const Potion* potionPtr = dynamic_cast<const Potion*>(&item);
+        int  qtyToAdd = potionPtr ? potionPtr->getQuantity() : 1;
+        bool isMana   = potionPtr ? potionPtr->isMana()      : false;
+
         // Kiểm tra xem đã có potion cùng id trong túi để gộp (stack) chưa
         for (size_t i = 0; i < items.size(); ++i) {
             if (items[i]->getId() == item.getId()) {
-                auto potion = std::dynamic_pointer_cast<Potion>(items[i]);
-                if (potion) {
-                    potion->addQuantity(1);
+                auto existingPotion = std::dynamic_pointer_cast<Potion>(items[i]);
+                if (existingPotion) {
+                    existingPotion->addQuantity(qtyToAdd);
                     return true;
                 }
             }
         }
         // Nếu chưa có, kiểm tra sức chứa trước khi thêm mới
-        if (static_cast<int>(items.size()) >= capacity) {
+        if (isFull()) {
+            std::cout << "[Inventory Error] Không thể thêm '" << item.getName()
+                      << "': Túi đồ đã đầy (tối đa " << capacity << " món)!\n";
             return false;
         }
         items.push_back(std::make_shared<Potion>(
-            item.getId(), item.getName(), item.getDescription(), item.getStatValue(), false, 1
+            item.getId(), item.getName(), item.getDescription(),
+            item.getStatValue(), isMana, qtyToAdd   // giữ đúng qty và isMana
         ));
         return true;
     }
 
-    if (static_cast<int>(items.size()) >= capacity) {
+    if (isFull()) {
+        std::cout << "[Inventory Error] Không thể thêm '" << item.getName()
+                  << "': Túi đồ đã đầy (tối đa " << capacity << " món)!\n";
         return false;
     }
     items.push_back(item.clone());
@@ -58,7 +68,9 @@ bool Inventory::addItem(std::shared_ptr<Item> item) {
         }
     }
 
-    if (static_cast<int>(items.size()) >= capacity) {
+    if (isFull()) {
+        std::cout << "[Inventory Error] Không thể thêm '" << item->getName()
+                  << "': Túi đồ đã đầy (tối đa " << capacity << " món)!\n";
         return false;
     }
     items.push_back(item);
@@ -112,6 +124,36 @@ bool Inventory::useItem(int index, Hero& hero) {
     return false;
 }
 
+// ==========================================
+// Xóa item theo ID
+// - Nếu là Potion: giảm qty đi 1, chỉ xóa slot khi qty == 0
+// - Nếu là Weapon/Armor: xóa slot người cố nhất có ID đó
+// ==========================================
+bool Inventory::removeItem(const std::string& itemId) {
+    for (int i = 0; i < static_cast<int>(items.size()); ++i) {
+        if (items[i]->getId() == itemId) {
+            if (items[i]->getType() == ItemType::POTION) {
+                auto potion = std::dynamic_pointer_cast<Potion>(items[i]);
+                if (potion && potion->getQuantity() > 1) {
+                    // Còn nhiều: chỉ giảm qty
+                    potion->consumeOne();
+                    return true;
+                }
+            }
+            // Weapon/Armor hoặc Potion cuối cùng: xóa slot
+            return removeItem(i);
+        }
+    }
+    return false; // Không tìm thấy
+}
+
+// Dùng item theo ID (tìm và gọi useItem thường)
+bool Inventory::useItemById(const std::string& itemId, Hero& hero) {
+    int idx = findItemIndex(itemId);
+    if (idx == -1) return false;
+    return useItem(idx, hero);
+}
+
 bool Inventory::equipWeapon(int index) {
     if (index < 0 || index >= static_cast<int>(items.size())) return false;
     if (items[index]->getType() == ItemType::WEAPON) {
@@ -157,6 +199,10 @@ int Inventory::getItemCount() const {
 
 int Inventory::getCapacity() const {
     return capacity;
+}
+
+bool Inventory::isFull() const {
+    return static_cast<int>(items.size()) >= capacity;
 }
 
 Item Inventory::getItem(int index) const {
@@ -208,4 +254,38 @@ int Inventory::getEquippedArmorBonus() const {
 
 const std::vector<std::shared_ptr<Item>>& Inventory::getItems() const {
     return items;
+}
+
+// ==========================================
+// Query helpers
+// ==========================================
+
+bool Inventory::hasItem(const std::string& itemId) const {
+    return findItemIndex(itemId) != -1;
+}
+
+int Inventory::findItemIndex(const std::string& itemId) const {
+    for (int i = 0; i < static_cast<int>(items.size()); ++i) {
+        if (items[i]->getId() == itemId) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Trả về quantity nếu là Potion, hoặc 1 nếu là Weapon/Armor, 0 nếu không có
+int Inventory::getItemCountById(const std::string& itemId) const {
+    int idx = findItemIndex(itemId);
+    if (idx == -1) return 0;
+    if (items[idx]->getType() == ItemType::POTION) {
+        auto potion = std::dynamic_pointer_cast<Potion>(items[idx]);
+        return potion ? potion->getQuantity() : 1;
+    }
+    return 1;
+}
+
+std::shared_ptr<Item> Inventory::getItemById(const std::string& itemId) const {
+    int idx = findItemIndex(itemId);
+    if (idx == -1) return nullptr;
+    return items[idx];
 }

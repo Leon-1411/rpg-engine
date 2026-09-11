@@ -23,15 +23,20 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 
     // Player action
     if (actionChoice == 1) { // Normal Attack
-        int damage = calculateDamage(hero.getAttack(), enemy.getDefense());
-        enemy.takeDamage(damage);
-        std::cout << hero.getName() << " attacks " << enemy.getName() << " for " << damage << " damage!\n";
+        // Truyền raw attack; Enemy::takeDamage tự áp defense của nó
+        int rawAtk     = hero.getEffectiveAttack();
+        int displayDmg = calculateDamage(rawAtk, enemy.getDefense()); // chỉ để log
+        enemy.takeDamage(rawAtk);
+        std::cout << hero.getName() << " attacks " << enemy.getName()
+                  << " for " << displayDmg << " damage!\n";
     } else if (actionChoice == 2) { // Skill
         int skillDmg = 0;
         if (hero.useSkill(skillOrItemIndex, skillDmg)) {
-            int damage = calculateDamage(skillDmg, enemy.getDefense());
-            enemy.takeDamage(damage);
-            std::cout << hero.getName() << " uses skill on " << enemy.getName() << " for " << damage << " damage!\n";
+            // skillDmg là damage thô từ skill; truyền thẳng, Enemy tự giảm defense
+            int displayDmg = calculateDamage(skillDmg, enemy.getDefense());
+            enemy.takeDamage(skillDmg);
+            std::cout << hero.getName() << " uses skill on " << enemy.getName()
+                      << " for " << displayDmg << " damage!\n";
         } else {
             std::cout << "Skill execution failed (Not enough MP or invalid skill)!\n";
         }
@@ -68,9 +73,12 @@ int CombatEngine::calculateDamage(int attackerAttack, int defenderDefense) const
 void CombatEngine::processEnemyTurn() {
     int enemyAction = enemy.chooseAction();
     if (enemyAction == 1) {
-        int damage = calculateDamage(enemy.getAttack(), hero.getDefense());
-        hero.takeDamage(damage);
-        std::cout << enemy.getName() << " attacks " << hero.getName() << " for " << damage << " damage!\n";
+        // Truyền raw attack; Hero::takeDamage tự áp getEffectiveDefense() bên trong
+        int rawAtk     = enemy.getAttack();
+        int displayDmg = calculateDamage(rawAtk, hero.getEffectiveDefense()); // chỉ để log
+        hero.takeDamage(rawAtk);
+        std::cout << enemy.getName() << " attacks " << hero.getName()
+                  << " for " << displayDmg << " damage!\n";
     }
 }
 

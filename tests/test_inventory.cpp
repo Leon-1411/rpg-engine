@@ -91,6 +91,48 @@ void testCapacityLimit() {
     assert(inv.getItemCount() == 2);
 }
 
+// ==========================================
+// Test giới hạn tối đa 10 items (VD: 10 items)
+// ==========================================
+void testMaxCapacity10Items() {
+    Inventory inv(10); // Khởi tạo túi đồ giới hạn tối đa 10 món
+    assert(inv.getCapacity() == 10);
+    assert(inv.getItemCount() == 0);
+    assert(inv.isFull() == false);
+
+    // Thêm tuần tự 10 món đồ -> tất cả đều thành công
+    for (int i = 1; i <= 10; ++i) {
+        std::string id = "item_" + std::to_string(i);
+        Item wpn(id, "Item " + std::to_string(i), "Equipment", ItemType::WEAPON, 10 + i);
+        assert(inv.addItem(wpn) == true);
+    }
+
+    assert(inv.getItemCount() == 10);
+    assert(inv.isFull() == true);
+
+    // Bắt lỗi: Thêm vật phẩm thứ 11 -> Phải trả về false và không tăng kích thước túi
+    Item overflowItem("item_11", "Overflow Blade", "Extra", ItemType::WEAPON, 99);
+    assert(inv.addItem(overflowItem) == false);
+    assert(inv.getItemCount() == 10);
+    assert(inv.hasItem("item_11") == false);
+
+    // Thử thêm 1 loại potion mới khi túi đã có 10 items -> phải bị từ chối
+    Item newPotion("pot_new", "Elixir", "Restores HP", ItemType::POTION, 50);
+    assert(inv.addItem(newPotion) == false);
+    assert(inv.getItemCount() == 10);
+
+    // Xóa 1 vật phẩm khỏi túi
+    assert(inv.removeItem("item_1") == true);
+    assert(inv.getItemCount() == 9);
+    assert(inv.isFull() == false);
+
+    // Lúc này đã có chỗ trống, có thể thêm lại thành công
+    assert(inv.addItem(overflowItem) == true);
+    assert(inv.getItemCount() == 10);
+    assert(inv.isFull() == true);
+    assert(inv.hasItem("item_11") == true);
+}
+
 void testHeroInventoryIntegration() {
     Hero hero("EquippedKnight", HeroClass::WARRIOR, 100, 30, 25, 10);
     assert(hero.getEffectiveAttack() == 25);
@@ -110,12 +152,112 @@ void testHeroInventoryIntegration() {
     assert(hero.getEffectiveDefense() == 30); // 10 + 20
 }
 
+// ==========================================
+// Test removeItem(id): Weapon/Armor xóa trực tiếp
+// ==========================================
+void testRemoveItemById() {
+    Inventory inv(5);
+    auto sword = std::make_shared<Weapon>("w_sw", "Sword", "Blade", 15);
+    auto shield = std::make_shared<Armor>("a_sh", "Shield", "Guard", 10);
+
+    inv.addItem(sword);
+    inv.addItem(shield);
+    assert(inv.getItemCount() == 2);
+
+    // Xóa Weapon theo ID
+    assert(inv.removeItem("w_sw") == true);
+    assert(inv.getItemCount() == 1);
+    assert(inv.hasItem("w_sw") == false);
+    assert(inv.hasItem("a_sh") == true);
+
+    // Xóa ID không tồn tại
+    assert(inv.removeItem("nonexistent") == false);
+}
+
+// ==========================================
+// Test removeItem(id) với Potion: giảm qty trước, xóa slot khi qty == 1
+// ==========================================
+void testRemovePotionById() {
+    Inventory inv(5);
+    // Thêm 3 lọ potion cùng ID (stack vào 1 slot, qty = 3)
+    Potion pot("p01", "Health Potion", "Heals 30 HP", 30, false, 1);
+    inv.addItem(pot);
+    inv.addItem(pot);
+    inv.addItem(pot);
+    assert(inv.getItemCount() == 1); // Chỉ 1 slot
+    assert(inv.getItemCountById("p01") == 3);
+
+    // Lần 1: qty giảm xuống 2, slot vẫn còn
+    assert(inv.removeItem("p01") == true);
+    assert(inv.getItemCount() == 1);
+    assert(inv.getItemCountById("p01") == 2);
+
+    // Lần 2: qty giảm xuống 1, slot vẫn còn
+    assert(inv.removeItem("p01") == true);
+    assert(inv.getItemCount() == 1);
+    assert(inv.getItemCountById("p01") == 1);
+
+    // Lần 3: qty = 1 → xóa slot
+    assert(inv.removeItem("p01") == true);
+    assert(inv.getItemCount() == 0);
+    assert(inv.hasItem("p01") == false);
+}
+
+// ==========================================
+// Test findItemIndex, hasItem, getItemById
+// ==========================================
+void testQueryHelpers() {
+    Inventory inv(5);
+    auto sword = std::make_shared<Weapon>("w01", "Sword", "Sharp", 12);
+    inv.addItem(sword);
+
+    assert(inv.hasItem("w01") == true);
+    assert(inv.hasItem("w99") == false);
+    assert(inv.findItemIndex("w01") == 0);
+    assert(inv.findItemIndex("w99") == -1);
+
+    auto ptr = inv.getItemById("w01");
+    assert(ptr != nullptr);
+    assert(ptr->getId() == "w01");
+
+    assert(inv.getItemById("w99") == nullptr);
+}
+
+// ==========================================
+// Test useItemById
+// ==========================================
+void testUseItemById() {
+    Inventory inv(5);
+    Potion pot("p_hp", "Health Potion", "Heals 40 HP", 40, false, 2);
+    inv.addItem(pot);
+
+    Hero hero("Tester", HeroClass::WARRIOR, 100, 20, 10, 5);
+    hero.takeDamage(60); // HP = 45
+
+    // Dùng bằng ID: qty 2→1
+    assert(inv.useItemById("p_hp", hero) == true);
+    assert(hero.getHp() == 85); // 45 + 40
+    assert(inv.getItemCountById("p_hp") == 1);
+
+    // Dùng lần 2: qty 1→0, slot bị xóa
+    assert(inv.useItemById("p_hp", hero) == true);
+    assert(inv.hasItem("p_hp") == false);
+
+    // Dùng lần 3: không còn item
+    assert(inv.useItemById("p_hp", hero) == false);
+}
+
 int main() {
     testLegacyUsage();
     testPotionStacking();
     testEquipmentAndBonuses();
     testCapacityLimit();
+    testMaxCapacity10Items();
     testHeroInventoryIntegration();
+    testRemoveItemById();
+    testRemovePotionById();
+    testQueryHelpers();
+    testUseItemById();
 
     std::cout << "[PASS] All Inventory unit tests successful!\n";
     return 0;

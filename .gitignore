@@ -2,6 +2,7 @@
 # Build directories & CMake output
 # ==========================================
 build/
+build*/
 bin/
 out/
 CMakeFiles/

@@ -25,7 +25,8 @@ bool Hero::useSkill(int skillIndex, int& outDamage) {
 }
 
 void Hero::takeDamage(int damage) {
-    int effectiveDamage = std::max(1, damage - defense);
+    // D\u00f9ng getEffectiveDefense() \u0111\u1ec3 c\u1ed9ng d\u1ed3n bonus Armor \u0111ang trang b\u1ecb
+    int effectiveDamage = std::max(1, damage - getEffectiveDefense());
     hp = std::max(0, hp - effectiveDamage);
 }
 

@@ -51,12 +51,14 @@ void testPotionSubclass() {
     assert(healthPot.consumeOne() == false); // quantity becomes 0
     assert(healthPot.getQuantity() == 0);
 
-    // Mana potion
+    // Mana potion: Hero ph\u1ea3i c\u00f3 maxMp \u0111\u1ee7 l\u1edbn \u0111\u1ec3 kh\u00f4ng b\u1ecb cap
     Potion manaPot("p_mp", "Mana Potion", "Restores 20 MP", 20, true, 1);
     assert(manaPot.isMana() == true);
-    Hero hero("Tester", HeroClass::MAGE, 50, 10, 10, 5);
+    Hero hero("Tester", HeroClass::MAGE, 50, 50, 10, 5);  // maxMp=50
+    hero.setMp(10);    // Hi\u1ec7n t\u1ea1i ch\u1ec9 c\u00f2n 10 MP
     manaPot.apply(hero);
-    assert(hero.getMp() == 30);
+    assert(hero.getMp() == 30); // 10 + 20 = 30 (\u2264 maxMp=50)
+
 }
 
 void testPolymorphism() {
