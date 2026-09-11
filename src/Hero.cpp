@@ -38,8 +38,8 @@ void Hero::restoreMp(int amount) {
     mp = std::min(maxMp, mp + amount);
 }
 
-void Hero::addExp(int amount) {
-    LevelSystem::addExp(*this, amount);
+bool Hero::addExp(int amount) {
+    return LevelSystem::addExp(*this, amount);
 }
 
 void Hero::levelUp() {
@@ -55,6 +55,16 @@ void Hero::displayStats() const {
               << "HP: " << hp << "/" << maxHp << " | MP: " << mp << "/" << maxMp << "\n"
               << "ATK: " << attack << " | DEF: " << defense 
               << " | EXP: " << exp << "/" << getExpToNextLevel() << "\n";
+}
+
+std::string Hero::getSkillName(int skillIndex) const {
+    if (skillIndex == 1) return "Basic Strike";
+    return "Unknown";
+}
+
+void Hero::displaySkills() const {
+    std::cout << "[Skills]\n"
+              << "  1. Basic Strike (MP: 10) - Deals 200% ATK damage\n";
 }
 
 std::string Hero::getName() const { return name; }

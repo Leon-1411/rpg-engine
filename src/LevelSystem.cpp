@@ -59,7 +59,7 @@ bool LevelSystem::addExp(Hero& hero, int amount) {
         if (currentExp >= required) {
             currentExp -= required;
             hero.setExp(currentExp);
-            levelUp(hero);
+            hero.levelUp();
             leveledUp = true;
         } else {
             break;

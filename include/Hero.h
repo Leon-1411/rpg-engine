@@ -33,12 +33,14 @@ public:
     virtual void takeDamage(int damage);
     virtual void heal(int amount);
     virtual void restoreMp(int amount);
-    virtual void addExp(int amount);
+    virtual bool addExp(int amount);
     virtual void levelUp();
 
     // Status checks
     bool isAlive() const;
     void displayStats() const;
+    virtual std::string getSkillName(int skillIndex) const;
+    virtual void displaySkills() const;
 
     // Getters & Setters
     std::string getName() const;
