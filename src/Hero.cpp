@@ -10,7 +10,8 @@
 
 Hero::Hero(const std::string& name, HeroClass heroClass)
     : name(name), heroClass(heroClass), level(1), exp(0),
-      isParrying(false), isBlocking(false), isEvading(false), skillLockTurns(0) {
+      isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
+      poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {
     
     skillCooldowns = {0, 0, 0};
 
@@ -63,7 +64,8 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
       critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns({0, 0, 0}),
-      isParrying(false), isBlocking(false), isEvading(false), skillLockTurns(0) {
+      isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
+      poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {
     
     switch (heroClass) {
         case HeroClass::WARRIOR: maxCooldowns = {1, 1, 5}; break;
@@ -72,8 +74,6 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
     }
 }
 
-Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int /*mp*/, int attack, int defense)
-    : Hero(name, heroClass, hp, attack, defense) {}
 
 int Hero::normalAttack() {
     return attack;
@@ -159,9 +159,10 @@ bool Hero::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
             outMessage = name + " channels an Energy Ray from the staff!";
             return true;
         } else if (skillIndex == 2) { // Healing Potion
-            heal(30);
+            heal(25);
+            applyRegen(3, 8); // Applies Regeneration HoT: +8 HP/turn for 3 turns
             skillCooldowns[idx] = maxCooldowns[idx];
-            outMessage = name + " consumes a Healing Potion restoring 30 HP! (HP: " +
+            outMessage = name + " consumes a Healing Potion restoring 25 HP and gaining Regeneration (+8 HP/turn for 3 turns)! (HP: " +
                          std::to_string(hp) + "/" + std::to_string(maxHp) + ")";
             return true;
         } else if (skillIndex == 3) { // Poison Flask
@@ -176,10 +177,12 @@ bool Hero::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
 }
 
 void Hero::takeDamage(int damage) {
+    if (damage <= 0) return;
     hp = std::max(0, hp - damage);
 }
 
 void Hero::heal(int amount) {
+    if (amount <= 0) return;
     hp = std::min(maxHp, hp + amount);
 }
 
@@ -221,10 +224,28 @@ int Hero::getSkillCooldown(int skillIndex) const {
     return skillCooldowns[skillIndex - 1];
 }
 
+std::string Hero::getSkillName(int skillIndex) const {
+    if (heroClass == HeroClass::WARRIOR) {
+        if (skillIndex == 1) return "Sword Slash";
+        if (skillIndex == 2) return "Parry";
+        if (skillIndex == 3) return "Shield Block";
+    } else if (heroClass == HeroClass::RANGER) {
+        if (skillIndex == 1) return "Evade & Reload";
+        if (skillIndex == 2) return "Aimed Shot";
+        if (skillIndex == 3) return "Arrow Barrage";
+    } else if (heroClass == HeroClass::MAGE) {
+        if (skillIndex == 1) return "Energy Ray";
+        if (skillIndex == 2) return "Healing Potion";
+        if (skillIndex == 3) return "Poison Flask";
+    }
+    return "Unknown";
+}
+
 void Hero::resetCombatStances() {
     isParrying = false;
     isBlocking = false;
     isEvading = false;
+    isDefending = false;
 }
 
 void Hero::lockSkills(int turns) {
@@ -281,8 +302,70 @@ bool Hero::getIsBlocking() const { return isBlocking; }
 void Hero::setIsBlocking(bool value) { isBlocking = value; }
 bool Hero::getIsEvading() const { return isEvading; }
 void Hero::setIsEvading(bool value) { isEvading = value; }
+bool Hero::getIsDefending() const { return isDefending; }
+void Hero::setIsDefending(bool value) { isDefending = value; }
 int Hero::getSkillLockTurns() const { return skillLockTurns; }
 
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setLevel(int value) { level = value; }
 void Hero::setExp(int value) { exp = value; }
+
+void Hero::applyPoison(int turns, int damagePerTurn) {
+    if (turns <= 0 || damagePerTurn <= 0) return;
+    poisonTurns = turns;
+    poisonDamagePerTurn = damagePerTurn;
+}
+
+int Hero::takePoisonDamage() {
+    if (poisonTurns <= 0) return 0;
+    int dmg = poisonDamagePerTurn;
+    takeDamage(dmg);
+    poisonTurns--;
+    return dmg;
+}
+
+bool Hero::isPoisoned() const {
+    return poisonTurns > 0 && hp > 0;
+}
+
+int Hero::getPoisonTurns() const {
+    return poisonTurns;
+}
+
+int Hero::getPoisonDamagePerTurn() const {
+    return poisonDamagePerTurn;
+}
+
+void Hero::applyRegen(int turns, int healPerTurn) {
+    if (turns <= 0 || healPerTurn <= 0) return;
+    regenTurns = turns;
+    regenPerTurn = healPerTurn;
+}
+
+int Hero::processRegen() {
+    if (regenTurns <= 0 || hp <= 0) return 0;
+    int before = hp;
+    heal(regenPerTurn);
+    int actualHealed = hp - before;
+    regenTurns--;
+    return actualHealed;
+}
+
+bool Hero::hasRegen() const {
+    return regenTurns > 0 && hp > 0;
+}
+
+int Hero::getRegenTurns() const {
+    return regenTurns;
+}
+
+int Hero::getRegenPerTurn() const {
+    return regenPerTurn;
+}
+
+void Hero::clearStatusEffects() {
+    poisonTurns = 0;
+    poisonDamagePerTurn = 0;
+    regenTurns = 0;
+    regenPerTurn = 0;
+}

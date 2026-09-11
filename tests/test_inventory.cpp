@@ -12,14 +12,21 @@ int main() {
     assert(inv.addItem(wpn) == true);
     assert(inv.getItemCount() == 2);
 
-    Hero hero("Tester", HeroClass::WARRIOR, 100, 10, 5);
-    hero.takeDamage(35); // 100 - 35 = 65
-    assert(hero.getHp() == 65);
+    // Rule: Potions are exclusive to Mage! Warrior cannot use potions.
+    Hero warrior("WarriorTester", HeroClass::WARRIOR, 100, 10, 5);
+    warrior.takeDamage(35); // 100 - 35 = 65
+    assert(warrior.getHp() == 65);
+    assert(inv.useItem(0, warrior) == false); // Warrior fails to use potion
+    assert(warrior.getHp() == 65);            // HP unchanged
+    assert(inv.getItemCount() == 2);          // Potion not consumed
 
-    // Use potion at index 0
-    assert(inv.useItem(0, hero) == true);
-    assert(hero.getHp() == 95);
-    assert(inv.getItemCount() == 1);
+    // Mage can use potions
+    Hero mage("MageTester", HeroClass::MAGE, 100, 10, 5);
+    mage.takeDamage(35); // 100 - 35 = 65
+    assert(mage.getHp() == 65);
+    assert(inv.useItem(0, mage) == true);    // Mage successfully uses potion
+    assert(mage.getHp() == 95);
+    assert(inv.getItemCount() == 1);          // Potion consumed
 
     std::cout << "[PASS] Inventory unit tests successful!\n";
     return 0;

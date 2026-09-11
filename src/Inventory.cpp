@@ -38,6 +38,12 @@ bool Inventory::useItem(int index, Hero& hero) {
     }
     const Item& item = items[index];
     if (item.getType() == ItemType::POTION) {
+        if (hero.getHeroClass() != HeroClass::MAGE) {
+            std::cout << "[RESTRICTION] Potions are exclusive to Mage! "
+                      << hero.getName() << " [" << hero.getHeroClassName()
+                      << "] cannot use potions.\n";
+            return false;
+        }
         hero.heal(item.getStatValue());
         removeItem(index);
         return true;

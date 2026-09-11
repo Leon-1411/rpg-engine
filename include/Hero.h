@@ -32,14 +32,19 @@ protected:
     bool isParrying;                  // Warrior skill 2
     bool isBlocking;                  // Warrior skill 3
     bool isEvading;                   // Ranger skill 1
+    bool isDefending;                 // Active Defend action (halves incoming damage)
     int skillLockTurns;               // Turn penalty if parry fails
+
+    // Status Effects (Poison DoT & Regeneration HoT)
+    int poisonTurns;
+    int poisonDamagePerTurn;
+    int regenTurns;
+    int regenPerTurn;
 
 public:
     // Auto-setup based on class design
     Hero(const std::string& name, HeroClass heroClass);
 
-    // Legacy constructor matching main.cpp: (name, heroClass, hp, mp, attack, defense)
-    Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense);
 
     // Full custom setup
     Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
@@ -59,8 +64,24 @@ public:
     void reduceCooldowns();
     bool isSkillReady(int skillIndex) const;
     int getSkillCooldown(int skillIndex) const;
+    std::string getSkillName(int skillIndex) const;
     void resetCombatStances();
     void lockSkills(int turns);
+
+    // Status Effects
+    void applyPoison(int turns, int damagePerTurn);
+    int takePoisonDamage();
+    bool isPoisoned() const;
+    int getPoisonTurns() const;
+    int getPoisonDamagePerTurn() const;
+
+    void applyRegen(int turns, int healPerTurn);
+    int processRegen();
+    bool hasRegen() const;
+    int getRegenTurns() const;
+    int getRegenPerTurn() const;
+
+    void clearStatusEffects();
 
     // Status checks
     bool isAlive() const;
@@ -91,6 +112,8 @@ public:
     void setIsBlocking(bool value);
     bool getIsEvading() const;
     void setIsEvading(bool value);
+    bool getIsDefending() const;
+    void setIsDefending(bool value);
     int getSkillLockTurns() const;
 
     void setHp(int value);

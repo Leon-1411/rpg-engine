@@ -13,7 +13,9 @@ Enemy::Enemy(const std::string& name, EnemyType type, int hp, int attack, int de
     : name(name), type(type), hp(hp), maxHp(hp), attack(attack), defense(defense),
       armorPenetration(armorPen), critChance(critChance), critDamage(critDamage),
       expReward(expReward), goldReward(goldReward),
-      poisonTurns(0), poisonDamagePerTurn(0) {}
+      poisonTurns(0), poisonDamagePerTurn(0),
+      isPoisonous(false), poisonInflictTurns(0), poisonInflictDmg(0),
+      regenTurns(0), regenPerTurn(0) {}
 
 int Enemy::chooseAction() {
     return 1;
@@ -34,8 +36,32 @@ int Enemy::chooseAction(HeroClass targetClass) {
     return 1; // 1 = Normal attack
 }
 
+int Enemy::chooseAction(HeroClass targetClass, int turnCount) {
+    if (type == EnemyType::BOSS) {
+        // Boss Attack Pattern:
+        // 1. Normal Attack (action 1)
+        // 2. Heavy Attack (action 2)
+        // 3. Special Skill (action 3)
+        int patternIndex = (turnCount > 0 ? (turnCount - 1) % 3 : 0);
+        if (patternIndex == 1) {
+            return 2; // Heavy Attack
+        } else if (patternIndex == 2) {
+            return 3; // Special Skill
+        }
+        return 1; // Normal Attack
+    }
+
+    return chooseAction(targetClass);
+}
+
 void Enemy::takeDamage(int damage) {
+    if (damage <= 0) return;
     hp = std::max(0, hp - damage);
+}
+
+void Enemy::heal(int amount) {
+    if (amount <= 0) return;
+    hp = std::min(maxHp, hp + amount);
 }
 
 bool Enemy::isAlive() const {
@@ -87,3 +113,44 @@ int Enemy::getExpReward() const { return expReward; }
 int Enemy::getGoldReward() const { return goldReward; }
 
 void Enemy::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
+
+void Enemy::setPoisonous(bool value, int turns, int dmg) {
+    isPoisonous = value;
+    poisonInflictTurns = turns;
+    poisonInflictDmg = dmg;
+}
+
+bool Enemy::getIsPoisonous() const {
+    return isPoisonous;
+}
+
+int Enemy::getPoisonInflictTurns() const {
+    return poisonInflictTurns;
+}
+
+int Enemy::getPoisonInflictDmg() const {
+    return poisonInflictDmg;
+}
+
+void Enemy::applyRegen(int turns, int healPerTurn) {
+    if (turns <= 0 || healPerTurn <= 0) return;
+    regenTurns = turns;
+    regenPerTurn = healPerTurn;
+}
+
+int Enemy::processRegen() {
+    if (regenTurns <= 0 || hp <= 0) return 0;
+    int before = hp;
+    heal(regenPerTurn);
+    int actualHealed = hp - before;
+    regenTurns--;
+    return actualHealed;
+}
+
+bool Enemy::hasRegen() const {
+    return regenTurns > 0 && hp > 0;
+}
+
+int Enemy::getRegenTurns() const {
+    return regenTurns;
+}

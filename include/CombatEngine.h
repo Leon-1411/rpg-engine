@@ -2,6 +2,8 @@
 
 #include "Hero.h"
 #include "Enemy.h"
+#include "Inventory.h"
+#include <iosfwd>
 
 enum class CombatState {
     ONGOING,
@@ -19,14 +21,19 @@ class CombatEngine {
 private:
     Hero& hero;
     Enemy& enemy;
+    Inventory* inventory;
     int turnCount;
     CombatState currentState;
 
-    void processPoisonTick();
+    void processHeroStatusEffects();
+    void processEnemyStatusEffects();
+    void processStatusEffects();
 
 public:
-    CombatEngine(Hero& hero, Enemy& enemy);
+    CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory = nullptr);
     ~CombatEngine() = default;
+
+    void setInventory(Inventory* inv);
 
     void startBattle();
     CombatState executeTurn(int actionChoice, int skillOrItemIndex = -1);
@@ -43,4 +50,9 @@ public:
     bool isBattleOver() const;
     CombatState getState() const;
     int getTurnCount() const;
+
+    // UI and Interactive Console Battle Helpers
+    static std::string renderBar(int current, int max, int length = 15);
+    void displayBattleStatus(std::ostream& out = std::cout) const;
+    void runInteractiveBattle(std::istream& in = std::cin, std::ostream& out = std::cout);
 };
