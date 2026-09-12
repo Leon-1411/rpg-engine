@@ -1,135 +1,368 @@
 {
-  "start_node_id": "node_01",
+  "start_node_id": "Node01",
   "nodes": {
-    "node_01": {
-      "id": "node_01",
-      "title": "Bản Đồ Ngã Ba Đường",
-      "description": "Bạn đứng trước hẻm núi tăm tối. Bên trái là Rừng Ma sương mù bao phủ, bên phải là Hang Cổ Băng Giá vang lên tiếng gầm rú.",
-      "type": "STORY",
-      "choices": [
-        {
-          "text": "Đi xuyên qua Rừng Ma (Lối đi ngắn, nguy cơ đụng quái cao)",
-          "next_node_id": "node_02"
-        },
-        {
-          "text": "Khám phá Hang Cổ Băng Giá (Lối đi dài, có thể có cổ vật)",
-          "next_node_id": "node_03"
-        }
-      ]
-    },
-    "node_02": {
-      "id": "node_02",
-      "title": "Rừng Ma - Phục Kích",
-      "description": "Một con Quỷ Bắt Hồn (Minion) nhảy ra từ tán cây gieo hãi hùng!",
-      "type": "COMBAT",
-      "enemy_id": "minion_soul_eater",
-      "on_win_node_id": "node_04",
-      "on_lose_node_id": "node_06"
-    },
-    "node_03": {
-      "id": "node_03",
-      "title": "Hang Cổ - Bẫy Cổ Đại",
-      "description": "Bạn thấy một rương kho báu tỏa ánh sáng xanh lục, bên dưới sàn nhà có các phiến đá khắc ký tự lạ.",
-      "type": "STORY",
-      "choices": [
-        {
-          "text": "Táo bạo tiến đến mở rương kho báu",
-          "next_node_id": "node_05"
-        },
-        {
-          "text": "Cẩn trọng né bẫy và đi thẳng đến lối ra",
-          "next_node_id": "node_04"
-        }
-      ]
-    },
-    "node_05": {
-      "id": "node_05",
-      "title": "Cổ Vật Cổ Đại",
-      "description": "Bạn tìm thấy 'Chìa Khóa Băng Bất Hoại' cùng 1 Bình Thuốc Máu Lớn!",
+    "Node01": {
+      "id": "Node01",
+      "title": "Hoàng Thành Eldoria",
       "type": "REWARD",
+      "description": "Tại đại điện Eldoria nguy nga, Nhà Vua trao mật lệnh: Công chúa Elena đã bị Ma Vương bắt cóc trong đêm Trăng Máu. Ngài trao cho bạn Huy hiệu Hoàng Gia và lệnh xuất chinh giải cứu công chúa.",
       "rewards": {
-        "items": [
-          "IceKey",
-          "GreaterHealthPotion"
-        ],
+        "items": ["RoyalInsignia"],
+        "exp": 50
+      },
+      "next_node_id": "Node02",
+      "choices": [
+        {
+          "text": "Rời hoàng thành, hướng về tiền tuyến Biên Giới Trăng Máu",
+          "next_node_id": "Node02"
+        }
+      ]
+    },
+    "Node02": {
+      "id": "Node02",
+      "title": "Ngã Ba Biên Giới Trăng Máu",
+      "type": "STORY",
+      "description": "Bầu trời đỏ rực ánh Trăng Máu. Trước mắt bạn là ngã ba ranh giới giữa các thế lực xung đột. Bạn sẽ chọn hướng đi nào để tiếp cận lâu đài Ma Vương?",
+      "choices": [
+        {
+          "text": "Hướng Rừng Sâu Bộ Tộc Tự Do (Gặp gỡ thợ săn du mục)",
+          "next_node_id": "Node03"
+        },
+        {
+          "text": "Hướng Phế Tích Tháp Pháp Sư (Tìm kiếm tri thức cổ ngữ)",
+          "next_node_id": "Node04"
+        },
+        {
+          "text": "Đột kích Tiền đồn Ma Tộc (Truy lùng dấu vết trinh sát quỷ)",
+          "next_node_id": "Node05"
+        }
+      ]
+    },
+    "Node03": {
+      "id": "Node03",
+      "title": "Rừng Rậm Huyết Nguyệt",
+      "type": "COMBAT",
+      "description": "Những tán cây rậm rạp ẩn chứa cạm bẫy. Lính đánh thuê du mục của Bộ Tộc Tự Do nhảy ra chặn đường bảo vệ ranh giới lãnh thổ!",
+      "enemy_id": "Wild_Mercenary",
+      "on_win_node_id": "Node06",
+      "on_lose_node_id": "GameOver"
+    },
+    "Node04": {
+      "id": "Node04",
+      "title": "Tàn Tích Pháp Viện",
+      "type": "STORY",
+      "description": "Khu phế tích lưu giữ những trang cổ thư phát sáng ma thuật huyền bí từ 500 năm trước.",
+      "choices": [
+        {
+          "text": "Giải mã văn tự cổ ngữ (Yêu cầu hiểu biết của Pháp Sư)",
+          "next_node_id": "Node04_Check"
+        },
+        {
+          "text": "Bỏ qua phế tích, trực tiếp tiến về Thung Lũng Răng Quỷ",
+          "next_node_id": "Node09"
+        }
+      ]
+    },
+    "Node04_Check": {
+      "id": "Node04_Check",
+      "title": "Kiểm Tra Tri Thức Pháp Thuật",
+      "type": "REQUIREMENT_CHECK",
+      "description": "Kiểm tra xem bạn có mang phẩm chất hoặc tri thức của Mage hay không...",
+      "required_hero_class": "Mage",
+      "on_pass_node_id": "Node07",
+      "on_fail_node_id": "Node04_Fail"
+    },
+    "Node04_Fail": {
+      "id": "Node04_Fail",
+      "title": "Giải Mã Thất Bại",
+      "type": "STORY",
+      "description": "Văn tự cổ ma thuật quá phức tạp, bạn không thể giải mã được bí mật của The Core.",
+      "choices": [
+        {
+          "text": "Rời phế tích và tiếp tục hành trình đến Thung Lũng",
+          "next_node_id": "Node09"
+        }
+      ]
+    },
+    "Node05": {
+      "id": "Node05",
+      "title": "Tiền Đồn Ma Tộc",
+      "type": "COMBAT",
+      "description": "Một toán trinh sát quỷ nhanh nhẹn phát hiện sự hiện diện của bạn và lập tức tấn công!",
+      "enemy_id": "Demon_Scout",
+      "on_win_node_id": "Node08",
+      "on_lose_node_id": "GameOver"
+    },
+    "Node06": {
+      "id": "Node06",
+      "title": "Tộc Trưởng Trao Tặng",
+      "type": "REWARD",
+      "description": "Nhận thấy lòng dũng cảm của bạn, Tộc Trưởng Bộ Tộc Tự Do đã trao tặng Bùa Hộ Mệnh Rừng Sâu và bình đại dược tăng cường sinh lực.",
+      "rewards": {
+        "items": ["FreeForestAmulet", "GreaterHealthPotion"],
         "exp": 100
       },
-      "next_node_id": "node_04"
-    },
-    "node_04": {
-      "id": "node_04",
-      "title": "Sảnh Ngoài Đền Băng",
-      "description": "Bạn đến được trước sảnh đền. Điện chính dẫn thẳng tới ngai vàng, nhưng bên hông có một lối đi bí mật bị phong ấn.",
-      "type": "STORY",
+      "next_node_id": "Node09",
       "choices": [
         {
-          "text": "Đẩy cửa vào Điện Chính đối đầu trực diện",
-          "next_node_id": "node_07"
+          "text": "Tiến vào Thung Lũng Răng Quỷ",
+          "next_node_id": "Node09"
+        }
+      ]
+    },
+    "Node07": {
+      "id": "Node07",
+      "title": "Giải Mã Cổ Thư The Core",
+      "type": "REWARD",
+      "description": "Bằng sự thông thái ma pháp, bạn đã giải mã thành công Cổ Thư The Core (AncientCodex), ghi chép cơ chế vận hành gốc của năng lượng ma thuật 500 năm trước!",
+      "rewards": {
+        "items": ["AncientCodex"],
+        "exp": 120
+      },
+      "next_node_id": "Node09",
+      "choices": [
+        {
+          "text": "Cất giữ Cổ Thư và tiến vào Thung Lũng Răng Quỷ",
+          "next_node_id": "Node09"
+        }
+      ]
+    },
+    "Node08": {
+      "id": "Node08",
+      "title": "Thu Thập Cổ Phù Thấu Cảm",
+      "type": "REWARD",
+      "description": "Từ tàn tích tiền đồn, bạn tìm thấy Cổ Phù Thấu Cảm Ma Tộc (DemonEmpathyRune), cho phép thấu hiểu và giao tiếp với loài Quỷ.",
+      "rewards": {
+        "items": ["DemonEmpathyRune"],
+        "exp": 100
+      },
+      "next_node_id": "Node09",
+      "choices": [
+        {
+          "text": "Nắm giữ Cổ Phù và tiến vào Thung Lũng Răng Quỷ",
+          "next_node_id": "Node09"
+        }
+      ]
+    },
+    "Node09": {
+      "id": "Node09",
+      "title": "Thung Lũng Răng Quỷ (Devil's Gorge)",
+      "type": "STORY",
+      "description": "Bạn đã đến trước cổng Ma Điện khổng lồ nằm sâu trong Thung Lũng Răng Quỷ. Khí tức hắc ám bao trùm khắp nơi.",
+      "choices": [
+        {
+          "text": "Tiến vào đại sảnh Ma Điện",
+          "next_node_id": "Node10"
+        }
+      ]
+    },
+    "Node10": {
+      "id": "Node10",
+      "title": "Kiểm Tra Cổ Phù Thấu Cảm",
+      "type": "REQUIREMENT_CHECK",
+      "description": "Kiểm tra xem bạn có mang theo DemonEmpathyRune để đàm phán hòa bình hay không...",
+      "required_items": ["DemonEmpathyRune"],
+      "on_pass_node_id": "Node11",
+      "on_fail_node_id": "Node12"
+    },
+    "Node11": {
+      "id": "Node11",
+      "title": "Hội Kiến Ma Vương & Công Chúa Elena",
+      "type": "REWARD",
+      "description": "BẤT NGỜ! Công chúa Elena không hề bị giam cầm. Nàng cùng Ma Vương Malakor tiết lộ: Nàng tự nguyện ra đi để ngăn nghi thức hiến tế sinh mạng hoàng gia nuôi sống The Core. Elena trao cho bạn cuốn Nhật Ký của nàng.",
+      "rewards": {
+        "items": ["ElenaDiary"],
+        "exp": 150
+      },
+      "next_node_id": "Node13",
+      "choices": [
+        {
+          "text": "Đọc nhật ký và đưa ra quyết định vận mệnh",
+          "next_node_id": "Node13"
+        }
+      ]
+    },
+    "Node12": {
+      "id": "Node12",
+      "title": "Phá Vỡ Cấm Vệ Quỷ",
+      "type": "COMBAT",
+      "description": "Không có phù thấu cảm, các Cuồng Chiến Binh Quỷ coi bạn là kẻ thù và lao vào tử chiến!",
+      "enemy_id": "Demon_Berserker",
+      "on_win_node_id": "Node11",
+      "on_lose_node_id": "GameOver"
+    },
+    "Node13": {
+      "id": "Node13",
+      "title": "Ngã Rẽ Quyết Định Của Người Chơi",
+      "type": "STORY",
+      "description": "Sự thật về The Core đã phơi bày. Vận mệnh của Vương quốc Eldoria và toàn bộ đại lục nằm trong tay bạn. Bạn sẽ chọn phe phái nào?",
+      "choices": [
+        {
+          "text": "Lựa chọn 1: Bắt Elena giao nộp cho Nhà Vua (Phe Vương Quốc)",
+          "next_node_id": "Node14"
         },
         {
-          "text": "Rẽ sang Hành Lang Bí Mật bên hông",
-          "next_node_id": "node_09"
+          "text": "Lựa chọn 2: Cùng Elena & Ma Tộc phá hủy The Core (Phe Elena & Ma Tộc)",
+          "next_node_id": "Node16"
+        },
+        {
+          "text": "Lựa chọn 3: Bắt tay Mage Council thâu tóm The Core (Phe Hội Đồng Pháp Sư)",
+          "next_node_id": "Node19"
+        },
+        {
+          "text": "Lựa chọn 4: Theo Free People phong ấn vĩnh viễn Core (Phe Bộ Tộc Tự Do)",
+          "next_node_id": "Node21"
         }
       ]
     },
-    "node_09": {
-      "id": "node_09",
-      "title": "Hành Lang Phong Ấn",
-      "description": "Một cánh cửa đá cổ đại chắn đường với ổ khóa hình bông tuyết huyền bí.",
-      "type": "REQUIREMENT_CHECK",
-      "required_item": "IceKey",
-      "on_pass_node_id": "node_10",
-      "on_fail_node_id": "node_07_no_key"
+    "Node14": {
+      "id": "Node14",
+      "title": "Trảm Ma Vương Malakor",
+      "type": "COMBAT",
+      "description": "Bạn quyết tâm giữ trọn lời thề trung thành với Nhà Vua. Ma Vương Malakor phẫn nộ rút ma kiếm bảo vệ Elena!",
+      "enemy_id": "Demon_King_Malakor",
+      "on_win_node_id": "Node15",
+      "on_lose_node_id": "GameOver"
     },
-    "node_07_no_key": {
-      "id": "node_07_no_key",
-      "title": "Cửa Khóa - Quay Lại Sảnh",
-      "description": "Bạn không có chìa khóa để mở cánh cửa này! Đành phải quay lại điện chính.",
+    "Node15": {
+      "id": "Node15",
+      "title": "Hộ Tống Elena Về Eldoria",
       "type": "STORY",
+      "description": "Ma Vương gục ngã. Bạn áp giải Elena trong nước mắt trở về kinh thành giao nộp cho đức vua...",
       "choices": [
         {
-          "text": "Tiến vào Điện Chính",
-          "next_node_id": "node_07"
+          "text": "Chứng kiến nghi lễ hiến tế tại đài thiên mệnh",
+          "next_node_id": "End1"
         }
       ]
     },
-    "node_07": {
-      "id": "node_07",
-      "title": "Chúa Tể Băng Giá",
-      "description": "Chúa Tể Băng Frost Lord triệu hồi bão tuyết! Cuộc chiến sinh tử bắt đầu.",
-      "type": "COMBAT",
-      "enemy_id": "boss_frost_lord",
-      "on_win_node_id": "node_08",
-      "on_lose_node_id": "node_06"
-    },
-    "node_10": {
-      "id": "node_10",
-      "title": "Thần Thú Cổ Đại (Bí Mật)",
-      "description": "Chìa khóa kích hoạt! Bạn bước vào phòng giam Rồng Băng Cổ Đại - nguồn gốc thực sự của lời nguyền!",
-      "type": "COMBAT",
-      "enemy_id": "boss_ice_dragon",
-      "on_win_node_id": "node_11",
-      "on_lose_node_id": "node_06"
-    },
-    "node_06": {
-      "id": "node_06",
-      "title": "KẾT CỤC: Bị Đóng Băng (Bad Ending)",
-      "description": "Bạn gục ngã và trở thành một bức tượng băng vĩnh cửu.",
-      "type": "GAME_OVER",
+    "End1": {
+      "id": "End1",
+      "title": "ENDING 1: Vương Quyền Xiềng Xích (Crown of Chains)",
+      "type": "ENDING",
+      "description": "Elena bị đưa lên đài hiến tế, linh hồn bị The Core nuốt chửng. Eldoria tiếp tục thịnh vượng thêm 500 năm trong sự che đậy và tội ác giả dối.",
       "choices": []
     },
-    "node_08": {
-      "id": "node_08",
-      "title": "KẾT CỤC: Anh Hùng Vương Quốc (Good Ending)",
-      "description": "Bạn tiêu diệt Frost Lord, giải cứu vương quốc khỏi mùa đông vĩnh cửu!",
-      "type": "VICTORY",
+    "Node16": {
+      "id": "Node16",
+      "title": "Tiến Vào Buồng The Core",
+      "type": "STORY",
+      "description": "Bạn cùng Elena và quân đoàn Ma tộc tiến thẳng vào thánh địa chứa nguồn năng lượng The Core để chấm dứt sự bất công.",
+      "choices": [
+        {
+          "text": "Tiến lên phá vỡ cửa buồng năng lượng",
+          "next_node_id": "Node17"
+        }
+      ]
+    },
+    "Node17": {
+      "id": "Node17",
+      "title": "Cản Đường Bởi Đại Tướng Hoàng Gia",
+      "type": "COMBAT",
+      "description": "Đại Tướng Aldric mang khiên sấm sét kiên cố đứng chắn trước cổng buồng Core với lòng trung thành mù quáng!",
+      "enemy_id": "General_Aldric",
+      "on_win_node_id": "Node18",
+      "on_lose_node_id": "GameOver"
+    },
+    "Node18": {
+      "id": "Node18",
+      "title": "Kích Hoạt Cấm Vệ Thần The Core",
+      "type": "COMBAT",
+      "description": "Cỗ máy hộ vệ The Core Guardian thức tỉnh, phóng ra luồng năng lượng hủy diệt bảo vệ lõi!",
+      "enemy_id": "The_Core_Guardian",
+      "on_win_node_id": "CheckSecret",
+      "on_lose_node_id": "GameOver"
+    },
+    "CheckSecret": {
+      "id": "CheckSecret",
+      "title": "Kiểm Tra Điều Kiện True Ending",
+      "type": "REQUIREMENT_CHECK",
+      "description": "Kiểm tra xem bạn có sở hữu cả AncientCodex và ElenaDiary hay không...",
+      "required_items": ["AncientCodex", "ElenaDiary"],
+      "on_pass_node_id": "End5",
+      "on_fail_node_id": "End2"
+    },
+    "End2": {
+      "id": "End2",
+      "title": "ENDING 2: Kỷ Nguyên Mới (Dawn of Unity)",
+      "type": "ENDING",
+      "description": "Thiếu đi tri thức cổ thư, bạn buộc phải phá hủy hoàn toàn The Core. Đại lục mất đi nguồn ma thuật, mọi chủng tộc bước vào thời kỳ tái thiết gian nan nhưng bình đẳng.",
       "choices": []
     },
-    "node_11": {
-      "id": "node_11",
-      "title": "KẾT CỤC: Giải Thoát Huyền Thoại (True / Secret Ending)",
-      "description": "Bạn hạ gục Rồng Băng, hóa giải triệt để lời nguyền ngàn năm và trở thành Đấng Cứu Thế!",
-      "type": "VICTORY",
+    "End5": {
+      "id": "End5",
+      "title": "★ TRUE ENDING: Khúc Ca Hòa Hợp (The Harmonious Resonance)",
+      "type": "ENDING",
+      "description": "Nhờ tri thức từ Cổ Thư và ý chí thuần khiết của Elena, bạn đã thanh tẩy The Core thành công! Năng lượng ma thuật trở thành dòng chảy tuần hoàn tự nhiên, chấm dứt vĩnh viễn nghi thức hiến tế đẫm máu. Hòa bình vĩnh cửu ngự trị khắp cõi Eldoria!",
+      "choices": []
+    },
+    "Node19": {
+      "id": "Node19",
+      "title": "Tranh Đoạt Trận Địa Pháp Thuật",
+      "type": "COMBAT",
+      "description": "Hội đồng Pháp sư triển khai cấm vệ Arcane Council Enforcers bao vây trận địa để độc chiếm buồng Core!",
+      "enemy_id": "Arcane_Council_Enforcers",
+      "on_win_node_id": "Node20",
+      "on_lose_node_id": "GameOver"
+    },
+    "Node20": {
+      "id": "Node20",
+      "title": "Thanh Trừng Đại Pháp Sư Morvath",
+      "type": "COMBAT",
+      "description": "Đại Pháp Sư Morvath lộ rõ bản chất bạo chúa, muốn biến cả thế giới thành nô lệ ma thuật của hắn!",
+      "enemy_id": "Archmage_Morvath",
+      "on_win_node_id": "End3",
+      "on_lose_node_id": "GameOver"
+    },
+    "End3": {
+      "id": "End3",
+      "title": "ENDING 3: Đế Chế Ma Pháp Độc Tài (Arcane Tyranny)",
+      "type": "ENDING",
+      "description": "Hội đồng Pháp sư chiếm đoạt The Core thành công, thiết lập chế độ độc tài ma pháp tối cao, cai trị toàn cõi trong sự sợ hãi.",
+      "choices": []
+    },
+    "Node21": {
+      "id": "Node21",
+      "title": "Kiểm Tra Bùa Hộ Mệnh Rừng Sâu",
+      "type": "REQUIREMENT_CHECK",
+      "description": "Kiểm tra xem bạn có sở hữu FreeForestAmulet để triệu tập liên minh Bộ Tộc Tự Do hay không...",
+      "required_items": ["FreeForestAmulet"],
+      "on_pass_node_id": "Node22",
+      "on_fail_node_id": "Node21_Fail"
+    },
+    "Node21_Fail": {
+      "id": "Node21_Fail",
+      "title": "Thiếu Tín Vật Rừng Sâu",
+      "type": "STORY",
+      "description": "Bạn không có Bùa Hộ Mệnh Rừng Sâu, các Tộc trưởng từ chối tham chiến cùng bạn.",
+      "choices": [
+        {
+          "text": "Quay lại lựa chọn phe phái khác",
+          "next_node_id": "Node13"
+        }
+      ]
+    },
+    "Node22": {
+      "id": "Node22",
+      "title": "Loạn Chiến 4 Phe",
+      "type": "COMBAT",
+      "description": "Một trận huyết chiến hỗn loạn nổ ra trước cổng phong ấn giữa tàn quân Hoàng Gia, Ma tộc và Pháp Sư nhằm tranh đoạt Core!",
+      "enemy_id": "Multi-Faction Battle",
+      "on_win_node_id": "End4",
+      "on_lose_node_id": "GameOver"
+    },
+    "End4": {
+      "id": "End4",
+      "title": "ENDING 4: Tự Do Vang Vọng (Echoes of Freedom)",
+      "type": "ENDING",
+      "description": "The Core bị phong ấn vĩnh viễn sâu trong lòng đất mẹ. Đế chế sụp đổ, các chủng tộc trở về lối sống bộ lạc tự do gắn liền với thiên nhiên nguyên thủy.",
+      "choices": []
+    },
+    "GameOver": {
+      "id": "GameOver",
+      "title": "Chiến Trường Ngã Xuống",
+      "type": "ENDING",
+      "description": "Bạn đã trút hơi thở cuối cùng nơi chiến trường khốc liệt. Ký ức về Eldoria dần chìm vào bóng tối vô tận...",
       "choices": []
     }
   }

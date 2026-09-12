@@ -88,6 +88,14 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                     node.onWinNodeId = nodeJson.value("on_win_node_id", "");
                     node.onLoseNodeId = nodeJson.value("on_lose_node_id", "");
                     node.requiredItem = nodeJson.value("required_item", "");
+                    node.requiredHeroClass = nodeJson.value("required_hero_class", "");
+                    if (nodeJson.contains("required_items") && nodeJson["required_items"].is_array()) {
+                        for (auto& itm : nodeJson["required_items"]) {
+                            node.requiredItems.push_back(itm.get<std::string>());
+                        }
+                    } else if (!node.requiredItem.empty()) {
+                        node.requiredItems.push_back(node.requiredItem);
+                    }
                     node.onPassNodeId = nodeJson.value("on_pass_node_id", "");
                     node.onFailNodeId = nodeJson.value("on_fail_node_id", "");
                     node.nextNodeId = nodeJson.value("next_node_id", "");
@@ -113,6 +121,32 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                     std::string typeStr = nodeJson.value("type", "NORMAL");
                     node.rawType = typeStr;
                     node.type = stringToEventType(typeStr);
+
+                    node.enemyId = nodeJson.value("enemy_id", "");
+                    node.onWinNodeId = nodeJson.value("on_win_node_id", "");
+                    node.onLoseNodeId = nodeJson.value("on_lose_node_id", "");
+                    node.requiredItem = nodeJson.value("required_item", "");
+                    node.requiredHeroClass = nodeJson.value("required_hero_class", "");
+                    if (nodeJson.contains("required_items") && nodeJson["required_items"].is_array()) {
+                        for (auto& itm : nodeJson["required_items"]) {
+                            node.requiredItems.push_back(itm.get<std::string>());
+                        }
+                    } else if (!node.requiredItem.empty()) {
+                        node.requiredItems.push_back(node.requiredItem);
+                    }
+                    node.onPassNodeId = nodeJson.value("on_pass_node_id", "");
+                    node.onFailNodeId = nodeJson.value("on_fail_node_id", "");
+                    node.nextNodeId = nodeJson.value("next_node_id", "");
+
+                    if (nodeJson.contains("rewards") && nodeJson["rewards"].is_object()) {
+                        auto rew = nodeJson["rewards"];
+                        node.rewardExp = rew.value("exp", 0);
+                        if (rew.contains("items") && rew["items"].is_array()) {
+                            for (auto& item : rew["items"]) {
+                                node.rewardItems.push_back(item.get<std::string>());
+                            }
+                        }
+                    }
 
                     if (nodeJson.contains("choices") && nodeJson["choices"].is_array()) {
                         for (auto& c : nodeJson["choices"]) {

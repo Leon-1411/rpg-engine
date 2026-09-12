@@ -24,6 +24,10 @@ private:
     SaveManager saveManager;
     MainMenu mainMenu;
 
+    std::string currentEnemyId;
+    std::string currentWinNodeId;
+    std::string currentLoseNodeId;
+
     void handleInit();
     void handleMainMenu();
     void handleStoryMode();
@@ -34,6 +38,7 @@ private:
     // Helper functions
     void startNewGame();
     void loadGame();
+    void giveItemById(const std::string& itemId);
 
 public:
     GameManager();

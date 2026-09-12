@@ -35,6 +35,8 @@ struct StoryNode {
     std::vector<std::string> rewardItems;
     int rewardExp;
     std::string requiredItem;
+    std::vector<std::string> requiredItems;
+    std::string requiredHeroClass;
     std::string onPassNodeId;
     std::string onFailNodeId;
     std::string nextNodeId;
