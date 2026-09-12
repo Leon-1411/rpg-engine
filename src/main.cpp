@@ -24,7 +24,7 @@ static void runDemo() {
     std::cout << "  Tên: " << ConsoleUI::colorize(player.getName(), ConsoleUI::Colors::BRIGHT_WHITE)
               << " | Lớp: " << ConsoleUI::colorize("Chiến Binh (Warrior)", ConsoleUI::Colors::BRIGHT_BLUE)
               << " | Cấp độ: " << ConsoleUI::colorize(std::to_string(player.getLevel()), ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
-    ConsoleUI::printProgressBar("  Máu (HP)", player.getHp(), player.getMaxHp(), 20);
+    ConsoleUI::printProgressBar("  Máu (HP)", player.getHp(), player.getMaxHp(), 20, ConsoleUI::Colors::BRIGHT_RED);
     ConsoleUI::printProgressBar("  Mana(MP)", player.getMp(), player.getMaxMp(), 20, ConsoleUI::Colors::BRIGHT_BLUE);
     ConsoleUI::printSuccess("Khởi tạo Hero thành công!");
 

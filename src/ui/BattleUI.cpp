@@ -1,15 +1,17 @@
 #include "ui/BattleUI.h"
 #include "ui/ConsoleUI.h"
 #include "ui/ASCIIArt.h"
+#include "CombatEngine.h"
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 
 static std::string heroClassToString(HeroClass c) {
     switch (c) {
-        case HeroClass::WARRIOR: return "Warrior";
-        case HeroClass::MAGE:    return "Mage";
-        case HeroClass::RANGER:  return "Ranger";
-        default:                 return "Unknown";
+        case HeroClass::WARRIOR: return "Chiến Binh (Warrior)";
+        case HeroClass::MAGE:    return "Pháp Sư (Mage)";
+        case HeroClass::RANGER:  return "Xạ Thủ (Ranger)";
+        default:                 return "Hiệp Sĩ";
     }
 }
 
@@ -17,18 +19,14 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     ConsoleUI::clearScreen();
     ASCIIArt::printBattleBanner();
 
-    // Enemy art
-    if (enemy.getType() == EnemyType::BOSS) {
-        ASCIIArt::printBossDragonArt();
-    } else {
-        ASCIIArt::printGoblinArt();
-    }
+    // Display Hero, VS, and Enemy/Boss ASCII Art
+    ASCIIArt::printBattleVersus(hero, enemy);
 
     ConsoleUI::printDivider('=', 64, ConsoleUI::Colors::BRIGHT_RED);
 
     // Hero Status (Left side) & Enemy Status (Right side)
     std::string heroHeader = hero.getName() + " (" + heroClassToString(hero.getHeroClass()) + " Lv." + std::to_string(hero.getLevel()) + ")";
-    std::string enemyHeader = enemy.getName() + (enemy.getType() == EnemyType::BOSS ? " [BOSS]" : " [Minion]");
+    std::string enemyHeader = enemy.getName() + (enemy.getType() == EnemyType::BOSS ? " [BOSS TỐI CAO]" : " [Minion]");
 
     std::cout << "  " 
               << ConsoleUI::colorize(heroHeader, ConsoleUI::Colors::BRIGHT_GREEN)
@@ -36,15 +34,15 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
               << ConsoleUI::colorize(enemyHeader, ConsoleUI::Colors::BRIGHT_RED)
               << "\n";
 
-    // HP Bars
-    std::string heroHpBar = ConsoleUI::formatProgressBar(hero.getHp(), hero.getMaxHp(), 14);
+    // HP Bars: Rendered in BRIGHT_RED for both Hero and Enemy/Boss
+    std::string heroHpBar = ConsoleUI::formatProgressBar(hero.getHp(), hero.getMaxHp(), 14, ConsoleUI::Colors::BRIGHT_RED);
     std::string enemyHpBar = ConsoleUI::formatProgressBar(enemy.getHp(), enemy.getMaxHp(), 14, ConsoleUI::Colors::BRIGHT_RED);
 
     std::cout << "  HP: " << heroHpBar
               << std::string(std::max(2, 30 - 24), ' ')
               << "HP: " << enemyHpBar << "\n";
 
-    // MP Bar for Hero
+    // MP Bar: Rendered in BRIGHT_BLUE for Hero
     std::string heroMpBar = ConsoleUI::formatProgressBar(hero.getMp(), hero.getMaxMp(), 14, ConsoleUI::Colors::BRIGHT_BLUE);
     std::cout << "  MP: " << heroMpBar << "\n";
 
@@ -60,14 +58,88 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     // Battle Actions Menu
     std::cout << "\n  " << ConsoleUI::colorize("1. Tấn công (Attack)", ConsoleUI::Colors::BRIGHT_RED)
               << "    " << ConsoleUI::colorize("2. Kỹ năng (Skill)", ConsoleUI::Colors::BRIGHT_BLUE)
-              << "    " << ConsoleUI::colorize("3. Vật phẩm (Item)", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n"
+              << "    " << ConsoleUI::colorize("3. Dược phẩm (Item)", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n"
               << "  " << ConsoleUI::colorize("4. Phòng thủ (Defend)", ConsoleUI::Colors::CYAN)
               << "   " << ConsoleUI::colorize("5. Bỏ chạy (Run)", ConsoleUI::Colors::DIM) << "\n\n";
 }
 
 BattleAction BattleUI::getPlayerAction() {
-    int choice = ConsoleUI::getIntInput(1, 5, "Chọn hành động của bạn [1-5]: ");
+    int choice = ConsoleUI::getIntInput(1, 5, "Chọn hành động chiến đấu [1-5]: ");
     return static_cast<BattleAction>(choice);
+}
+
+CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy) {
+    CombatEngine engine(hero, enemy);
+    engine.startBattle();
+
+    std::string lastMessage = "Một kẻ địch đã xuất hiện: " + enemy.getName() + "!";
+    if (enemy.getType() == EnemyType::BOSS) {
+        lastMessage = "CẢNH BÁO NGUY HIỂM: TRẬN CHIẾN BOSS TỐI CAO - " + enemy.getName() + " BẮT ĐẦU!";
+    }
+
+    while (!engine.isBattleOver()) {
+        renderBattleScreen(hero, enemy, lastMessage);
+        BattleAction action = getPlayerAction();
+
+        bool isDefending = false;
+        if (action == BattleAction::ATTACK) {
+            int dmg = engine.calculateDamage(hero.getAttack(), enemy.getDefense());
+            enemy.takeDamage(hero.getAttack());
+            lastMessage = hero.getName() + " vung vũ khí tấn công " + enemy.getName() + " gây " + std::to_string(dmg) + " sát thương!";
+        } else if (action == BattleAction::SKILL) {
+            int skillDmg = 0;
+            if (hero.useSkill(1, skillDmg)) {
+                int dmg = engine.calculateDamage(skillDmg, enemy.getDefense());
+                enemy.takeDamage(skillDmg);
+                lastMessage = hero.getName() + " thi triển KỸ NĂNG TẤT SÁT, oanh tạc " + enemy.getName() + " với " + std::to_string(dmg) + " sát thương cực đại!";
+            } else {
+                lastMessage = "Không đủ điểm Mana (MP) để kích hoạt kỹ năng đặc biệt!";
+                continue;
+            }
+        } else if (action == BattleAction::ITEM) {
+            hero.heal(35);
+            hero.restoreMp(25);
+            lastMessage = hero.getName() + " sử dụng Bình Dược Phẩm, hồi phục 35 HP (đỏ) và 25 MP (xanh)!";
+        } else if (action == BattleAction::DEFEND) {
+            isDefending = true;
+            lastMessage = hero.getName() + " lập phòng tuyến kiên cố, giảm 50% sát thương nhận vào trong lượt này!";
+        } else if (action == BattleAction::RUN) {
+            if (enemy.getType() == EnemyType::BOSS) {
+                lastMessage = "Không thể đào tẩu khỏi trận chiến định mệnh với Trùm Cuối (Boss)!";
+                continue;
+            } else {
+                renderBattleScreen(hero, enemy, hero.getName() + " đã nhanh nhẹn rút lui an toàn khỏi trận chiến!");
+                ConsoleUI::pause();
+                return CombatState::FLED;
+            }
+        }
+
+        // Check if enemy defeated
+        if (!enemy.isAlive()) {
+            renderBattleScreen(hero, enemy, enemy.getName() + " đã bị tiêu diệt hoàn toàn!");
+            hero.addExp(enemy.getExpReward());
+            showVictory(enemy);
+            return CombatState::HERO_VICTORY;
+        }
+
+        // Enemy turn
+        int enemyDmg = engine.calculateDamage(enemy.getAttack(), hero.getDefense());
+        if (isDefending) {
+            enemyDmg = std::max(1, enemyDmg / 2);
+            hero.takeDamage(enemy.getAttack() / 2);
+        } else {
+            hero.takeDamage(enemy.getAttack());
+        }
+        lastMessage += "\n  " + enemy.getName() + " phản kích dồn dập, gây " + std::to_string(enemyDmg) + " sát thương lên " + hero.getName() + "!";
+
+        if (!hero.isAlive()) {
+            renderBattleScreen(hero, enemy, hero.getName() + " đã kiệt sức và ngã xuống trên chiến trường...");
+            showDefeat();
+            return CombatState::ENEMY_VICTORY;
+        }
+    }
+
+    return engine.getState();
 }
 
 void BattleUI::printCombatLog(const std::string& message) {
@@ -88,5 +160,5 @@ void BattleUI::showVictory(const Enemy& enemy) {
 void BattleUI::showDefeat() {
     std::cout << "\n";
     ASCIIArt::printGameOverBanner();
-    ConsoleUI::pause("Trò chơi kết thúc. Nhấn Enter...");
+    ConsoleUI::pause("Trò chơi kết thúc. Nhấn Enter để quay lại...");
 }

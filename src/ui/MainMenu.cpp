@@ -205,7 +205,7 @@ void MainMenu::playStoryLoop(Hero& hero, StoryGraph& story) {
         std::cout << "  Hero: " << ConsoleUI::colorize(hero.getName(), ConsoleUI::Colors::BRIGHT_WHITE)
                   << " | Lớp: " << ConsoleUI::colorize(classStr, ConsoleUI::Colors::BRIGHT_BLUE)
                   << " | Level: " << ConsoleUI::colorize(std::to_string(hero.getLevel()), ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
-        ConsoleUI::printProgressBar("  Máu (HP)", hero.getHp(), hero.getMaxHp(), 20);
+        ConsoleUI::printProgressBar("  Máu (HP)", hero.getHp(), hero.getMaxHp(), 20, ConsoleUI::Colors::BRIGHT_RED);
         ConsoleUI::printProgressBar("  Mana(MP)", hero.getMp(), hero.getMaxMp(), 20, ConsoleUI::Colors::BRIGHT_BLUE);
         ConsoleUI::printDivider('-', 65, ConsoleUI::Colors::DIM);
 
@@ -217,22 +217,21 @@ void MainMenu::playStoryLoop(Hero& hero, StoryGraph& story) {
         };
         ConsoleUI::printBox(storyBox, 65, ConsoleUI::Colors::BRIGHT_MAGENTA);
 
-        // Handle BATTLE event
+        // Handle BATTLE event with full interactive BattleUI
         if (node.type == EventType::BATTLE) {
-            ConsoleUI::printWarning("Chiến trường nguy hiểm! Một kẻ địch xuất hiện!");
+            ConsoleUI::printWarning("Chiến trường nguy hiểm! Một kẻ địch xuất hiện cản bước!");
             Enemy enemy("Quái Vật Hắc Ám", EnemyType::MINION, 50, 14, 4, 50, 20);
-            BattleUI battleUI;
-            battleUI.renderBattleScreen(hero, enemy, "Trận chiến nổ ra khốc liệt!");
-            CombatEngine combat(hero, enemy);
-            combat.startBattle();
-            while (!combat.isBattleOver()) {
-                combat.executeTurn(1);
-            }
-            if (hero.isAlive()) {
-                battleUI.showVictory(enemy);
+            if (node.id == "boss_chamber") {
+                enemy = Enemy("Hắc Long Thần Ma", EnemyType::BOSS, 250, 35, 18, 300, 200);
+            } else if (node.id.find("forest") != std::string::npos) {
+                enemy = Enemy("Goblin Trinh Sát", EnemyType::MINION, 50, 12, 4, 40, 15);
             } else {
-                ConsoleUI::printError("Bạn đã tử trận trên chiến trường! Game Over.");
-                ConsoleUI::pause();
+                enemy = Enemy("Bộ Xương Chiến Binh", EnemyType::MINION, 70, 16, 6, 60, 25);
+            }
+
+            BattleUI battleUI;
+            CombatState result = battleUI.runBattle(hero, enemy);
+            if (result == CombatState::ENEMY_VICTORY) {
                 return;
             }
         }

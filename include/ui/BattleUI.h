@@ -2,6 +2,7 @@
 
 #include "Hero.h"
 #include "Enemy.h"
+#include "CombatEngine.h"
 #include <string>
 
 enum class BattleAction {
@@ -17,11 +18,14 @@ public:
     BattleUI() = default;
     ~BattleUI() = default;
 
-    // Renders the battle HUD with Hero stats/bars, Enemy stats/bars, and action log
+    // Renders the battle HUD with Hero stats/bars (HP Red, Mana Blue), Enemy stats/bars (HP Red), and action log
     void renderBattleScreen(const Hero& hero, const Enemy& enemy, const std::string& battleMessage = "");
 
     // Prompts player for battle action
     BattleAction getPlayerAction();
+
+    // Runs a complete interactive turn-by-turn battle loop with Console UI
+    CombatState runBattle(Hero& hero, Enemy& enemy);
 
     // Prints a combat turn log event
     void printCombatLog(const std::string& message);

@@ -16,21 +16,48 @@ int main() {
     assert(uncolored == "Test");
     ConsoleUI::setColorEnabled(true);
 
-    // 2. Test progress bar formatting
+    // 2. Test progress bar formatting (Red HP & Blue Mana)
     std::string pbar = ConsoleUI::formatProgressBar(50, 100, 20);
     assert(pbar.find("50/100") != std::string::npos);
 
-    std::string pbarZero = ConsoleUI::formatProgressBar(0, 100, 20);
-    assert(pbarZero.find("0/100") != std::string::npos);
+    std::string hpRedBar = ConsoleUI::formatProgressBar(80, 100, 20, ConsoleUI::Colors::BRIGHT_RED);
+    assert(hpRedBar.find("80/100") != std::string::npos);
+    assert(hpRedBar.find("\033[91m") != std::string::npos); // Red ANSI escape
 
-    std::string pbarFull = ConsoleUI::formatProgressBar(100, 100, 20);
-    assert(pbarFull.find("100/100") != std::string::npos);
+    std::string mpBlueBar = ConsoleUI::formatProgressBar(40, 100, 20, ConsoleUI::Colors::BRIGHT_BLUE);
+    assert(mpBlueBar.find("40/100") != std::string::npos);
+    assert(mpBlueBar.find("\033[94m") != std::string::npos); // Blue ANSI escape
 
-    // 3. Test Art rendering without crash
+    // 3. Test Art rendering for Hero, Enemy, and Boss without crash
     ASCIIArt::printTitleLogo();
     ASCIIArt::printWarriorArt();
+    ASCIIArt::printMageArt();
+    ASCIIArt::printRangerArt();
+    ASCIIArt::printHeroArt(HeroClass::WARRIOR);
+    ASCIIArt::printHeroArt(HeroClass::MAGE);
+    ASCIIArt::printHeroArt(HeroClass::RANGER);
+
+    ASCIIArt::printGoblinArt();
+    ASCIIArt::printSkeletonArt();
+    ASCIIArt::printOrcArt();
+    ASCIIArt::printBossDragonArt();
+
+    Enemy minionGoblin("Goblin Scout", EnemyType::MINION, 40, 10, 2, 20, 10);
+    Enemy minionSkeleton("Skeleton Warrior", EnemyType::MINION, 50, 12, 3, 30, 15);
+    Enemy minionOrc("Armored Orc", EnemyType::MINION, 70, 15, 5, 45, 20);
+    Enemy bossDragon("Hắc Long Thần Ma", EnemyType::BOSS, 250, 35, 18, 300, 200);
+
+    ASCIIArt::printEnemyArt(minionGoblin);
+    ASCIIArt::printEnemyArt(minionSkeleton);
+    ASCIIArt::printEnemyArt(minionOrc);
+    ASCIIArt::printEnemyArt(bossDragon);
+
+    Hero testHero("Arthur", HeroClass::WARRIOR, 100, 30, 20, 5);
+    ASCIIArt::printBattleVersus(testHero, bossDragon);
+
     ASCIIArt::printBattleBanner();
     ASCIIArt::printVictoryBanner();
+    ASCIIArt::printGameOverBanner();
 
     // 4. Test isValidInteger validation helper
     long long parsedVal = 0;
