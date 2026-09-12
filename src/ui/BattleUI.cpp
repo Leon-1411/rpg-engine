@@ -63,12 +63,12 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
               << "   " << ConsoleUI::colorize("5. Bỏ chạy (Run)", ConsoleUI::Colors::DIM) << "\n\n";
 }
 
-BattleAction BattleUI::getPlayerAction() {
-    int choice = ConsoleUI::getIntInput(1, 5, "Chọn hành động chiến đấu [1-5]: ");
+BattleAction BattleUI::getPlayerAction(std::istream& in) {
+    int choice = ConsoleUI::getIntInput(1, 5, "Chọn hành động chiến đấu [1-5]: ", in);
     return static_cast<BattleAction>(choice);
 }
 
-CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy) {
+CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
     CombatEngine engine(hero, enemy);
     engine.startBattle();
 
@@ -79,7 +79,7 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy) {
 
     while (!engine.isBattleOver()) {
         renderBattleScreen(hero, enemy, lastMessage);
-        BattleAction action = getPlayerAction();
+        BattleAction action = getPlayerAction(in);
 
         bool isDefending = false;
         if (action == BattleAction::ATTACK) {

@@ -22,10 +22,10 @@ public:
     void renderBattleScreen(const Hero& hero, const Enemy& enemy, const std::string& battleMessage = "");
 
     // Prompts player for battle action
-    BattleAction getPlayerAction();
+    BattleAction getPlayerAction(std::istream& in = std::cin);
 
     // Runs a complete interactive turn-by-turn battle loop with Console UI
-    CombatState runBattle(Hero& hero, Enemy& enemy);
+    CombatState runBattle(Hero& hero, Enemy& enemy, std::istream& in = std::cin);
 
     // Prints a combat turn log event
     void printCombatLog(const std::string& message);

@@ -1,5 +1,6 @@
 #include "ui/ConsoleUI.h"
 #include "ui/ASCIIArt.h"
+#include "ui/BattleUI.h"
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -100,13 +101,49 @@ int main() {
         assert(res == 5);
     }
 
-    // 9. Test getIntInput handling EOF safely without infinite loop
+    // 10. Test BattleUI::runBattle interactive combat with Console UI
+    // 10a. Attack action (1) defeating an enemy
     {
-        std::istringstream stream("");
-        int res = ConsoleUI::getIntInput(1, 5, "Test prompt: ", stream);
-        assert(res == 1);
+        Hero hero("Knight", HeroClass::WARRIOR, 100, 30, 25, 5);
+        Enemy enemy("Slime", EnemyType::MINION, 20, 8, 2, 10, 5);
+        BattleUI battleUI;
+        std::istringstream stream("1\n"); // Attack
+        CombatState state = battleUI.runBattle(hero, enemy, stream);
+        assert(state == CombatState::HERO_VICTORY);
+        assert(!enemy.isAlive());
     }
 
-    std::cout << "[PASS] UI Console, ANSI & Input Validation unit tests successful!\n";
+    // 10b. Skill action (2) consuming MP and dealing critical damage
+    {
+        Hero hero("Mage", HeroClass::MAGE, 80, 50, 20, 3);
+        Enemy enemy("Goblin", EnemyType::MINION, 30, 10, 2, 15, 5);
+        BattleUI battleUI;
+        std::istringstream stream("2\n"); // Skill (20 * 2 = 40 dmg)
+        CombatState state = battleUI.runBattle(hero, enemy, stream);
+        assert(state == CombatState::HERO_VICTORY);
+        assert(hero.getMp() == 40); // 10 MP deducted
+    }
+
+    // 10c. Defend action (4) then Flee action (5) from Minion
+    {
+        Hero hero("Defender", HeroClass::WARRIOR, 100, 20, 10, 2);
+        Enemy enemy("Armored Orc", EnemyType::MINION, 100, 20, 5, 20, 10);
+        BattleUI battleUI;
+        std::istringstream stream("4\n5\n"); // Defend then Run
+        CombatState state = battleUI.runBattle(hero, enemy, stream);
+        assert(state == CombatState::FLED);
+    }
+
+    // 10d. Flee action (5) blocked by Boss, then Attack (1)
+    {
+        Hero hero("HeroVsBoss", HeroClass::WARRIOR, 100, 30, 100, 10);
+        Enemy boss("Ancient Dragon", EnemyType::BOSS, 30, 20, 5, 100, 50);
+        BattleUI battleUI;
+        std::istringstream stream("5\n1\n"); // Flee rejected, then Attack kills boss
+        CombatState state = battleUI.runBattle(hero, boss, stream);
+        assert(state == CombatState::HERO_VICTORY);
+    }
+
+    std::cout << "[PASS] UI Console, Battle HUD & ASCII Art unit tests successful!\n";
     return 0;
 }
