@@ -227,7 +227,6 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 }
 
 void CombatEngine::processEnemyTurn() {
-<<<<<<< HEAD
     std::cout << "\n[Enemy Turn - " << enemy.getName() << "]\n";
     if (!enemy.isAlive()) return;
 

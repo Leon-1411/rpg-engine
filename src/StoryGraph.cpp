@@ -1,12 +1,22 @@
- /**
+/**
  * @file StoryGraph.cpp
  * @brief Implement StoryGraph class methods.
- * @author Nghĩa
+ * @author Nghĩa & Antigravity
  */
 
 #include "StoryGraph.h"
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <nlohmann/json.hpp>
+
+static EventType stringToEventType(const std::string& str) {
+    if (str == "COMBAT" || str == "BATTLE") return EventType::BATTLE;
+    if (str == "REWARD" || str == "ITEM") return EventType::ITEM;
+    if (str == "SHOP") return EventType::SHOP;
+    if (str == "GAME_OVER" || str == "VICTORY" || str == "ENDING") return EventType::ENDING;
+    return EventType::NORMAL;
+}
 
 StoryGraph::StoryGraph() : currentNodeId("start") {
     // Default initial graph skeleton
@@ -23,17 +33,19 @@ void StoryGraph::addNode(const StoryNode& node) {
     nodes[node.id] = node;
 }
 
-bool StoryGraph::loadStoryGraph(const std::string& filePath) {
-    std::cout << "[StoryGraph] Loading story data from " << filePath << "...\n";
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        std::cerr << "[StoryGraph] Error: Could not open file " << filePath << "\n";
-        return false;
-    }
+void StoryGraph::clear() {
+    nodes.clear();
+    currentNodeId.clear();
+    storyFlags.clear();
+}
 
+const std::unordered_map<std::string, StoryNode>& StoryGraph::getAllNodes() const {
+    return nodes;
+}
+
+bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
     try {
-        nlohmann::json j;
-        file >> j;
+        nlohmann::json j = nlohmann::json::parse(jsonContent);
         nodes.clear();
         storyFlags.clear();
 
@@ -57,11 +69,7 @@ bool StoryGraph::loadStoryGraph(const std::string& filePath) {
 
                     std::string typeStr = nodeJson.value("type", "STORY");
                     node.rawType = typeStr;
-                    if (typeStr == "COMBAT" || typeStr == "BATTLE") node.type = EventType::BATTLE;
-                    else if (typeStr == "REWARD" || typeStr == "ITEM") node.type = EventType::ITEM;
-                    else if (typeStr == "SHOP") node.type = EventType::SHOP;
-                    else if (typeStr == "GAME_OVER" || typeStr == "VICTORY" || typeStr == "ENDING") node.type = EventType::ENDING;
-                    else node.type = EventType::NORMAL;
+                    node.type = stringToEventType(typeStr);
 
                     if (nodeJson.contains("choices") && nodeJson["choices"].is_array()) {
                         for (auto& c : nodeJson["choices"]) {
@@ -102,11 +110,7 @@ bool StoryGraph::loadStoryGraph(const std::string& filePath) {
                     node.text = nodeJson.value("description", nodeJson.value("text", ""));
                     std::string typeStr = nodeJson.value("type", "NORMAL");
                     node.rawType = typeStr;
-                    if (typeStr == "BATTLE" || typeStr == "COMBAT") node.type = EventType::BATTLE;
-                    else if (typeStr == "ITEM" || typeStr == "REWARD") node.type = EventType::ITEM;
-                    else if (typeStr == "SHOP") node.type = EventType::SHOP;
-                    else if (typeStr == "ENDING" || typeStr == "GAME_OVER" || typeStr == "VICTORY") node.type = EventType::ENDING;
-                    else node.type = EventType::NORMAL;
+                    node.type = stringToEventType(typeStr);
 
                     if (nodeJson.contains("choices") && nodeJson["choices"].is_array()) {
                         for (auto& c : nodeJson["choices"]) {
@@ -123,12 +127,31 @@ bool StoryGraph::loadStoryGraph(const std::string& filePath) {
             }
         }
 
-        std::cout << "[StoryGraph] Successfully loaded " << nodes.size() << " nodes from " << filePath << ".\n";
+        if (nodes.empty()) {
+            return false;
+        }
+
+        if (nodes.find(currentNodeId) == nodes.end() && !nodes.empty()) {
+            currentNodeId = nodes.begin()->first;
+        }
+
         return true;
     } catch (const std::exception& e) {
-        std::cerr << "[StoryGraph] Parse exception: " << e.what() << "\n";
+        std::cerr << "[StoryGraph] JSON Parse error: " << e.what() << "\n";
         return false;
     }
+}
+
+bool StoryGraph::loadStoryGraph(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "[StoryGraph] Error: Could not open file " << filePath << "\n";
+        return false;
+    }
+    std::string content((std::istreambuf_iterator<char>(file)),
+                         std::istreambuf_iterator<char>());
+    file.close();
+    return loadFromJsonString(content);
 }
 
 StoryNode StoryGraph::getCurrentNode() const {
@@ -176,8 +199,3 @@ bool StoryGraph::isEnding() const {
 size_t StoryGraph::getNodeCount() const {
     return nodes.size();
 }
-
-const std::unordered_map<std::string, StoryNode>& StoryGraph::getAllNodes() const {
-    return nodes;
-}
-

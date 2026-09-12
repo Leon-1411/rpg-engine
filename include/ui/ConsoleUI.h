@@ -70,8 +70,9 @@ void printProgressBar(const std::string& label, int current, int max, int width 
                       const std::string& filledColor = "");
 
 // Input validation utilities
-int getIntInput(int minVal, int maxVal, const std::string& prompt = "Chọn: ");
-std::string getStringInput(const std::string& prompt = "> ");
+bool isValidInteger(const std::string& str, long long& outVal);
+int getIntInput(int minVal, int maxVal, const std::string& prompt = "Chọn: ", std::istream& in = std::cin);
+std::string getStringInput(const std::string& prompt = "> ", std::istream& in = std::cin);
 
 // Status notification helpers
 void printSuccess(const std::string& message);

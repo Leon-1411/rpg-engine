@@ -52,6 +52,9 @@ public:
 
     void addNode(const StoryNode& node);
     bool loadStoryGraph(const std::string& filePath);
+    bool loadFromJsonString(const std::string& jsonContent);
+    void clear();
+    const std::unordered_map<std::string, StoryNode>& getAllNodes() const;
     
     StoryNode getCurrentNode() const;
     bool selectChoice(int choiceIndex);

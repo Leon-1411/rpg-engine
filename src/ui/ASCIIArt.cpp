@@ -90,6 +90,87 @@ R"(
 )", BRIGHT_RED) << "\n";
 }
 
+<<<<<<< HEAD
+void printSkeletonArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+      [ SKELETON WARRIOR ]
+             .---.
+            /     \
+           | () () |
+            \  -  /
+             `---'
+            /| | |\   <--- (Rusty Blade)
+           / |_|_| \
+             |   |
+             d   b
+)", BRIGHT_BLACK) << "\n";
+}
+
+void printOrcArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+       [ ARMORED ORC ]
+             .-"-.
+           _/.-.-.\_
+          (q/  -  \p)
+           (   v   )   <--- (Spiked Club)
+          /|-=====-|\
+         / |       | \
+           d       b
+)", GREEN) << "\n";
+}
+
+void printHeroArt(HeroClass heroClass) {
+    switch (heroClass) {
+        case HeroClass::WARRIOR:
+            printWarriorArt();
+            break;
+        case HeroClass::MAGE:
+            printMageArt();
+            break;
+        case HeroClass::RANGER:
+            printRangerArt();
+            break;
+        default:
+            printWarriorArt();
+            break;
+    }
+}
+
+void printEnemyArt(const Enemy& enemy) {
+    if (enemy.getType() == EnemyType::BOSS) {
+        printBossDragonArt();
+        return;
+    }
+
+    std::string name = enemy.getName();
+    if (name.find("Skeleton") != std::string::npos || name.find("Xương") != std::string::npos) {
+        printSkeletonArt();
+    } else if (name.find("Orc") != std::string::npos) {
+        printOrcArt();
+    } else {
+        printGoblinArt();
+    }
+}
+
+void printBattleVersus(const Hero& hero, const Enemy& enemy) {
+    std::cout << ConsoleUI::colorize("  HERO:", ConsoleUI::Colors::BRIGHT_CYAN) 
+              << " " << ConsoleUI::colorize(hero.getName(), ConsoleUI::Colors::BRIGHT_WHITE) << "\n";
+    printHeroArt(hero.getHeroClass());
+
+    std::cout << ConsoleUI::colorize("                  ⚔   V E R S U S   ⚔\n", ConsoleUI::Colors::BRIGHT_YELLOW);
+
+    std::cout << ConsoleUI::colorize("  KẺ ĐỊCH:", ConsoleUI::Colors::BRIGHT_RED) 
+              << " " << ConsoleUI::colorize(enemy.getName(), ConsoleUI::Colors::BRIGHT_WHITE)
+              << (enemy.getType() == EnemyType::BOSS ? ConsoleUI::colorize(" [BOSS TỐI CAO]", ConsoleUI::Colors::BRIGHT_RED) : "") << "\n";
+    printEnemyArt(enemy);
+}
+
+=======
+>>>>>>> origin/main
 void printBattleBanner() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(

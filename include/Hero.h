@@ -136,7 +136,9 @@ public:
     int getEffectiveDefense() const;
 
     void setHp(int value);
+    void setMaxHp(int value);
     void setMp(int value);
+    void setMaxMp(int value);
     void setLevel(int value);
     void setExp(int value);
     void setMaxHp(int value);

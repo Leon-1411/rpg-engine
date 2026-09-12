@@ -1,7 +1,43 @@
 #include "ui/MainMenu.h"
 #include "ui/ConsoleUI.h"
 #include "ui/ASCIIArt.h"
+<<<<<<< HEAD
+#include "ui/BattleUI.h"
+#include "SaveManager.h"
+#include "DataLoader.h"
+#include "CombatEngine.h"
 #include <iostream>
+#include <fstream>
+
+void MainMenu::run() {
+    bool running = true;
+    while (running) {
+        MainMenuOption option = showMenu();
+        switch (option) {
+            case MainMenuOption::NEW_GAME:
+                handleNewGame();
+                break;
+            case MainMenuOption::LOAD_GAME:
+                handleLoadGame();
+                break;
+            case MainMenuOption::HERO_SHOWCASE:
+                showHeroShowcase();
+                break;
+            case MainMenuOption::HELP:
+                showHelp();
+                break;
+            case MainMenuOption::EXIT:
+                ConsoleUI::clearScreen();
+                ConsoleUI::printHeader("CẢM ƠN BẠN ĐÃ TRẢI NGHIỆM RPG ENGINE!", 60, ConsoleUI::Colors::BRIGHT_YELLOW);
+                std::cout << "\n  Chúc bạn có những giờ phút lập trình và chơi game vui vẻ!\n\n";
+                running = false;
+                break;
+        }
+    }
+}
+=======
+#include <iostream>
+>>>>>>> origin/main
 
 MainMenuOption MainMenu::showMenu() {
     ConsoleUI::clearScreen();
@@ -32,13 +68,21 @@ void MainMenu::showHeroShowcase() {
     // Warrior
     ASCIIArt::printWarriorArt();
     std::cout << "  " << ConsoleUI::colorize("• Chiến Binh (Warrior):", ConsoleUI::Colors::BRIGHT_BLUE)
+<<<<<<< HEAD
+              << " Máu cao (120 HP), giáp cứng (8 DEF), sát thương vật lý mạnh mẽ.\n";
+=======
               << " Máu cao, giáp cứng, sát thương vật lý mạnh mẽ.\n";
+>>>>>>> origin/main
     ConsoleUI::printDivider('.', 60, ConsoleUI::Colors::DIM);
 
     // Mage
     ASCIIArt::printMageArt();
     std::cout << "  " << ConsoleUI::colorize("• Pháp Sư (Mage):", ConsoleUI::Colors::BRIGHT_MAGENTA)
+<<<<<<< HEAD
+              << " Lượng MP dồi dào (100 MP), kỹ năng phép thuật tầm rộng cực mạnh.\n";
+=======
               << " Lượng MP dồi dào, kỹ năng phép thuật tầm rộng cực mạnh.\n";
+>>>>>>> origin/main
     ConsoleUI::printDivider('.', 60, ConsoleUI::Colors::DIM);
 
     // Ranger
@@ -83,13 +127,175 @@ void MainMenu::showHelp() {
     
     std::vector<std::string> lines = {
         "1. Lựa chọn hành động bằng cách nhập số hiển thị trên màn hình.",
+<<<<<<< HEAD
+        "2. Hệ thống kiểm tra đầu vào nghiêm ngặt: khi nhập sai chữ,",
+        "   ký tự lạ hoặc để trống, hệ thống sẽ cảnh báo lịch sự.",
+        "3. Chiến đấu theo lượt (Turn-based): Tấn công, dùng Skill, Item.",
+        "4. Khám phá cốt truyện phân nhánh nạp trực tiếp từ file JSON.",
+        "5. Dữ liệu game được lưu và tải theo chuẩn JSON nlohmann."
+=======
         "2. Chiến đấu theo lượt (Turn-based):",
         "   - Tấn công, dùng kỹ năng tiêu tốn MP, dùng bình máu/mana.",
         "   - Quản lý HP không để tụt về 0.",
         "3. Khám phá cốt truyện phân nhánh qua các quyết định.",
         "4. Dữ liệu game được lưu tự động theo chuẩn JSON."
+>>>>>>> origin/main
     };
     ConsoleUI::printBox(lines, 60, ConsoleUI::Colors::BRIGHT_BLUE);
     
     ConsoleUI::pause();
 }
+<<<<<<< HEAD
+
+void MainMenu::handleNewGame() {
+    ConsoleUI::clearScreen();
+    ConsoleUI::printHeader("TẠO NHÂN VẬT MỚI (NEW GAME)", 60, ConsoleUI::Colors::BRIGHT_CYAN);
+
+    std::cout << "\n";
+    std::string heroName = ConsoleUI::getStringInput("  Nhập tên Anh Hùng của bạn: ");
+    if (heroName.empty()) {
+        heroName = "Arthur";
+    }
+
+    std::cout << "\n  Chọn lớp nhân vật (Class):\n";
+    std::cout << "  " << ConsoleUI::colorize("1.", ConsoleUI::Colors::BRIGHT_BLUE) << " Chiến Binh (Warrior)  [HP: 120 | MP: 30  | ATK: 18 | DEF: 8]\n";
+    std::cout << "  " << ConsoleUI::colorize("2.", ConsoleUI::Colors::BRIGHT_MAGENTA) << " Pháp Sư (Mage)         [HP: 80  | MP: 100 | ATK: 24 | DEF: 3]\n";
+    std::cout << "  " << ConsoleUI::colorize("3.", ConsoleUI::Colors::BRIGHT_GREEN) << " Xạ Thủ (Ranger)        [HP: 95  | MP: 50  | ATK: 20 | DEF: 5]\n\n";
+
+    int classChoice = ConsoleUI::getIntInput(1, 3, "  Chọn lớp [1-3]: ");
+
+    Hero player(heroName, HeroClass::WARRIOR, 120, 30, 18, 8);
+    if (classChoice == 1) {
+        player = Hero(heroName, HeroClass::WARRIOR, 120, 30, 18, 8);
+    } else if (classChoice == 2) {
+        player = Hero(heroName, HeroClass::MAGE, 80, 100, 24, 3);
+    } else {
+        player = Hero(heroName, HeroClass::RANGER, 95, 50, 20, 5);
+    }
+
+    ConsoleUI::printSuccess("Khởi tạo nhân vật " + player.getName() + " thành công!");
+    ConsoleUI::pause();
+
+    // Load story from JSON
+    StoryGraph story;
+    std::string storyPath = "data/story.json";
+    if (!std::ifstream(storyPath).good()) storyPath = "../data/story.json";
+    if (!DataLoader::loadStory(storyPath, story)) {
+        ConsoleUI::printWarning("Không tìm thấy data/story.json, sử dụng cốt truyện mặc định.");
+    }
+
+    playStoryLoop(player, story);
+}
+
+void MainMenu::handleLoadGame() {
+    SaveManager saveMgr("saves/");
+    std::vector<int> slots = saveMgr.getExistingSlots();
+    int slot = showLoadGameMenu(slots);
+    if (slot <= 0) return;
+
+    Hero player("TempHero", HeroClass::WARRIOR, 100, 20, 10, 5);
+    StoryGraph story;
+    std::string storyPath = "data/story.json";
+    if (!std::ifstream(storyPath).good()) storyPath = "../data/story.json";
+    if (!DataLoader::loadStory(storyPath, story)) {
+        // Use default story graph
+    }
+
+    if (saveMgr.loadGame(slot, player, story)) {
+        ConsoleUI::printSuccess("Tải bản lưu Slot " + std::to_string(slot) + " thành công!");
+        ConsoleUI::pause();
+        playStoryLoop(player, story);
+    } else {
+        ConsoleUI::printError("Không thể tải bản lưu Slot " + std::to_string(slot) + "!");
+        ConsoleUI::pause();
+    }
+}
+
+void MainMenu::playStoryLoop(Hero& hero, StoryGraph& story) {
+    SaveManager saveMgr("saves/");
+
+    while (true) {
+        ConsoleUI::clearScreen();
+        ConsoleUI::printHeader("RPG ADVENTURE: " + hero.getName(), 65, ConsoleUI::Colors::BRIGHT_YELLOW);
+
+        // Display Hero status
+        std::string classStr = "Chiến Binh";
+        if (hero.getHeroClass() == HeroClass::MAGE) classStr = "Pháp Sư";
+        else if (hero.getHeroClass() == HeroClass::RANGER) classStr = "Xạ Thủ";
+
+        std::cout << "  Hero: " << ConsoleUI::colorize(hero.getName(), ConsoleUI::Colors::BRIGHT_WHITE)
+                  << " | Lớp: " << ConsoleUI::colorize(classStr, ConsoleUI::Colors::BRIGHT_BLUE)
+                  << " | Level: " << ConsoleUI::colorize(std::to_string(hero.getLevel()), ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+        ConsoleUI::printProgressBar("  Máu (HP)", hero.getHp(), hero.getMaxHp(), 20, ConsoleUI::Colors::BRIGHT_RED);
+        ConsoleUI::printProgressBar("  Mana(MP)", hero.getMp(), hero.getMaxMp(), 20, ConsoleUI::Colors::BRIGHT_BLUE);
+        ConsoleUI::printDivider('-', 65, ConsoleUI::Colors::DIM);
+
+        // Display Current Story Node
+        StoryNode node = story.getCurrentNode();
+        std::vector<std::string> storyBox = {
+            "Địa điểm: " + node.id,
+            node.text
+        };
+        ConsoleUI::printBox(storyBox, 65, ConsoleUI::Colors::BRIGHT_MAGENTA);
+
+        // Handle BATTLE event with full interactive BattleUI
+        if (node.type == EventType::BATTLE) {
+            ConsoleUI::printWarning("Chiến trường nguy hiểm! Một kẻ địch xuất hiện cản bước!");
+            Enemy enemy("Quái Vật Hắc Ám", EnemyType::MINION, 50, 14, 4, 50, 20);
+            if (node.id == "boss_chamber") {
+                enemy = Enemy("Hắc Long Thần Ma", EnemyType::BOSS, 250, 35, 18, 300, 200);
+            } else if (node.id.find("forest") != std::string::npos) {
+                enemy = Enemy("Goblin Trinh Sát", EnemyType::MINION, 50, 12, 4, 40, 15);
+            } else {
+                enemy = Enemy("Bộ Xương Chiến Binh", EnemyType::MINION, 70, 16, 6, 60, 25);
+            }
+
+            BattleUI battleUI;
+            CombatState result = battleUI.runBattle(hero, enemy);
+            if (result == CombatState::ENEMY_VICTORY) {
+                return;
+            }
+        }
+
+        // Check if Ending
+        if (story.isEnding() || node.choices.empty()) {
+            std::cout << "\n";
+            ASCIIArt::printVictoryBanner();
+            ConsoleUI::printHeader("KẾT THÚC CỐT TRUYỆN", 65, ConsoleUI::Colors::BRIGHT_GREEN);
+            ConsoleUI::pause();
+            return;
+        }
+
+        // Show Choices
+        std::cout << "\n" << ConsoleUI::colorize("Các lựa chọn của bạn:", ConsoleUI::Colors::BRIGHT_CYAN) << "\n";
+        int choiceCount = static_cast<int>(node.choices.size());
+        for (int i = 0; i < choiceCount; ++i) {
+            std::cout << "  " << ConsoleUI::colorize(std::to_string(i + 1) + ".", ConsoleUI::Colors::BRIGHT_GREEN)
+                      << " " << node.choices[i].text << "\n";
+        }
+        int saveOpt = choiceCount + 1;
+        int exitOpt = choiceCount + 2;
+        std::cout << "  " << ConsoleUI::colorize(std::to_string(saveOpt) + ".", ConsoleUI::Colors::BRIGHT_YELLOW)
+                  << " Lưu trò chơi (Save Game vào slot JSON)\n";
+        std::cout << "  " << ConsoleUI::colorize(std::to_string(exitOpt) + ".", ConsoleUI::Colors::BRIGHT_RED)
+                  << " Quay lại Main Menu\n\n";
+
+        int playerChoice = ConsoleUI::getIntInput(1, exitOpt, "Lựa chọn của bạn [1-" + std::to_string(exitOpt) + "]: ");
+
+        if (playerChoice == exitOpt) {
+            return;
+        } else if (playerChoice == saveOpt) {
+            int slot = ConsoleUI::getIntInput(1, 9, "Chọn số slot lưu [1-9]: ");
+            if (saveMgr.saveGame(slot, hero, story)) {
+                ConsoleUI::printSuccess("Đã lưu tiến trình thành công vào slot " + std::to_string(slot) + "!");
+            } else {
+                ConsoleUI::printError("Không thể lưu tiến trình!");
+            }
+            ConsoleUI::pause();
+        } else {
+            story.selectChoice(playerChoice - 1);
+        }
+    }
+}
+=======
+>>>>>>> origin/main

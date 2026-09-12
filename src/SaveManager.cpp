@@ -1,7 +1,7 @@
 /**
  * @file SaveManager.cpp
  * @brief Implement SaveManager class methods with nlohmann/json serialization & Inventory persistence.
- * @author Phong
+ * @author Phong & Team
  */
 
 #include "SaveManager.h"
@@ -29,7 +29,6 @@ std::string SaveManager::getSaveDirectory() const {
     return saveDirectory;
 }
 
-bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
 bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
     std::error_code ec;
     if (!fs::exists(saveDirectory, ec)) {
@@ -109,6 +108,8 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         inFile.close();
 
         // Restore hero attributes
+        if (j.contains("maxHp")) hero.setMaxHp(j["maxHp"].get<int>());
+        if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
         if (j.contains("level")) hero.setLevel(j["level"].get<int>());
         if (j.contains("exp")) hero.setExp(j["exp"].get<int>());
         if (j.contains("hp")) hero.setHp(j["hp"].get<int>());
@@ -155,7 +156,6 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         std::cerr << "[SaveManager] Exception during load: " << e.what() << "\n";
         return false;
     }
-}
 }
 
 bool SaveManager::slotExists(int slot) const {

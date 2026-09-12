@@ -272,7 +272,6 @@ void Hero::resetCombatStances() {
 void Hero::lockSkills(int turns) {
     skillLockTurns = turns;
 }
-}
 
 bool Hero::isAlive() const {
     return hp > 0;
