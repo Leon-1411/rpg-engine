@@ -254,29 +254,53 @@ classDiagram
     Hero o-- Skill
 ```
 
-### Warrior
+## 5. Hero System
 
--   HP/DEF cao
--   Power Slash
--   Shield Block
--   Berserk
+### Class hierarchy
 
-### Mage
+``` mermaid
+classDiagram
+    class Hero {
+        <<abstract>>
+        -string name
+        -HeroClass heroClass
+        -int level
+        -int exp
+        -int hp
+        -int maxHp
+        -int mp
+        -int maxMp
+        -int attack
+        -int defense
+        +normalAttack()
+        +useSkill()*
+        +takeDamage()
+        +isAlive()
+        +getHeroClassName() string
+    }
 
--   MP và skill damage cao
--   Fireball
--   Ice Blast
--   Meteor
+    Hero <|-- Warrior
+    Hero <|-- Mage
+    Hero <|-- Ranger
 
-### Ranger
+    Hero o-- Inventory
+    Hero o-- Skill
+```
 
--   Crit/dodge tốt
--   Double Shot
--   Poison Arrow
--   Rain of Arrows
+### 1. Warrior (Arthur)
+- **Thuộc tính:** HP và DEF cực cao, phong cách cận chiến vững chắc.
+- **Kỹ năng:** Power Slash, Shield Block, Berserk.
+- **Lợi thế cốt truyện:** Khắc chế các Boss vật lý (`General_Aldric`, `Demon_Berserker`). Mở ra các nhánh hội thoại đặc biệt liên quan đến Lời thề Hiệp sĩ và Danh dự Vương quốc.
 
-`Hero` là abstract base class. Behavior đặc trưng của từng class được
-triển khai bằng polymorphism.
+### 2. Mage (Morrigan)
+- **Thuộc tính:** MP dồi dào, sát thương phép diện rộng và khắc chế ma thuật.
+- **Kỹ năng:** Fireball, Ice Blast, Meteor.
+- **Lợi thế cốt truyện:** Dễ dàng giải mã các phong ấn cổ ngữ tại Tháp Viện Ma Pháp (Node 04 -> Node 07), tự động tìm thấy `AncientCodex`; giảm sát thương ma thuật từ `Archmage_Morvath`.
+
+### 3. Ranger (Lyra)
+- **Thuộc tính:** Tỷ lệ Crit/Dodge cao, tốc độ đi trước trong lượt đấu.
+- **Kỹ năng:** Double Shot, Poison Arrow, Rain of Arrows.
+- **Lợi thế cốt truyện:** Phát hiện dấu vết bí mật qua Rừng Sâu (Whispering Forest), né tránh bẫy phục kích và tìm ra các rương cổ vật ẩn chứa bình thuốc quý.
 
 ------------------------------------------------------------------------
 
@@ -287,6 +311,7 @@ classDiagram
     class Enemy {
         <<abstract>>
         -string name
+        -EnemyType type
         -int hp
         -int attack
         -int defense
@@ -301,44 +326,40 @@ classDiagram
     Enemy <|-- BossMonster
 ```
 
-Minion có thể gồm Goblin, Skeleton, Orc, Dark Knight.
+### Danh sách Kẻ địch & Bosses theo Cốt truyện (Fractured Crown)
 
-Boss có attack pattern riêng, ví dụ:
+#### Minions:
+1. **`Wild_Mercenary`** (Bộ Tộc Tự Do - Node 03): Lính đánh thuê và thợ săn du mục canh giữ ranh giới Rừng Rậm Huyết Nguyệt.
+2. **`Demon_Scout`** (Ma Tộc - Node 05): Trinh sát quỷ nhanh nhẹn tuần tra vùng biên giới Trăng Máu.
+3. **`Demon_Berserker`** (Ma Tộc - Node 12): Chiến binh quỷ cuồng nộ canh giữ lối vào Ma Điện khi người chơi đột kích trực diện.
 
-1.  Normal Attack
-2.  Heavy Attack
-3.  Special Skill
-4.  Quay lại pattern hoặc chuyển phase.
+#### 6 Faction Bosses:
+1. **`Demon_King_Malakor`** (Ma Tộc - Node 14): Thống lĩnh Ma tộc mang sức mạnh hỏa ngục và bóng tối (Nhánh 1 - Vương Quốc).
+2. **`General_Aldric`** (Hoàng Gia - Node 17): Đại tướng huyền thoại của Eldoria bảo vệ buồng The Core (Nhánh 2 - Elena & Ma Tộc).
+3. **`The_Core_Guardian`** (Vệ Thần Cổ Đại - Node 18): Cỗ máy hộ vệ khổng lồ bảo vệ lõi The Core (Nhánh 2 - Elena & Ma Tộc).
+4. **`Arcane_Council_Enforcers`** (Hội Đồng Pháp Sư - Node 19): Đội cấm vệ pháp sư bảo vệ trận địa cấm thuật (Nhánh 3 - Pháp Sư).
+5. **`Archmage_Morvath`** (Hội Đồng Pháp Sư - Node 20): Trưởng lão tối cao mưu mô của Hội đồng Pháp sư (Nhánh 3 - Pháp Sư).
+6. **`Multi-Faction Battle`** (Hỗn Hợp - Node 22): Trận huyết chiến hỗn loạn giữa tàn quân Hoàng Gia, Ma tộc và Pháp sư (Nhánh 4 - Bộ Tộc Tự Do).
 
 ------------------------------------------------------------------------
 
 ## 7. Combat System
 
-`CombatSystem` chịu trách nhiệm điều khiển trận đấu:
-
--   `startBattle()`
--   `playerTurn()`
--   `enemyTurn()`
--   `useSkill()`
--   `applyStatusEffect()`
--   `updateCooldowns()`
--   `checkBattleResult()`
-
-`DamageCalculator` chịu trách nhiệm công thức damage.
-
-`StatusEffect` đại diện các trạng thái như poison, buff defense, giảm
-attack.
+`CombatEngine` / `CombatSystem` điều khiển trận đấu theo lượt:
+- `startBattle()`
+- `executeTurn(actionCode)`
+- `playerTurn()`
+- `enemyTurn()`
+- `useSkill()`
+- `applyStatusEffect()`
+- `checkBattleResult()`
 
 ### Player actions
-
-1.  Attack
-2.  Skill
-3.  Item
-4.  Defend
-5.  Run (chỉ khi trận đấu cho phép)
-
-`CombatSystem` không tự in menu. `BattleUI` nhận trạng thái combat và
-hiển thị.
+1. Attack (Đánh thường)
+2. Skill (Dùng kỹ năng tốn MP)
+3. Item (Dùng Potion trong Inventory)
+4. Defend (Thủ giảm sát thương)
+5. Run (Bỏ chạy nếu sự kiện cho phép)
 
 ------------------------------------------------------------------------
 
@@ -347,10 +368,11 @@ hiển thị.
 ``` mermaid
 classDiagram
     class Item {
-        <<abstract>>
         -string id
         -string name
         -string description
+        -ItemType type
+        -int statValue
     }
 
     Item <|-- Weapon
@@ -359,85 +381,132 @@ classDiagram
     Inventory o-- Item
 ```
 
-### Inventory
-
--   Add item
--   Remove item
--   Use item
--   Equip Weapon
--   Equip Armor
--   Kiểm tra số lượng
--   Truy xuất item cho UI
-
-Ví dụ item:
-
--   Iron Sword
--   Magic Staff
--   Long Bow
--   Iron Armor
--   Magic Robe
--   Leather Armor
--   Health Potion
--   Mana Potion
+### Danh sách Key Items Cốt truyện (Fractured Crown)
+- **`RoyalInsignia`** (Huy hiệu Hoàng Gia - Node 01): Nhận từ Nhà Vua, giúp qua các trạm gác Hoàng gia.
+- **`FreeForestAmulet`** (Bùa Hộ Mệnh Rừng Sâu - Node 06): Vật phẩm bắt buộc để mở khóa Nhánh Lựa Chọn 4 (Bộ Tộc Tự Do - Node 21).
+- **`DemonEmpathyRune`** (Cổ Phù Thấu Cảm - Node 08): Giúp giao tiếp hòa bình với Ma Vương và Elena tại Node 10/11 mà không cần giao tranh.
+- **`AncientCodex`** (Cổ Thư The Core - Node 07): Chứa tri thức cổ 500 năm về The Core, điều kiện tiên quyết cho True Ending.
+- **`ElenaDiary`** (Nhật Ký Elena - Node 11): Tiết lộ bí mật hiến tế linh hồn của The Core, cùng AncientCodex mở khóa True Ending.
+- **`GreaterHealthPotion`** / **`HealthPotion`**: Bình thuốc hồi phục sinh lực.
 
 ------------------------------------------------------------------------
 
 ## 9. Progression
 
-`LevelSystem` xử lý:
-
--   EXP requirement
--   Add EXP
--   Level Up
--   Stat points
--   Stat progression
-
-Khi lên level, người chơi có thể tăng HP, MP, ATK hoặc DEF tùy thiết kế
-gameplay.
+`LevelSystem` xử lý tính toán EXP, thăng cấp và tăng chỉ số cơ bản (HP, MP, ATK, DEF) theo từng Class Hero.
 
 ------------------------------------------------------------------------
 
-## 10. Story System
+## 10. Story System & Narrative (Fractured Crown)
+
+### 10.1. Bối cảnh Cốt truyện
+Vương quốc Eldoria đang đứng trước bờ vực suy tàn. Nguồn năng lượng ma thuật duy trì sự sống của vương quốc – **The Core** – đang dần cạn kiệt. Đúng đêm Trăng Máu (**Blood Moon**), Công chúa Elena biến mất. Nhà Vua tuyên bố Ma Vương đã bắt cóc nàng và triệu tập chiến binh đi giải cứu. Tuy nhiên, sự thật là The Core đòi hỏi linh hồn của người mang dòng máu hoàng gia hiến tế mỗi 500 năm, và Elena đã tự nguyện bỏ trốn cùng Ma tộc để tìm cách chấm dứt nghi thức tàn bạo này.
+
+### 10.2. Cấu trúc 4 Thế lực
+1. 👑 **Kingdom (Vương Quốc)**: Muốn duy trì trật tự và sự thịnh vượng hiện tại bằng mọi giá (kể cả hiến tế).
+2. ☠️ **Demon Clan (Ma Tộc)**: Bị con người đày ải và săn đuổi, muốn giải phóng vùng đất và vạch trần tội ác hoàng gia.
+3. 🔮 **Mage Council (Hội Đồng Pháp Sư)**: Muốn thâu tóm quyền kiểm soát The Core để lập nên đế chế ma pháp độc tài.
+4. 🌿 **Free People (Các Bộ Tộc Tự Do)**: Muốn phá hủy hoặc phong ấn vĩnh viễn The Core để thế giới trở về quy luật tự nhiên.
+
+### 10.3. Sơ đồ Mermaid Flowchart (22 Nodes & 5 Endings)
 
 ``` mermaid
-classDiagram
-    class StoryNode {
-        +string id
-        +string text
-        +EventType type
-        +vector~Choice~ choices
-    }
+flowchart TD
+    %% Khởi tạo Hero
+    Start([Bắt đầu New Game]) --> ChooseHero{Chọn Lớp Hero}
+    ChooseHero -->|Warrior| H_Warrior["Warrior (Arthur)<br/>HP/DEF cao, Cận chiến vững chắc"]
+    ChooseHero -->|Mage| H_Mage["Mage (Morrigan)<br/>MP cao, Sát thương phép & Khắc chế ma thuật"]
+    ChooseHero -->|Ranger| H_Ranger["Ranger (Lyra)<br/>Nhanh nhẹn, Crit/Dodge, Do thám đường tắt"]
 
-    class Choice {
-        +string text
-        +string nextNodeId
-        +string requiredFlag
-        +string setFlag
-    }
+    %% Hồi 1: Chiếu chỉ & Xuất phát
+    H_Warrior & H_Mage & H_Ranger --> Node01["Node 01: [STORY] Hoàng Thành Eldoria<br/>Nhận chiếu chỉ từ Nhà Vua & Nhận Item: RoyalInsignia"]
+    Node01 --> Node02["Node 02: [STORY] Ngã Ba Biên Giới Trăng Máu"]
 
-    class StoryManager {
-        -string currentNodeId
-        +getCurrentNode()
-        +selectChoice()
-        +moveToNode()
-    }
+    %% Nhánh khám phá Hồi 1
+    Node02 -->|Hướng Rừng Sâu Bộ Tộc Tự Do| Node03["Node 03: [COMBAT] Rừng Rậm Huyết Nguyệt<br/>Đánh Minion: Wild_Mercenary"]
+    Node02 -->|Hướng Phế Tích Tháp Pháp Sư| Node04["Node 04: [STORY] Tàn Tích Pháp Viện"]
+    Node02 -->|Đột kích Tiền đồn Ma Tộc| Node05["Node 05: [COMBAT] Tiền Đồn Ma Tộc<br/>Đánh Minion: Demon_Scout"]
 
-    StoryManager --> StoryNode
-    StoryNode o-- Choice
+    %% Tương tác Item & Hero Checks
+    Node03 -->|Thắng trận| Node06["Node 06: [REWARD] Tộc Trưởng Trao Tặng<br/>Nhận Item: FreeForestAmulet + GreaterHealthPotion"]
+    Node04 -->|Hero Mage hoặc Skill Check| Node07["Node 07: [REWARD] Giải Mã Thư Tịch Cổ<br/>Nhận Item: AncientCodex (Cổ Thư The Core)"]
+    Node05 -->|Thắng trận| Node08["Node 08: [REWARD] Thu Thập Manh Mối<br/>Nhận Item: DemonEmpathyRune"]
+
+    %% Hồi 2: Thâm nhập & Khám phá Bí Mật The Core
+    Node06 & Node07 & Node08 --> Node09["Node 09: [STORY] Thung Lũng Răng Quỷ (Devil's Gorge)"]
+    
+    Node09 -->|Tiến vào Lâu đài Ma Vương| Node10["Node 10: [REQUIREMENT_CHECK] Kiểm tra Item"]
+    Node10 -->|Có DemonEmpathyRune| Node11["Node 11: [STORY] Hội Kiến Ma Vương & Công Chúa Elena<br/>Nhận Item: ElenaDiary (Hiểu rõ chân tướng The Core)"]
+    Node10 -->|Không có Rune / Giao chiến trực diện| Node12["Node 12: [COMBAT] Phá Vỡ Cấm Vệ Quỷ<br/>Đánh Minion: Demon_Berserker"]
+    Node12 -->|Thắng trận| Node11
+
+    %% Hồi 3: Ngã Rẽ Quyết Định Lớn (4 Phe)
+    Node11 --> Node13{"Node 13: [STORY/CHOICE]<br/>Lựa Chọn Của Người Chơi"}
+
+    %% ------------------- NHÁNH 1: PHE VƯƠNG QUỐC -------------------
+    Node13 -->|Lựa chọn 1: Bắt Elena nộp cho Nhà Vua| Route_Kingdom["Node 14: [COMBAT] Trảm Ma Vương<br/>Boss: Demon_King_Malakor"]
+    Route_Kingdom -->|Thắng trận| Node15["Node 15: [STORY] Hộ Tống Elena Về Eldoria"]
+    Node15 --> End1["★ ENDING 1: Vương Quyền Xiềng Xích (Crown of Chains)<br/>(Elena bị hiến tế - Vương quốc duy trì trong giả dối)"]
+
+    %% ------------------- NHÁNH 2: PHE ELENA & MA TỘC -------------------
+    Node13 -->|Lựa chọn 2: Cùng Elena & Ma Tộc phá The Core| Route_Rebel["Node 16: [STORY] Tiến Vào Buồng The Core"]
+    Route_Rebel --> Node17["Node 17: [COMBAT] Cản đường bởi Đại Tướng Hoàng Gia<br/>Boss: General_Aldric"]
+    Node17 -->|Thắng trận| Node18["Node 18: [COMBAT] Kích Hoạt Cấm Vệ Thần<br/>Boss: The_Core_Guardian"]
+    
+    %% Kiểm tra điều kiện Secret Ending
+    Node18 -->|Thắng trận| CheckSecret{"Kiểm tra Item:<br/>AncientCodex + ElenaDiary?"}
+    CheckSecret -->|Không đủ item: Phá hủy hoàn toàn Core| End2["★ ENDING 2: Kỷ Nguyên Mới (Dawn of Unity)<br/>(Core vỡ - Vương quốc mất ma thuật - Hòa bình đa tộc)"]
+    CheckSecret -->|Có đủ cả 2 Cổ Vật| End5["★ TRUE ENDING: Khúc Ca Hòa Hợp (The Harmonious Resonance)<br/>(Thanh tẩy Core - Hòa bình vĩnh cửu không cần hiến tế)"]
+
+    %% ------------------- NHÁNH 3: PHE HỘI ĐỒNG PHÁP SƯ -------------------
+    Node13 -->|Lựa chọn 3: Bắt tay Mage Council thâu tóm The Core| Route_Mage["Node 19: [COMBAT] Tranh Đoạt Trận Địa Pháp Thuật<br/>Boss: Arcane_Council_Enforcers"]
+    Route_Mage -->|Thắng trận| Node20["Node 20: [COMBAT] Thanh Trừng Đại Pháp Sư<br/>Boss: Archmage_Morvath"]
+    Node20 -->|Thắng trận| End3["★ ENDING 3: Đế Chế Ma Pháp Độc Tài (Arcane Tyranny)<br/>(Mage Council độc chiếm Core, cai trị bằng bạo quyền)"]
+
+    %% ------------------- NHÁNH 4: PHE BỘ TỘC TỰ DO -------------------
+    Node13 -->|Lựa chọn 4: Theo Free People phong ấn vĩnh viễn Core| Route_Free["Node 21: [REQUIREMENT_CHECK]<br/>Kiểm tra Item: FreeForestAmulet"]
+    Route_Free -->|Thành công| Node22["Node 22: [COMBAT] Loạn Chiến 4 Phe<br/>Boss: Multi-Faction Battle"]
+    Node22 -->|Thắng trận| End4["★ ENDING 4: Tự Do Vang Vọng (Echoes of Freedom)<br/>(Core bị phong ấn - Eldoria phân rã thành các bộ tộc tự do)"]
+
+    %% Bad Ending nhánh Combat
+    Route_Kingdom -.->|Thất bại trận đấu| GameOver["💀 GAME OVER: Bạn đã ngã xuống nơi chiến trường"]
+    Route_Rebel -.->|Thất bại trận đấu| GameOver
+    Route_Mage -.->|Thất bại trận đấu| GameOver
+    Route_Free -.->|Thất bại trận đấu| GameOver
 ```
 
-### Event Type
+### 10.4. Bảng Ma Trận Tương Tác Giữa Các Thành Phần
 
--   NORMAL
--   BATTLE
--   ITEM
--   SHOP
--   BOSS
--   ENDING
+| Giai đoạn / Node | Thành phần tham gia | Tương tác & Điều kiện (Requirement / Logic) | Kết quả / Phần thưởng |
+| :--- | :--- | :--- | :--- |
+| **Bắt đầu** | Hero: `Warrior`, `Mage`, `Ranger` | Chọn 1 trong 3 lớp nhân vật | Khởi tạo chỉ số & kỹ năng riêng |
+| **Node 01** | Hero + Hoàng Gia | Nhận chiếu chỉ từ Nhà Vua | Nhận Key Item: `RoyalInsignia` |
+| **Node 02** | Hero | Lựa chọn 1 trong 3 hướng đi Biên Giới Trăng Máu | Mở khóa Node 03, 04, hoặc 05 |
+| **Node 03** | Hero vs Minion `Wild_Mercenary` | Trận chiến Turn-based tại Rừng Rậm | Thắng $\rightarrow$ Node 06 |
+| **Node 04** | Hero: `Mage` hoặc Skill Check | Kiểm tra class `Mage` hoặc điểm kỹ năng | Thành công $\rightarrow$ Node 07 |
+| **Node 05** | Hero vs Minion `Demon_Scout` | Trận chiến Turn-based tại Tiền Đồn Ma Tộc | Thắng $\rightarrow$ Node 08 |
+| **Node 06** | Hero + Tộc Trưởng Rừng Sâu | Trao thưởng sau khi chứng minh thực lực | Nhận `FreeForestAmulet` + Potion |
+| **Node 07** | Hero + Tháp Viện Cổ | Giải mã văn tự cổ ngữ | Nhận Key Item: `AncientCodex` |
+| **Node 08** | Hero + Trinh Sát Quỷ | Thu thập chiến lợi phẩm | Nhận Key Item: `DemonEmpathyRune` |
+| **Node 09** | Hero | Thâm nhập Thung Lũng Răng Quỷ | Chuyển tiếp tới Node 10 |
+| **Node 10** | Item: `DemonEmpathyRune` | Kiểm tra sở hữu `DemonEmpathyRune` | Có Rune $\rightarrow$ Node 11; Không Rune $\rightarrow$ Node 12 |
+| **Node 11** | Hero + Elena + Ma Vương | Hội đàm hòa bình, Elena trao nhật ký | Nhận `ElenaDiary`, mở khóa Node 13 |
+| **Node 12** | Hero vs Minion `Demon_Berserker` | Trận chiến đột kích trực diện Ma Điện | Thắng $\rightarrow$ Node 11 |
+| **Node 13** | Hero (Lựa chọn 4 ngã rẽ) | Chọn phe: Vương Quốc, Elena/Quỷ, Pháp Sư, Bộ Tộc | Mở khóa Node 14, 16, 19, hoặc 21 |
+| **Node 14** | Hero vs Boss `Demon_King_Malakor` | Quyết đấu Ma Vương | Thắng $\rightarrow$ Node 15 $\rightarrow$ **Ending 1** |
+| **Node 16-17** | Hero vs Boss `General_Aldric` | Đại Tướng cản đường buồng Core | Thắng $\rightarrow$ Node 18 |
+| **Node 18** | Hero vs Boss `The_Core_Guardian` | Đấu Cỗ Máy Vệ Thần bảo vệ Core | Thắng $\rightarrow$ Kiểm tra Cổ vật |
+| **Check Secret** | Item: `AncientCodex` + `ElenaDiary` | Kiểm tra đủ cả 2 Key Items | Đủ $\rightarrow$ **True Ending**; Thiếu $\rightarrow$ **Ending 2** |
+| **Node 19-20** | Hero vs Boss `Archmage_Morvath` | Tranh đoạt Core và diệt Pháp Sư Trưởng | Thắng $\rightarrow$ **Ending 3** |
+| **Node 21-22** | Item: `FreeForestAmulet` + Boss `Multi-Faction` | Check Bùa Rừng Sâu và Loạn chiến 4 phe | Thắng $\rightarrow$ **Ending 4** |
+| **Combat Nodes** | Bất kỳ trận đấu nào | Hero HP $\le 0$ | Dẫn đến **💀 GAME OVER** |
 
-Choice có thể thay đổi story flags để mở/khóa các nhánh khác nhau.
-
-Tối thiểu có: - Good Ending - Bad Ending
+### 10.5. Ý nghĩa 5 Kết cục (Endings)
+- **Ending 1: Vương Quyền Xiềng Xích (*Crown of Chains*)**: Elena bị hiến tế, vương quốc tiếp tục phồn vinh giả dối thêm 500 năm.
+- **Ending 2: Kỷ Nguyên Mới (*Dawn of Unity*)**: The Core bị phá hủy, mất ma lực nhưng xóa bỏ ách hiến tế, mở ra hòa bình giữa Người và Ma tộc.
+- **Ending 3: Đế Chế Ma Pháp Độc Tài (*Arcane Tyranny*)**: Hội Đồng Pháp Sư đoạt lấy Core, cai trị thế giới bằng bạo quyền ma thuật.
+- **Ending 4: Tự Do Vang Vọng (*Echoes of Freedom*)**: The Core bị phong ấn vĩnh viễn, thế giới phân rã thành các bộ tộc tự do nguyên thủy.
+- **★ TRUE ENDING: Khúc Ca Hòa Hợp (*The Harmonious Resonance*)**: Dùng tri thức từ `AncientCodex` và ý chí của Elena thanh tẩy The Core thành nguồn năng lượng tuần hoàn tự nhiên vĩnh cửu.
 
 ------------------------------------------------------------------------
 
