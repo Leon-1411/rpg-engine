@@ -61,11 +61,16 @@ public:
     const std::unordered_map<std::string, StoryNode>& getAllNodes() const;
     
     StoryNode getCurrentNode() const;
+    std::string getCurrentNodeId() const;
+    void setCurrentNodeId(const std::string& nodeId);
     bool selectChoice(int choiceIndex);
     bool moveToNode(const std::string& nodeId);
     
     void setFlag(const std::string& flag, bool value = true);
     bool getFlag(const std::string& flag) const;
+    const std::unordered_map<std::string, bool>& getStoryFlags() const;
+    void setStoryFlags(const std::unordered_map<std::string, bool>& flags);
+    void clearStoryFlags();
     
     bool isEnding() const;
     size_t getNodeCount() const;

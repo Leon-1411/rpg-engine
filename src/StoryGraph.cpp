@@ -164,6 +164,14 @@ StoryNode StoryGraph::getCurrentNode() const {
     return {};
 }
 
+std::string StoryGraph::getCurrentNodeId() const {
+    return currentNodeId;
+}
+
+void StoryGraph::setCurrentNodeId(const std::string& nodeId) {
+    currentNodeId = nodeId;
+}
+
 bool StoryGraph::selectChoice(int choiceIndex) {
     auto node = getCurrentNode();
     if (choiceIndex >= 0 && choiceIndex < static_cast<int>(node.choices.size())) {
@@ -192,6 +200,18 @@ bool StoryGraph::getFlag(const std::string& flag) const {
     auto it = storyFlags.find(flag);
     if (it != storyFlags.end()) return it->second;
     return false;
+}
+
+const std::unordered_map<std::string, bool>& StoryGraph::getStoryFlags() const {
+    return storyFlags;
+}
+
+void StoryGraph::setStoryFlags(const std::unordered_map<std::string, bool>& flags) {
+    storyFlags = flags;
+}
+
+void StoryGraph::clearStoryFlags() {
+    storyFlags.clear();
 }
 
 bool StoryGraph::isEnding() const {
