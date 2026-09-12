@@ -69,6 +69,5 @@ public:
     
     bool isEnding() const;
     size_t getNodeCount() const;
-    const std::unordered_map<std::string, StoryNode>& getAllNodes() const;
 };
 

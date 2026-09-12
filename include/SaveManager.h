@@ -16,7 +16,7 @@ struct SavedItemRecord {
     bool isEquippedArmor;
 };
 
-struct GameState {
+struct SavedGameState {
     std::string heroName;
     HeroClass heroClass;
     int level;

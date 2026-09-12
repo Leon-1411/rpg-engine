@@ -140,8 +140,6 @@ public:
     void setMaxMp(int value);
     void setLevel(int value);
     void setExp(int value);
-    void setMaxHp(int value);
-    void setMaxMp(int value);
     void setAttack(int value);
     void setDefense(int value);
 

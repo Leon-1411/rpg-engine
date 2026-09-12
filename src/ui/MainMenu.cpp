@@ -1,17 +1,15 @@
 #include "ui/MainMenu.h"
 #include "ui/ConsoleUI.h"
 #include "ui/ASCIIArt.h"
-<<<<<<< HEAD
 #include "ui/BattleUI.h"
-#include "SaveManager.h"
 #include "DataLoader.h"
-#include "CombatEngine.h"
+#include "SaveManager.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 void MainMenu::run() {
-    bool running = true;
-    while (running) {
+    while (true) {
         MainMenuOption option = showMenu();
         switch (option) {
             case MainMenuOption::NEW_GAME:
@@ -28,16 +26,11 @@ void MainMenu::run() {
                 break;
             case MainMenuOption::EXIT:
                 ConsoleUI::clearScreen();
-                ConsoleUI::printHeader("CẢM ƠN BẠN ĐÃ TRẢI NGHIỆM RPG ENGINE!", 60, ConsoleUI::Colors::BRIGHT_YELLOW);
-                std::cout << "\n  Chúc bạn có những giờ phút lập trình và chơi game vui vẻ!\n\n";
-                running = false;
-                break;
+                std::cout << "\n" << ConsoleUI::colorize("Cảm ơn bạn đã chơi! Hẹn gặp lại trong thế giới Fantasy RPG!", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n\n";
+                return;
         }
     }
 }
-=======
-#include <iostream>
->>>>>>> origin/main
 
 MainMenuOption MainMenu::showMenu() {
     ConsoleUI::clearScreen();
@@ -68,21 +61,13 @@ void MainMenu::showHeroShowcase() {
     // Warrior
     ASCIIArt::printWarriorArt();
     std::cout << "  " << ConsoleUI::colorize("• Chiến Binh (Warrior):", ConsoleUI::Colors::BRIGHT_BLUE)
-<<<<<<< HEAD
               << " Máu cao (120 HP), giáp cứng (8 DEF), sát thương vật lý mạnh mẽ.\n";
-=======
-              << " Máu cao, giáp cứng, sát thương vật lý mạnh mẽ.\n";
->>>>>>> origin/main
     ConsoleUI::printDivider('.', 60, ConsoleUI::Colors::DIM);
 
     // Mage
     ASCIIArt::printMageArt();
     std::cout << "  " << ConsoleUI::colorize("• Pháp Sư (Mage):", ConsoleUI::Colors::BRIGHT_MAGENTA)
-<<<<<<< HEAD
               << " Lượng MP dồi dào (100 MP), kỹ năng phép thuật tầm rộng cực mạnh.\n";
-=======
-              << " Lượng MP dồi dào, kỹ năng phép thuật tầm rộng cực mạnh.\n";
->>>>>>> origin/main
     ConsoleUI::printDivider('.', 60, ConsoleUI::Colors::DIM);
 
     // Ranger
@@ -127,25 +112,16 @@ void MainMenu::showHelp() {
     
     std::vector<std::string> lines = {
         "1. Lựa chọn hành động bằng cách nhập số hiển thị trên màn hình.",
-<<<<<<< HEAD
         "2. Hệ thống kiểm tra đầu vào nghiêm ngặt: khi nhập sai chữ,",
         "   ký tự lạ hoặc để trống, hệ thống sẽ cảnh báo lịch sự.",
         "3. Chiến đấu theo lượt (Turn-based): Tấn công, dùng Skill, Item.",
         "4. Khám phá cốt truyện phân nhánh nạp trực tiếp từ file JSON.",
         "5. Dữ liệu game được lưu và tải theo chuẩn JSON nlohmann."
-=======
-        "2. Chiến đấu theo lượt (Turn-based):",
-        "   - Tấn công, dùng kỹ năng tiêu tốn MP, dùng bình máu/mana.",
-        "   - Quản lý HP không để tụt về 0.",
-        "3. Khám phá cốt truyện phân nhánh qua các quyết định.",
-        "4. Dữ liệu game được lưu tự động theo chuẩn JSON."
->>>>>>> origin/main
     };
     ConsoleUI::printBox(lines, 60, ConsoleUI::Colors::BRIGHT_BLUE);
     
     ConsoleUI::pause();
 }
-<<<<<<< HEAD
 
 void MainMenu::handleNewGame() {
     ConsoleUI::clearScreen();
@@ -297,5 +273,3 @@ void MainMenu::playStoryLoop(Hero& hero, StoryGraph& story) {
         }
     }
 }
-=======
->>>>>>> origin/main

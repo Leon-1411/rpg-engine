@@ -90,7 +90,6 @@ R"(
 )", BRIGHT_RED) << "\n";
 }
 
-<<<<<<< HEAD
 void printSkeletonArt() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(
@@ -169,8 +168,6 @@ void printBattleVersus(const Hero& hero, const Enemy& enemy) {
     printEnemyArt(enemy);
 }
 
-=======
->>>>>>> origin/main
 void printBattleBanner() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(
@@ -189,18 +186,18 @@ R"(
                       ★  V I C T O R Y  ★
                  You defeated the enemy!
  ****************************************************************
-)", BRIGHT_GREEN) << "\n";
+)", BRIGHT_YELLOW) << "\n";
 }
 
 void printGameOverBanner() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(
 R"(
- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    ☠  G A M E   O V E R  ☠
-                     You have perished...
- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-)", RED) << "\n";
+ ################################################################
+                      ☠  G A M E   O V E R  ☠
+                         You were defeated...
+ ################################################################
+)", BRIGHT_RED) << "\n";
 }
 
 } // namespace ASCIIArt

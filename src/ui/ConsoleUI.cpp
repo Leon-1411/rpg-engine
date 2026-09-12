@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <limits>
 #include <algorithm>
+#include <cctype>
+#include <stdexcept>
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -56,11 +58,11 @@ void clearScreen() {
     std::cout << "\033[2J\033[H" << std::flush;
 }
 
-void pause(const std::string& prompt) {
-    if (std::cin.eof()) return;
+void pause(const std::string& prompt, std::istream& in) {
+    if (in.eof()) return;
     std::cout << colorize("\n" + prompt, Colors::DIM);
     std::string line;
-    std::getline(std::cin, line);
+    std::getline(in, line);
 }
 
 void printHeader(const std::string& title, int width, const std::string& color) {
@@ -132,18 +134,9 @@ std::string formatProgressBar(int current, int max, int width,
     std::string filledBar(filledLength, '#');
     std::string emptyBar(emptyLength, '-');
 
-<<<<<<< HEAD
     std::string countText = std::to_string(current) + "/" + std::to_string(max);
     std::string result = "[" + colorize(filledBar, color) + colorize(emptyBar, emptyColor) + "] "
                        + colorize(countText, color);
-=======
-    std::string result = "[" + colorize(filledBar, color) + colorize(emptyBar, emptyColor) + "] "
-<<<<<<< HEAD
-                       + colorize(std::to_string(current), color) + "/" + std::to_string(max);
->>>>>>> origin/main
-=======
-                       + colorize(std::to_string(current) + "/" + std::to_string(max), color);
->>>>>>> 210e93a (fix: resolve compiler errors, missing includes and configure MinGW)
     return result;
 }
 
@@ -153,7 +146,6 @@ void printProgressBar(const std::string& label, int current, int max, int width,
               << formatProgressBar(current, max, width, filledColor) << "\n";
 }
 
-<<<<<<< HEAD
 bool isValidInteger(const std::string& str, long long& outVal) {
     if (str.empty()) return false;
     size_t start = str.find_first_not_of(" \t\r\n");
@@ -184,11 +176,9 @@ int getIntInput(int minVal, int maxVal, const std::string& prompt, std::istream&
         std::cout << colorize(prompt, Colors::BRIGHT_CYAN);
         std::string line;
         if (!std::getline(in, line)) {
-            // Reached EOF or stream closed
             return minVal;
         }
 
-        // Trim leading and trailing whitespace
         size_t start = line.find_first_not_of(" \t\r\n");
         if (start == std::string::npos) {
             std::cout << colorize("  [!] Bạn chưa nhập gì. Vui lòng nhập một số từ " + 
@@ -199,7 +189,6 @@ int getIntInput(int minVal, int maxVal, const std::string& prompt, std::istream&
         size_t end = line.find_last_not_of(" \t\r\n");
         std::string trimmed = line.substr(start, end - start + 1);
 
-        // Check for any non-digit characters (letters, symbols, punctuation)
         bool hasNonDigit = false;
         size_t i = 0;
         if (trimmed[0] == '+' || trimmed[0] == '-') {
@@ -238,32 +227,10 @@ int getIntInput(int minVal, int maxVal, const std::string& prompt, std::istream&
         } catch (...) {
             std::cout << colorize("  [!] Lỗi chuyển đổi số. Vui lòng nhập lại.\n", Colors::BRIGHT_RED);
             continue;
-=======
-int getIntInput(int minVal, int maxVal, const std::string& prompt) {
-    int choice = 0;
-    while (true) {
-        std::cout << colorize(prompt, Colors::BRIGHT_CYAN);
-        if (std::cin >> choice) {
-            if (choice >= minVal && choice <= maxVal) {
-                // Clear any trailing characters on the line
-                std::string trailing;
-                std::getline(std::cin, trailing);
-                return choice;
-            }
-            std::cout << colorize("  [!] Lựa chọn phải từ " + std::to_string(minVal) + 
-                                  " đến " + std::to_string(maxVal) + ". Vui lòng nhập lại.\n", 
-                                  Colors::BRIGHT_RED);
-        } else {
-            std::cin.clear();
-            std::string invalid;
-            std::getline(std::cin, invalid);
-            std::cout << colorize("  [!] Giá trị không hợp lệ. Vui lòng nhập số.\n", Colors::BRIGHT_RED);
->>>>>>> origin/main
         }
     }
 }
 
-<<<<<<< HEAD
 std::string getStringInput(const std::string& prompt, std::istream& in) {
     std::cout << colorize(prompt, Colors::BRIGHT_CYAN);
     std::string input;
@@ -273,12 +240,6 @@ std::string getStringInput(const std::string& prompt, std::istream& in) {
     if (!input.empty() && input.back() == '\r') {
         input.pop_back();
     }
-=======
-std::string getStringInput(const std::string& prompt) {
-    std::cout << colorize(prompt, Colors::BRIGHT_CYAN);
-    std::string input;
-    std::getline(std::cin, input);
->>>>>>> origin/main
     return input;
 }
 
