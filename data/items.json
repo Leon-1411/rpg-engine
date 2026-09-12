@@ -1,0 +1,38 @@
+{
+  "wpn_01": {
+    "name": "Thanh Kiếm Rỉ Sét",
+    "description": "Thanh kiếm cũ nhưng vẫn đủ sắc để chém quái vật",
+    "type": "WEAPON",
+    "statValue": 8
+  },
+  "wpn_02": {
+    "name": "Trượng Băng Lam",
+    "description": "Quyền trượng tỏa ra luồng hàn khí gia tăng phép thuật",
+    "type": "WEAPON",
+    "statValue": 16
+  },
+  "arm_01": {
+    "name": "Áo Giáp Da Rừng",
+    "description": "Bộ giáp làm từ da thú dai chắc",
+    "type": "ARMOR",
+    "statValue": 6
+  },
+  "arm_02": {
+    "name": "Giáp Hiệp Sĩ Hoàng Gia",
+    "description": "Tấm giáp thép tôi luyện kiên cố",
+    "type": "ARMOR",
+    "statValue": 14
+  },
+  "pot_hp_small": {
+    "name": "Bình Máu Nhỏ",
+    "description": "Hồi phục 35 điểm Sinh Lực (HP)",
+    "type": "POTION",
+    "statValue": 35
+  },
+  "pot_mp_small": {
+    "name": "Bình Mana Nhỏ",
+    "description": "Hồi phục 25 điểm Năng Lượng (MP)",
+    "type": "POTION",
+    "statValue": 25
+  }
+}

@@ -53,6 +53,7 @@ void clearScreen() {
 }
 
 void pause(const std::string& prompt) {
+    if (std::cin.eof()) return;
     std::cout << colorize("\n" + prompt, Colors::DIM);
     std::string line;
     std::getline(std::cin, line);
@@ -127,8 +128,9 @@ std::string formatProgressBar(int current, int max, int width,
     std::string filledBar(filledLength, '#');
     std::string emptyBar(emptyLength, '-');
 
+    std::string countText = std::to_string(current) + "/" + std::to_string(max);
     std::string result = "[" + colorize(filledBar, color) + colorize(emptyBar, emptyColor) + "] "
-                       + colorize(std::to_string(current), color) + "/" + std::to_string(max);
+                       + colorize(countText, color);
     return result;
 }
 
@@ -138,33 +140,103 @@ void printProgressBar(const std::string& label, int current, int max, int width,
               << formatProgressBar(current, max, width, filledColor) << "\n";
 }
 
-int getIntInput(int minVal, int maxVal, const std::string& prompt) {
-    int choice = 0;
+bool isValidInteger(const std::string& str, long long& outVal) {
+    if (str.empty()) return false;
+    size_t start = str.find_first_not_of(" \t\r\n");
+    if (start == std::string::npos) return false;
+    size_t end = str.find_last_not_of(" \t\r\n");
+    std::string trimmed = str.substr(start, end - start + 1);
+
+    size_t i = 0;
+    if (trimmed[0] == '+' || trimmed[0] == '-') {
+        if (trimmed.length() == 1) return false;
+        i = 1;
+    }
+    for (; i < trimmed.length(); ++i) {
+        if (!std::isdigit(static_cast<unsigned char>(trimmed[i]))) {
+            return false;
+        }
+    }
+    try {
+        outVal = std::stoll(trimmed);
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+int getIntInput(int minVal, int maxVal, const std::string& prompt, std::istream& in) {
     while (true) {
         std::cout << colorize(prompt, Colors::BRIGHT_CYAN);
-        if (std::cin >> choice) {
-            if (choice >= minVal && choice <= maxVal) {
-                // Clear any trailing characters on the line
-                std::string trailing;
-                std::getline(std::cin, trailing);
-                return choice;
+        std::string line;
+        if (!std::getline(in, line)) {
+            // Reached EOF or stream closed
+            return minVal;
+        }
+
+        // Trim leading and trailing whitespace
+        size_t start = line.find_first_not_of(" \t\r\n");
+        if (start == std::string::npos) {
+            std::cout << colorize("  [!] Bạn chưa nhập gì. Vui lòng nhập một số từ " + 
+                                  std::to_string(minVal) + " đến " + std::to_string(maxVal) + ".\n", 
+                                  Colors::BRIGHT_YELLOW);
+            continue;
+        }
+        size_t end = line.find_last_not_of(" \t\r\n");
+        std::string trimmed = line.substr(start, end - start + 1);
+
+        // Check for any non-digit characters (letters, symbols, punctuation)
+        bool hasNonDigit = false;
+        size_t i = 0;
+        if (trimmed[0] == '+' || trimmed[0] == '-') {
+            if (trimmed.length() == 1) hasNonDigit = true;
+            i = 1;
+        }
+        for (; i < trimmed.length(); ++i) {
+            if (!std::isdigit(static_cast<unsigned char>(trimmed[i]))) {
+                hasNonDigit = true;
+                break;
             }
-            std::cout << colorize("  [!] Lựa chọn phải từ " + std::to_string(minVal) + 
-                                  " đến " + std::to_string(maxVal) + ". Vui lòng nhập lại.\n", 
+        }
+
+        if (hasNonDigit) {
+            std::cout << colorize("  [!] Ký tự không hợp lệ! Bạn đã nhập chữ hoặc ký hiệu thay vì số: \"" + 
+                                  trimmed + "\". Vui lòng chỉ nhập số nguyên!\n", 
                                   Colors::BRIGHT_RED);
-        } else {
-            std::cin.clear();
-            std::string invalid;
-            std::getline(std::cin, invalid);
-            std::cout << colorize("  [!] Giá trị không hợp lệ. Vui lòng nhập số.\n", Colors::BRIGHT_RED);
+            continue;
+        }
+
+        try {
+            long long val = std::stoll(trimmed);
+            if (val < minVal || val > maxVal) {
+                std::cout << colorize("  [!] Số đã nhập (" + std::to_string(val) + 
+                                      ") nằm ngoài phạm vi [" + std::to_string(minVal) + 
+                                      " - " + std::to_string(maxVal) + "]. Vui lòng nhập lại.\n", 
+                                      Colors::BRIGHT_YELLOW);
+                continue;
+            }
+            return static_cast<int>(val);
+        } catch (const std::out_of_range&) {
+            std::cout << colorize("  [!] Số vượt giới hạn xử lý! Vui lòng nhập lại trong khoảng [" + 
+                                  std::to_string(minVal) + " - " + std::to_string(maxVal) + "].\n", 
+                                  Colors::BRIGHT_RED);
+            continue;
+        } catch (...) {
+            std::cout << colorize("  [!] Lỗi chuyển đổi số. Vui lòng nhập lại.\n", Colors::BRIGHT_RED);
+            continue;
         }
     }
 }
 
-std::string getStringInput(const std::string& prompt) {
+std::string getStringInput(const std::string& prompt, std::istream& in) {
     std::cout << colorize(prompt, Colors::BRIGHT_CYAN);
     std::string input;
-    std::getline(std::cin, input);
+    if (!std::getline(in, input)) {
+        return "";
+    }
+    if (!input.empty() && input.back() == '\r') {
+        input.pop_back();
+    }
     return input;
 }
 

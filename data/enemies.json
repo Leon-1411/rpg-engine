@@ -1,0 +1,38 @@
+{
+  "goblin": {
+    "name": "Goblin Trinh Sát",
+    "type": "MINION",
+    "hp": 50,
+    "attack": 12,
+    "defense": 4,
+    "expReward": 40,
+    "goldReward": 15
+  },
+  "skeleton": {
+    "name": "Bộ Xương Chiến Binh",
+    "type": "MINION",
+    "hp": 70,
+    "attack": 16,
+    "defense": 6,
+    "expReward": 60,
+    "goldReward": 25
+  },
+  "dark_orc": {
+    "name": "Orc Thiết Giáp",
+    "type": "MINION",
+    "hp": 110,
+    "attack": 22,
+    "defense": 10,
+    "expReward": 90,
+    "goldReward": 40
+  },
+  "dragon_boss": {
+    "name": "Hắc Long Thần Ma",
+    "type": "BOSS",
+    "hp": 250,
+    "attack": 35,
+    "defense": 18,
+    "expReward": 300,
+    "goldReward": 200
+  }
+}

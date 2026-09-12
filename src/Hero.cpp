@@ -77,6 +77,8 @@ int Hero::getAttack() const { return attack; }
 int Hero::getDefense() const { return defense; }
 
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
+void Hero::setMaxHp(int value) { maxHp = std::max(1, value); }
 void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
+void Hero::setMaxMp(int value) { maxMp = std::max(0, value); }
 void Hero::setLevel(int value) { level = value; }
 void Hero::setExp(int value) { exp = value; }

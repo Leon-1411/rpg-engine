@@ -1,0 +1,88 @@
+{
+  "startNodeId": "village_start",
+  "nodes": [
+    {
+      "id": "village_start",
+      "text": "Bạn đứng tại cổng Làng Khởi Nguyên. Trưởng làng giao phó thanh gươm và bảo bạn đi tìm nguồn cơn của sự biến chất trong Rừng Hắc Ám.",
+      "type": "NORMAL",
+      "choices": [
+        {
+          "text": "Tiến vào Rừng Hắc Ám theo lối mòn chính",
+          "nextNodeId": "forest_main_path",
+          "requiredFlag": "",
+          "setFlag": "entered_forest"
+        },
+        {
+          "text": "Đi men theo Bờ Suối Băng Giá",
+          "nextNodeId": "frost_river",
+          "requiredFlag": "",
+          "setFlag": "explored_river"
+        }
+      ]
+    },
+    {
+      "id": "forest_main_path",
+      "text": "Những rễ cây cổ thụ khổng lồ quấn quanh mặt đất. Bất chợt, tiếng gầm gừ vang lên từ bụi rậm. Một bầy Goblin phục kích!",
+      "type": "BATTLE",
+      "choices": [
+        {
+          "text": "Tuốt vũ khí và chiến đấu với lũ Goblin",
+          "nextNodeId": "ruins_entrance",
+          "requiredFlag": "",
+          "setFlag": "defeated_goblins"
+        },
+        {
+          "text": "Ném bom khói và rút lui về bờ suối",
+          "nextNodeId": "frost_river",
+          "requiredFlag": "",
+          "setFlag": ""
+        }
+      ]
+    },
+    {
+      "id": "frost_river",
+      "text": "Dòng nước lạnh buốt phản chiếu ánh trăng mờ ảo. Bạn phát hiện một rương báu cổ bên dưới một tảng đá rêu phong.",
+      "type": "ITEM",
+      "choices": [
+        {
+          "text": "Mở rương báu nhặt vật phẩm quý rồi tiếp tục",
+          "nextNodeId": "ruins_entrance",
+          "requiredFlag": "",
+          "setFlag": "found_treasure"
+        }
+      ]
+    },
+    {
+      "id": "ruins_entrance",
+      "text": "Trước mắt bạn là Tàn Tích Cổ Đại - nơi Tà Thần bóng đêm ngự trị. Không khí xung quanh đặc quánh tà khí.",
+      "type": "NORMAL",
+      "choices": [
+        {
+          "text": "Bước vào điện chính đối đầu Thủ Lĩnh Bóng Đêm (Boss)",
+          "nextNodeId": "boss_chamber",
+          "requiredFlag": "",
+          "setFlag": ""
+        }
+      ]
+    },
+    {
+      "id": "boss_chamber",
+      "text": "Hắc Long Thần gầm vang rung chuyển cả thánh đường ngầm. Trận chiến quyết định vận mệnh vương quốc bắt đầu!",
+      "type": "BATTLE",
+      "choices": [
+        {
+          "text": "Dốc toàn lực tấn công với tất cả kỹ năng",
+          "nextNodeId": "good_ending",
+          "requiredFlag": "",
+          "setFlag": "game_won"
+        }
+      ]
+    },
+    {
+      "id": "good_ending",
+      "text": "Ánh bình minh rọi sáng qua mái vòm tàn tích đổ nát. Bạn đã cứu vương quốc thoát khỏi thảm họa bóng đêm! (VICTORY - GOOD ENDING)",
+      "type": "ENDING",
+      "choices": []
+    }
+  ]
+}

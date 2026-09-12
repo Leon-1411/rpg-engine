@@ -86,6 +86,8 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         inFile.close();
 
         // Restore hero attributes
+        if (j.contains("maxHp")) hero.setMaxHp(j["maxHp"].get<int>());
+        if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
         if (j.contains("level")) hero.setLevel(j["level"].get<int>());
         if (j.contains("exp")) hero.setExp(j["exp"].get<int>());
         if (j.contains("hp")) hero.setHp(j["hp"].get<int>());
