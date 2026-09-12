@@ -1,4 +1,5 @@
 #include "ui/ConsoleUI.h"
+#include <iostream>
 #include <iomanip>
 #include <limits>
 #include <algorithm>
@@ -8,6 +9,9 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
 #endif
 
 namespace ConsoleUI {
@@ -53,10 +57,7 @@ void clearScreen() {
 }
 
 void pause(const std::string& prompt) {
-<<<<<<< HEAD
     if (std::cin.eof()) return;
-=======
->>>>>>> origin/main
     std::cout << colorize("\n" + prompt, Colors::DIM);
     std::string line;
     std::getline(std::cin, line);
@@ -137,8 +138,12 @@ std::string formatProgressBar(int current, int max, int width,
                        + colorize(countText, color);
 =======
     std::string result = "[" + colorize(filledBar, color) + colorize(emptyBar, emptyColor) + "] "
+<<<<<<< HEAD
                        + colorize(std::to_string(current), color) + "/" + std::to_string(max);
 >>>>>>> origin/main
+=======
+                       + colorize(std::to_string(current) + "/" + std::to_string(max), color);
+>>>>>>> 210e93a (fix: resolve compiler errors, missing includes and configure MinGW)
     return result;
 }
 

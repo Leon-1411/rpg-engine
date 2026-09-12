@@ -2,47 +2,46 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
 
 namespace ConsoleUI {
 
 namespace Colors {
     // Formatting
-    inline const std::string RESET         = "\033[0m";
-    inline const std::string BOLD          = "\033[1m";
-    inline const std::string DIM           = "\033[2m";
-    inline const std::string ITALIC        = "\033[3m";
-    inline const std::string UNDERLINE     = "\033[4m";
+    constexpr const char* RESET         = "\033[0m";
+    constexpr const char* BOLD          = "\033[1m";
+    constexpr const char* DIM           = "\033[2m";
+    constexpr const char* ITALIC        = "\033[3m";
+    constexpr const char* UNDERLINE     = "\033[4m";
 
     // Standard Foreground Colors
-    inline const std::string BLACK         = "\033[30m";
-    inline const std::string RED           = "\033[31m";
-    inline const std::string GREEN         = "\033[32m";
-    inline const std::string YELLOW        = "\033[33m";
-    inline const std::string BLUE          = "\033[34m";
-    inline const std::string MAGENTA       = "\033[35m";
-    inline const std::string CYAN          = "\033[36m";
-    inline const std::string WHITE         = "\033[37m";
+    constexpr const char* BLACK         = "\033[30m";
+    constexpr const char* RED           = "\033[31m";
+    constexpr const char* GREEN         = "\033[32m";
+    constexpr const char* YELLOW        = "\033[33m";
+    constexpr const char* BLUE          = "\033[34m";
+    constexpr const char* MAGENTA       = "\033[35m";
+    constexpr const char* CYAN          = "\033[36m";
+    constexpr const char* WHITE         = "\033[37m";
 
     // High Intensity / Bright Foreground Colors
-    inline const std::string BRIGHT_BLACK   = "\033[90m";
-    inline const std::string BRIGHT_RED     = "\033[91m";
-    inline const std::string BRIGHT_GREEN   = "\033[92m";
-    inline const std::string BRIGHT_YELLOW  = "\033[93m";
-    inline const std::string BRIGHT_BLUE    = "\033[94m";
-    inline const std::string BRIGHT_MAGENTA = "\033[95m";
-    inline const std::string BRIGHT_CYAN    = "\033[96m";
-    inline const std::string BRIGHT_WHITE   = "\033[97m";
+    constexpr const char* BRIGHT_BLACK   = "\033[90m";
+    constexpr const char* BRIGHT_RED     = "\033[91m";
+    constexpr const char* BRIGHT_GREEN   = "\033[92m";
+    constexpr const char* BRIGHT_YELLOW  = "\033[93m";
+    constexpr const char* BRIGHT_BLUE    = "\033[94m";
+    constexpr const char* BRIGHT_MAGENTA = "\033[95m";
+    constexpr const char* BRIGHT_CYAN    = "\033[96m";
+    constexpr const char* BRIGHT_WHITE   = "\033[97m";
 
     // Background Colors
-    inline const std::string BG_BLACK       = "\033[40m";
-    inline const std::string BG_RED         = "\033[41m";
-    inline const std::string BG_GREEN       = "\033[42m";
-    inline const std::string BG_YELLOW      = "\033[43m";
-    inline const std::string BG_BLUE        = "\033[44m";
-    inline const std::string BG_MAGENTA     = "\033[45m";
-    inline const std::string BG_CYAN        = "\033[46m";
-    inline const std::string BG_WHITE       = "\033[47m";
+    constexpr const char* BG_BLACK       = "\033[40m";
+    constexpr const char* BG_RED         = "\033[41m";
+    constexpr const char* BG_GREEN       = "\033[42m";
+    constexpr const char* BG_YELLOW      = "\033[43m";
+    constexpr const char* BG_BLUE        = "\033[44m";
+    constexpr const char* BG_MAGENTA     = "\033[45m";
+    constexpr const char* BG_CYAN        = "\033[46m";
+    constexpr const char* BG_WHITE       = "\033[47m";
 } // namespace Colors
 
 // Console initialization & settings

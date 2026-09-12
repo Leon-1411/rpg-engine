@@ -309,7 +309,6 @@ void CombatEngine::processEnemyTurn() {
 
         hero.resetCombatStances();
     }
-    }
 }
 
 bool CombatEngine::isBattleOver() const {
@@ -326,7 +325,7 @@ int CombatEngine::getTurnCount() const {
 
 std::string CombatEngine::renderBar(int current, int max, int length) {
     if (max <= 0) max = 1;
-    current = std::clamp(current, 0, max);
+    current = std::max(0, std::min(current, max));
     int filled = (current * length) / max;
     int empty = length - filled;
     std::string bar = "[";

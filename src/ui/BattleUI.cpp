@@ -15,7 +15,6 @@ static std::string heroClassToString(HeroClass c) {
         default:                 return "Hiệp Sĩ";
 =======
 #include <iostream>
-#include <iomanip>
 
 static std::string heroClassToString(HeroClass c) {
     switch (c) {

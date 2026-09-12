@@ -7,9 +7,17 @@
 
 #include "Inventory.h"
 #include "Hero.h"
+#include <iostream>
+#include <algorithm>
 
 Inventory::Inventory(int capacity)
     : capacity(capacity), equippedWeaponIndex(-1), equippedArmorIndex(-1) {}
+
+void Inventory::clear() {
+    items.clear();
+    equippedWeaponIndex = -1;
+    equippedArmorIndex = -1;
+}
 
 bool Inventory::addItem(const Item& item) {
     if (item.getType() == ItemType::POTION) {
@@ -119,7 +127,6 @@ bool Inventory::useItem(int index, Hero& hero) {
             removeItem(index);
             return true;
         }
-    }
     }
     return false;
 }

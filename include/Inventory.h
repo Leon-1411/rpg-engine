@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Item.h"
+#include <string>
 #include <vector>
 #include <memory>
-#include <iostream>
+#include "Item.h"
 
-class Hero; // Forward declaration
+class Hero;
+class Weapon;
+class Armor;
 
 class Inventory {
 private:
@@ -19,6 +21,7 @@ public:
     ~Inventory() = default;
 
     // Item Management
+    void clear();
     bool addItem(const Item& item);
     bool addItem(std::shared_ptr<Item> item);
     bool removeItem(int index);                        // Xóa theo index
