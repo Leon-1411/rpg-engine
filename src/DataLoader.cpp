@@ -42,9 +42,16 @@ std::vector<Item> DataLoader::loadItems(const std::string& filePath) {
         };
 
         if (j.is_object()) {
-            for (auto it = j.begin(); it != j.end(); ++it) {
-                if (it.value().is_object()) {
-                    items.push_back(parseItemObj(it.key(), it.value()));
+            if (j.contains("items") && j["items"].is_array()) {
+                for (const auto& el : j["items"]) {
+                    std::string id = el.value("id", "item_unknown");
+                    items.push_back(parseItemObj(id, el));
+                }
+            } else {
+                for (auto it = j.begin(); it != j.end(); ++it) {
+                    if (it.value().is_object()) {
+                        items.push_back(parseItemObj(it.key(), it.value()));
+                    }
                 }
             }
         } else if (j.is_array()) {
@@ -88,9 +95,15 @@ std::vector<Enemy> DataLoader::loadEnemies(const std::string& filePath) {
         };
 
         if (j.is_object()) {
-            for (auto it = j.begin(); it != j.end(); ++it) {
-                if (it.value().is_object()) {
-                    enemies.push_back(parseEnemyObj(it.value()));
+            if (j.contains("enemies") && j["enemies"].is_array()) {
+                for (const auto& el : j["enemies"]) {
+                    enemies.push_back(parseEnemyObj(el));
+                }
+            } else {
+                for (auto it = j.begin(); it != j.end(); ++it) {
+                    if (it.value().is_object()) {
+                        enemies.push_back(parseEnemyObj(it.value()));
+                    }
                 }
             }
         } else if (j.is_array()) {

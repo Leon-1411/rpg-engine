@@ -31,8 +31,8 @@ public:
     void printCombatLog(const std::string& message);
 
     // Displays victory banner with EXP/Gold rewards
-    void showVictory(const Enemy& enemy);
+    void showVictory(const Enemy& enemy, std::istream& in = std::cin);
 
     // Displays defeat / game over screen
-    void showDefeat();
+    void showDefeat(std::istream& in = std::cin);
 };

@@ -1,4 +1,4 @@
-33 #pragma once
+#pragma once
 
 #include "Enemy.h"
 #include "Hero.h"
