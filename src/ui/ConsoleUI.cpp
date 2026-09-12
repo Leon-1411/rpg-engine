@@ -58,11 +58,11 @@ void clearScreen() {
     std::cout << "\033[2J\033[H" << std::flush;
 }
 
-void pause(const std::string& prompt) {
-    if (std::cin.eof()) return;
+void pause(const std::string& prompt, std::istream& in) {
+    if (in.eof()) return;
     std::cout << colorize("\n" + prompt, Colors::DIM);
     std::string line;
-    std::getline(std::cin, line);
+    std::getline(in, line);
 }
 
 void printHeader(const std::string& title, int width, const std::string& color) {

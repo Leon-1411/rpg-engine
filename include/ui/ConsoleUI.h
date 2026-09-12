@@ -55,7 +55,7 @@ std::string colorize(const std::string& text, const std::string& ansiCode);
 
 // Screen manipulation
 void clearScreen();
-void pause(const std::string& prompt = "Nhấn Enter để tiếp tục...");
+void pause(const std::string& prompt = "Nhấn Enter để tiếp tục...", std::istream& in = std::cin);
 
 // Visual layout & formatting helpers
 void printHeader(const std::string& title, int width = 60, const std::string& color = Colors::BRIGHT_YELLOW);

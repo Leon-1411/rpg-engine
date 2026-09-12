@@ -21,9 +21,9 @@ goto end
 echo [RPG Engine] Running Tests...
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_save.cpp -o test_save.exe
 .\test_save.exe
-%GXX% %CXXFLAGS% src/StoryGraph.cpp tests/test_story.cpp -o test_story.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_story.cpp -o test_story.exe
 .\test_story.exe
-%GXX% %CXXFLAGS% src/ui/ConsoleUI.cpp src/ui/ASCIIArt.cpp tests/test_ui.cpp -o test_ui.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_ui.cpp -o test_ui.exe
 .\test_ui.exe
 goto end
 

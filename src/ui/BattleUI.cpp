@@ -109,7 +109,7 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
                 continue;
             } else {
                 renderBattleScreen(hero, enemy, hero.getName() + " đã nhanh nhẹn rút lui an toàn khỏi trận chiến!");
-                ConsoleUI::pause();
+                ConsoleUI::pause("Nhấn Enter để tiếp tục...", in);
                 return CombatState::FLED;
             }
         }
@@ -118,7 +118,7 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
         if (!enemy.isAlive()) {
             renderBattleScreen(hero, enemy, enemy.getName() + " đã bị tiêu diệt hoàn toàn!");
             hero.addExp(enemy.getExpReward());
-            showVictory(enemy);
+            showVictory(enemy, in);
             return CombatState::HERO_VICTORY;
         }
 
@@ -134,7 +134,7 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
 
         if (!hero.isAlive()) {
             renderBattleScreen(hero, enemy, hero.getName() + " đã kiệt sức và ngã xuống trên chiến trường...");
-            showDefeat();
+            showDefeat(in);
             return CombatState::ENEMY_VICTORY;
         }
     }
@@ -146,7 +146,7 @@ void BattleUI::printCombatLog(const std::string& message) {
     std::cout << "  " << ConsoleUI::colorize("» ", ConsoleUI::Colors::CYAN) << message << "\n";
 }
 
-void BattleUI::showVictory(const Enemy& enemy) {
+void BattleUI::showVictory(const Enemy& enemy, std::istream& in) {
     std::cout << "\n";
     ASCIIArt::printVictoryBanner();
     std::cout << "  " << ConsoleUI::colorize("+ Nhận được: ", ConsoleUI::Colors::BRIGHT_YELLOW)
@@ -154,11 +154,11 @@ void BattleUI::showVictory(const Enemy& enemy) {
               << " và "
               << ConsoleUI::colorize(std::to_string(enemy.getGoldReward()) + " Vàng", ConsoleUI::Colors::BRIGHT_YELLOW)
               << "!\n";
-    ConsoleUI::pause();
+    ConsoleUI::pause("Nhấn Enter để tiếp tục...", in);
 }
 
-void BattleUI::showDefeat() {
+void BattleUI::showDefeat(std::istream& in) {
     std::cout << "\n";
     ASCIIArt::printGameOverBanner();
-    ConsoleUI::pause("Trò chơi kết thúc. Nhấn Enter để quay lại...");
+    ConsoleUI::pause("Trò chơi kết thúc. Nhấn Enter để quay lại...", in);
 }
