@@ -1,0 +1,17 @@
+-xc++
+-std=c++14
+-Iinclude
+-Iinclude/ui
+-Iinclude/nlohmann
+-isystem
+C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++
+-isystem
+C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++/x86_64-w64-mingw32
+-isystem
+C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++/backward
+-isystem
+C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include
+-isystem
+C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include
+-isystem
+C:/Program Files (x86)/Dev-Cpp/MinGW64/include

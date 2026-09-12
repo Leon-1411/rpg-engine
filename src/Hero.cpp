@@ -58,6 +58,9 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
     }
 }
 
+Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense)
+    : Hero(name, heroClass, hp, 50, attack, defense, 10, 0.25f, 0.25f, false) {}
+
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
     : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(50), maxMp(50),
@@ -352,7 +355,7 @@ int Hero::getEffectiveDefense() const {
     return defense + inventory.getEquippedArmorBonus();
 }
 
-void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
+void Hero::setHp(int value) { hp = std::max(0, std::min(value, maxHp)); }
 void Hero::setLevel(int value) { level = value; }
 void Hero::setExp(int value) { exp = value; }
 
@@ -418,7 +421,7 @@ void Hero::clearStatusEffects() {
 
 int Hero::getMp() const { return mp; }
 int Hero::getMaxMp() const { return maxMp; }
-void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
+void Hero::setMp(int value) { mp = std::max(0, std::min(value, maxMp)); }
 void Hero::setMaxHp(int value) { maxHp = std::max(1, value); hp = std::min(hp, maxHp); }
 void Hero::setMaxMp(int value) { maxMp = std::max(0, value); mp = std::min(mp, maxMp); }
 void Hero::setAttack(int value) { attack = std::max(0, value); }

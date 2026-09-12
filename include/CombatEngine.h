@@ -3,7 +3,8 @@
 #include "Hero.h"
 #include "Enemy.h"
 #include "Inventory.h"
-#include <iosfwd>
+#include <iostream>
+#include <string>
 
 enum class CombatState {
     ONGOING,

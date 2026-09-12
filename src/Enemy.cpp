@@ -113,7 +113,7 @@ int Enemy::getExpReward() const { return expReward; }
 int Enemy::getGoldReward() const { return goldReward; }
 std::string Enemy::getSpecialSkillName() const { return ""; }
 
-void Enemy::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
+void Enemy::setHp(int value) { hp = std::max(0, std::min(value, maxHp)); }
 
 void Enemy::setPoisonous(bool value, int turns, int dmg) {
     isPoisonous = value;

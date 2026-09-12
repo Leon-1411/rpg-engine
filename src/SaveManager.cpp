@@ -5,24 +5,38 @@
  */
 
 #include "SaveManager.h"
+#include "Item.h"
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
-#include <filesystem>
+#include <cstdio>
 
-namespace fs = std::filesystem;
+#ifdef _WIN32
+#include <direct.h>
+#include <io.h>
+static void createDirectoryIfNotExists(const std::string& path) {
+    _mkdir(path.c_str());
+}
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+static void createDirectoryIfNotExists(const std::string& path) {
+    mkdir(path.c_str(), 0755);
+}
+#endif
+
 using json = nlohmann::json;
 
 SaveManager::SaveManager(const std::string& saveDir) : saveDirectory(saveDir) {
-    std::error_code ec;
-    if (!fs::exists(saveDirectory, ec)) {
-        fs::create_directories(saveDirectory, ec);
-    }
+    createDirectoryIfNotExists(saveDirectory);
 }
 
 std::string SaveManager::getSlotFilePath(int slot) const {
-    fs::path dir(saveDirectory);
-    return (dir / ("slot" + std::to_string(slot) + ".json")).string();
+    std::string dir = saveDirectory;
+    if (!dir.empty() && dir.back() != '/' && dir.back() != '\\') {
+        dir += "/";
+    }
+    return dir + "slot" + std::to_string(slot) + ".json";
 }
 
 std::string SaveManager::getSaveDirectory() const {
@@ -30,10 +44,7 @@ std::string SaveManager::getSaveDirectory() const {
 }
 
 bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
-    std::error_code ec;
-    if (!fs::exists(saveDirectory, ec)) {
-        fs::create_directories(saveDirectory, ec);
-    }
+    createDirectoryIfNotExists(saveDirectory);
 
     std::string filePath = getSlotFilePath(slot);
 
@@ -112,6 +123,10 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
         if (j.contains("level")) hero.setLevel(j["level"].get<int>());
         if (j.contains("exp")) hero.setExp(j["exp"].get<int>());
+        if (j.contains("maxHp")) hero.setMaxHp(j["maxHp"].get<int>());
+        if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
+        if (j.contains("attack")) hero.setAttack(j["attack"].get<int>());
+        if (j.contains("defense")) hero.setDefense(j["defense"].get<int>());
         if (j.contains("hp")) hero.setHp(j["hp"].get<int>());
         if (j.contains("mp")) hero.setMp(j["mp"].get<int>());
 
@@ -134,11 +149,13 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
                 int qty = itemJ.value("quantity", 1);
 
                 if (type == ItemType::POTION) {
-                    Item potion(id, name, desc, type, statVal, qty);
-                    inv.addItem(potion);
+                    inv.addItem(std::make_shared<Potion>(id, name, desc, statVal, false, qty));
+                } else if (type == ItemType::WEAPON) {
+                    inv.addItem(std::make_shared<Weapon>(id, name, desc, statVal));
+                } else if (type == ItemType::ARMOR) {
+                    inv.addItem(std::make_shared<Armor>(id, name, desc, statVal));
                 } else {
-                    Item equip(id, name, desc, type, statVal);
-                    inv.addItem(equip);
+                    inv.addItem(std::make_shared<Item>(id, name, desc, type, statVal));
                 }
             }
             if (j.contains("equippedWeaponIndex")) {
@@ -159,16 +176,15 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
 }
 
 bool SaveManager::slotExists(int slot) const {
-    std::error_code ec;
-    return fs::exists(getSlotFilePath(slot), ec);
+    std::ifstream inFile(getSlotFilePath(slot));
+    return inFile.good();
 }
 
 bool SaveManager::deleteSlot(int slot) {
     if (!slotExists(slot)) {
         return false;
     }
-    std::error_code ec;
-    return fs::remove(getSlotFilePath(slot), ec);
+    return std::remove(getSlotFilePath(slot).c_str()) == 0;
 }
 
 std::vector<int> SaveManager::getExistingSlots() const {

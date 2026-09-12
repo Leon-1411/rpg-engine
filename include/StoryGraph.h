@@ -23,7 +23,7 @@ struct Choice {
 struct StoryNode {
     std::string id;
     std::string text;
-    EventType type = EventType::NORMAL;
+    EventType type;
     std::vector<Choice> choices;
 
     // Thuộc tính mở rộng từ file JSON
@@ -33,11 +33,15 @@ struct StoryNode {
     std::string onWinNodeId;
     std::string onLoseNodeId;
     std::vector<std::string> rewardItems;
-    int rewardExp = 0;
+    int rewardExp;
     std::string requiredItem;
     std::string onPassNodeId;
     std::string onFailNodeId;
     std::string nextNodeId;
+
+    StoryNode() : type(EventType::NORMAL), rewardExp(0) {}
+    StoryNode(const std::string& id, const std::string& text, EventType type = EventType::NORMAL, const std::vector<Choice>& choices = {})
+        : id(id), text(text), type(type), choices(choices), rewardExp(0) {}
 };
 
 class StoryGraph {

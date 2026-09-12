@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 
 std::string minionTypeToString(MinionType type) {
     switch (type) {
@@ -241,7 +242,9 @@ std::vector<std::shared_ptr<Minion>> MinionFactory::loadAllFromJson(const std::s
     try {
         nlohmann::json data;
         file >> data;
-        for (auto& [key, value] : data.items()) {
+        for (auto it : data.items()) {
+            std::string key = it.key();
+            const auto& value = it.value();
             std::string type = value.value("type", "MINION");
             if (type == "BOSS") {
                 continue;

@@ -59,7 +59,9 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
 
         if (j.contains("nodes")) {
             if (j["nodes"].is_object()) {
-                for (auto& [key, nodeJson] : j["nodes"].items()) {
+                for (auto it : j["nodes"].items()) {
+                    std::string key = it.key();
+                    const auto& nodeJson = it.value();
                     StoryNode node;
                     node.id = key;
                     if (nodeJson.contains("id")) node.id = nodeJson["id"].get<std::string>();
