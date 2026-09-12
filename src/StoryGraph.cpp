@@ -1,19 +1,20 @@
 /**
  * @file StoryGraph.cpp
  * @brief Implement StoryGraph class methods.
- * @author Nghĩa
+ * @author Nghĩa & Antigravity
  */
 
 #include "StoryGraph.h"
-#include <nlohmann/json.hpp>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <nlohmann/json.hpp>
 
 static EventType stringToEventType(const std::string& str) {
-    if (str == "BATTLE") return EventType::BATTLE;
-    if (str == "ITEM") return EventType::ITEM;
+    if (str == "COMBAT" || str == "BATTLE") return EventType::BATTLE;
+    if (str == "REWARD" || str == "ITEM") return EventType::ITEM;
     if (str == "SHOP") return EventType::SHOP;
-    if (str == "ENDING") return EventType::ENDING;
+    if (str == "GAME_OVER" || str == "VICTORY" || str == "ENDING") return EventType::ENDING;
     return EventType::NORMAL;
 }
 
@@ -45,66 +46,98 @@ const std::unordered_map<std::string, StoryNode>& StoryGraph::getAllNodes() cons
 bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
     try {
         nlohmann::json j = nlohmann::json::parse(jsonContent);
-        std::unordered_map<std::string, StoryNode> parsedNodes;
-        std::string startId;
+        nodes.clear();
+        storyFlags.clear();
 
-        if (j.contains("startNodeId") && j["startNodeId"].is_string()) {
-            startId = j["startNodeId"].get<std::string>();
+        if (j.contains("start_node_id")) {
+            currentNodeId = j["start_node_id"].get<std::string>();
+        } else if (j.contains("startNodeId")) {
+            currentNodeId = j["startNodeId"].get<std::string>();
+        } else {
+            currentNodeId = "start";
         }
 
-        if (j.contains("nodes") && j["nodes"].is_array()) {
-            for (const auto& item : j["nodes"]) {
-                StoryNode node;
-                if (!item.contains("id") || !item["id"].is_string()) continue;
-                node.id = item["id"].get<std::string>();
-                if (item.contains("text") && item["text"].is_string()) {
-                    node.text = item["text"].get<std::string>();
-                }
-                if (item.contains("type") && item["type"].is_string()) {
-                    node.type = stringToEventType(item["type"].get<std::string>());
-                } else {
-                    node.type = EventType::NORMAL;
-                }
+        if (j.contains("nodes")) {
+            if (j["nodes"].is_object()) {
+                for (auto& [key, nodeJson] : j["nodes"].items()) {
+                    StoryNode node;
+                    node.id = key;
+                    if (nodeJson.contains("id")) node.id = nodeJson["id"].get<std::string>();
+                    if (nodeJson.contains("title")) node.title = nodeJson["title"].get<std::string>();
+                    if (nodeJson.contains("description")) node.text = nodeJson["description"].get<std::string>();
+                    else if (nodeJson.contains("text")) node.text = nodeJson["text"].get<std::string>();
 
-                if (item.contains("choices") && item["choices"].is_array()) {
-                    for (const auto& ch : item["choices"]) {
-                        Choice choice;
-                        if (ch.contains("text") && ch["text"].is_string()) {
-                            choice.text = ch["text"].get<std::string>();
+                    std::string typeStr = nodeJson.value("type", "STORY");
+                    node.rawType = typeStr;
+                    node.type = stringToEventType(typeStr);
+
+                    if (nodeJson.contains("choices") && nodeJson["choices"].is_array()) {
+                        for (auto& c : nodeJson["choices"]) {
+                            Choice choice;
+                            choice.text = c.value("text", "");
+                            choice.nextNodeId = c.value("next_node_id", c.value("nextNodeId", ""));
+                            choice.requiredFlag = c.value("required_flag", c.value("requiredFlag", ""));
+                            choice.setFlag = c.value("set_flag", c.value("setFlag", ""));
+                            node.choices.push_back(choice);
                         }
-                        if (ch.contains("nextNodeId") && ch["nextNodeId"].is_string()) {
-                            choice.nextNodeId = ch["nextNodeId"].get<std::string>();
-                        }
-                        if (ch.contains("requiredFlag") && ch["requiredFlag"].is_string()) {
-                            choice.requiredFlag = ch["requiredFlag"].get<std::string>();
-                        }
-                        if (ch.contains("setFlag") && ch["setFlag"].is_string()) {
-                            choice.setFlag = ch["setFlag"].get<std::string>();
-                        }
-                        node.choices.push_back(choice);
                     }
+
+                    node.enemyId = nodeJson.value("enemy_id", "");
+                    node.onWinNodeId = nodeJson.value("on_win_node_id", "");
+                    node.onLoseNodeId = nodeJson.value("on_lose_node_id", "");
+                    node.requiredItem = nodeJson.value("required_item", "");
+                    node.onPassNodeId = nodeJson.value("on_pass_node_id", "");
+                    node.onFailNodeId = nodeJson.value("on_fail_node_id", "");
+                    node.nextNodeId = nodeJson.value("next_node_id", "");
+
+                    if (nodeJson.contains("rewards") && nodeJson["rewards"].is_object()) {
+                        auto rew = nodeJson["rewards"];
+                        node.rewardExp = rew.value("exp", 0);
+                        if (rew.contains("items") && rew["items"].is_array()) {
+                            for (auto& item : rew["items"]) {
+                                node.rewardItems.push_back(item.get<std::string>());
+                            }
+                        }
+                    }
+
+                    nodes[node.id] = node;
                 }
-                parsedNodes[node.id] = node;
-                if (startId.empty()) {
-                    startId = node.id;
+            } else if (j["nodes"].is_array()) {
+                for (auto& nodeJson : j["nodes"]) {
+                    StoryNode node;
+                    node.id = nodeJson.value("id", "");
+                    node.title = nodeJson.value("title", "");
+                    node.text = nodeJson.value("description", nodeJson.value("text", ""));
+                    std::string typeStr = nodeJson.value("type", "NORMAL");
+                    node.rawType = typeStr;
+                    node.type = stringToEventType(typeStr);
+
+                    if (nodeJson.contains("choices") && nodeJson["choices"].is_array()) {
+                        for (auto& c : nodeJson["choices"]) {
+                            Choice choice;
+                            choice.text = c.value("text", "");
+                            choice.nextNodeId = c.value("next_node_id", c.value("nextNodeId", ""));
+                            choice.requiredFlag = c.value("required_flag", c.value("requiredFlag", ""));
+                            choice.setFlag = c.value("set_flag", c.value("setFlag", ""));
+                            node.choices.push_back(choice);
+                        }
+                    }
+                    nodes[node.id] = node;
                 }
             }
         }
 
-        if (parsedNodes.empty()) {
-            std::cerr << "[StoryGraph] Cảnh báo: Không tìm thấy node hợp lệ trong dữ liệu JSON.\n";
+        if (nodes.empty()) {
             return false;
         }
 
-        nodes = std::move(parsedNodes);
-        if (!startId.empty() && nodes.find(startId) != nodes.end()) {
-            currentNodeId = startId;
-        } else if (!nodes.empty()) {
+        if (nodes.find(currentNodeId) == nodes.end() && !nodes.empty()) {
             currentNodeId = nodes.begin()->first;
         }
+
         return true;
     } catch (const std::exception& e) {
-        std::cerr << "[StoryGraph] Lỗi cú pháp JSON: " << e.what() << "\n";
+        std::cerr << "[StoryGraph] JSON Parse error: " << e.what() << "\n";
         return false;
     }
 }
@@ -112,7 +145,7 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
 bool StoryGraph::loadStoryGraph(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        std::cerr << "[StoryGraph] Lỗi: Không thể mở file " << filePath << "\n";
+        std::cerr << "[StoryGraph] Error: Could not open file " << filePath << "\n";
         return false;
     }
     std::string content((std::istreambuf_iterator<char>(file)),
@@ -161,4 +194,8 @@ bool StoryGraph::getFlag(const std::string& flag) const {
 
 bool StoryGraph::isEnding() const {
     return getCurrentNode().type == EventType::ENDING;
+}
+
+size_t StoryGraph::getNodeCount() const {
+    return nodes.size();
 }

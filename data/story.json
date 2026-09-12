@@ -1,88 +1,136 @@
 {
-  "startNodeId": "village_start",
-  "nodes": [
-    {
-      "id": "village_start",
-      "text": "Bạn đứng tại cổng Làng Khởi Nguyên. Trưởng làng giao phó thanh gươm và bảo bạn đi tìm nguồn cơn của sự biến chất trong Rừng Hắc Ám.",
-      "type": "NORMAL",
+  "start_node_id": "node_01",
+  "nodes": {
+    "node_01": {
+      "id": "node_01",
+      "title": "Bản Đồ Ngã Ba Đường",
+      "description": "Bạn đứng trước hẻm núi tăm tối. Bên trái là Rừng Ma sương mù bao phủ, bên phải là Hang Cổ Băng Giá vang lên tiếng gầm rú.",
+      "type": "STORY",
       "choices": [
         {
-          "text": "Tiến vào Rừng Hắc Ám theo lối mòn chính",
-          "nextNodeId": "forest_main_path",
-          "requiredFlag": "",
-          "setFlag": "entered_forest"
+          "text": "Đi xuyên qua Rừng Ma (Lối đi ngắn, nguy cơ đụng quái cao)",
+          "next_node_id": "node_02"
         },
         {
-          "text": "Đi men theo Bờ Suối Băng Giá",
-          "nextNodeId": "frost_river",
-          "requiredFlag": "",
-          "setFlag": "explored_river"
+          "text": "Khám phá Hang Cổ Băng Giá (Lối đi dài, có thể có cổ vật)",
+          "next_node_id": "node_03"
         }
       ]
     },
-    {
-      "id": "forest_main_path",
-      "text": "Những rễ cây cổ thụ khổng lồ quấn quanh mặt đất. Bất chợt, tiếng gầm gừ vang lên từ bụi rậm. Một bầy Goblin phục kích!",
-      "type": "BATTLE",
+    "node_02": {
+      "id": "node_02",
+      "title": "Rừng Ma - Phục Kích",
+      "description": "Một con Quỷ Bắt Hồn (Minion) nhảy ra từ tán cây gieo hãi hùng!",
+      "type": "COMBAT",
+      "enemy_id": "minion_soul_eater",
+      "on_win_node_id": "node_04",
+      "on_lose_node_id": "node_06"
+    },
+    "node_03": {
+      "id": "node_03",
+      "title": "Hang Cổ - Bẫy Cổ Đại",
+      "description": "Bạn thấy một rương kho báu tỏa ánh sáng xanh lục, bên dưới sàn nhà có các phiến đá khắc ký tự lạ.",
+      "type": "STORY",
       "choices": [
         {
-          "text": "Tuốt vũ khí và chiến đấu với lũ Goblin",
-          "nextNodeId": "ruins_entrance",
-          "requiredFlag": "",
-          "setFlag": "defeated_goblins"
+          "text": "Táo bạo tiến đến mở rương kho báu",
+          "next_node_id": "node_05"
         },
         {
-          "text": "Ném bom khói và rút lui về bờ suối",
-          "nextNodeId": "frost_river",
-          "requiredFlag": "",
-          "setFlag": ""
+          "text": "Cẩn trọng né bẫy và đi thẳng đến lối ra",
+          "next_node_id": "node_04"
         }
       ]
     },
-    {
-      "id": "frost_river",
-      "text": "Dòng nước lạnh buốt phản chiếu ánh trăng mờ ảo. Bạn phát hiện một rương báu cổ bên dưới một tảng đá rêu phong.",
-      "type": "ITEM",
+    "node_05": {
+      "id": "node_05",
+      "title": "Cổ Vật Cổ Đại",
+      "description": "Bạn tìm thấy 'Chìa Khóa Băng Bất Hoại' cùng 1 Bình Thuốc Máu Lớn!",
+      "type": "REWARD",
+      "rewards": {
+        "items": [
+          "IceKey",
+          "GreaterHealthPotion"
+        ],
+        "exp": 100
+      },
+      "next_node_id": "node_04"
+    },
+    "node_04": {
+      "id": "node_04",
+      "title": "Sảnh Ngoài Đền Băng",
+      "description": "Bạn đến được trước sảnh đền. Điện chính dẫn thẳng tới ngai vàng, nhưng bên hông có một lối đi bí mật bị phong ấn.",
+      "type": "STORY",
       "choices": [
         {
-          "text": "Mở rương báu nhặt vật phẩm quý rồi tiếp tục",
-          "nextNodeId": "ruins_entrance",
-          "requiredFlag": "",
-          "setFlag": "found_treasure"
+          "text": "Đẩy cửa vào Điện Chính đối đầu trực diện",
+          "next_node_id": "node_07"
+        },
+        {
+          "text": "Rẽ sang Hành Lang Bí Mật bên hông",
+          "next_node_id": "node_09"
         }
       ]
     },
-    {
-      "id": "ruins_entrance",
-      "text": "Trước mắt bạn là Tàn Tích Cổ Đại - nơi Tà Thần bóng đêm ngự trị. Không khí xung quanh đặc quánh tà khí.",
-      "type": "NORMAL",
+    "node_09": {
+      "id": "node_09",
+      "title": "Hành Lang Phong Ấn",
+      "description": "Một cánh cửa đá cổ đại chắn đường với ổ khóa hình bông tuyết huyền bí.",
+      "type": "REQUIREMENT_CHECK",
+      "required_item": "IceKey",
+      "on_pass_node_id": "node_10",
+      "on_fail_node_id": "node_07_no_key"
+    },
+    "node_07_no_key": {
+      "id": "node_07_no_key",
+      "title": "Cửa Khóa - Quay Lại Sảnh",
+      "description": "Bạn không có chìa khóa để mở cánh cửa này! Đành phải quay lại điện chính.",
+      "type": "STORY",
       "choices": [
         {
-          "text": "Bước vào điện chính đối đầu Thủ Lĩnh Bóng Đêm (Boss)",
-          "nextNodeId": "boss_chamber",
-          "requiredFlag": "",
-          "setFlag": ""
+          "text": "Tiến vào Điện Chính",
+          "next_node_id": "node_07"
         }
       ]
     },
-    {
-      "id": "boss_chamber",
-      "text": "Hắc Long Thần gầm vang rung chuyển cả thánh đường ngầm. Trận chiến quyết định vận mệnh vương quốc bắt đầu!",
-      "type": "BATTLE",
-      "choices": [
-        {
-          "text": "Dốc toàn lực tấn công với tất cả kỹ năng",
-          "nextNodeId": "good_ending",
-          "requiredFlag": "",
-          "setFlag": "game_won"
-        }
-      ]
+    "node_07": {
+      "id": "node_07",
+      "title": "Chúa Tể Băng Giá",
+      "description": "Chúa Tể Băng Frost Lord triệu hồi bão tuyết! Cuộc chiến sinh tử bắt đầu.",
+      "type": "COMBAT",
+      "enemy_id": "boss_frost_lord",
+      "on_win_node_id": "node_08",
+      "on_lose_node_id": "node_06"
     },
-    {
-      "id": "good_ending",
-      "text": "Ánh bình minh rọi sáng qua mái vòm tàn tích đổ nát. Bạn đã cứu vương quốc thoát khỏi thảm họa bóng đêm! (VICTORY - GOOD ENDING)",
-      "type": "ENDING",
+    "node_10": {
+      "id": "node_10",
+      "title": "Thần Thú Cổ Đại (Bí Mật)",
+      "description": "Chìa khóa kích hoạt! Bạn bước vào phòng giam Rồng Băng Cổ Đại - nguồn gốc thực sự của lời nguyền!",
+      "type": "COMBAT",
+      "enemy_id": "boss_ice_dragon",
+      "on_win_node_id": "node_11",
+      "on_lose_node_id": "node_06"
+    },
+    "node_06": {
+      "id": "node_06",
+      "title": "KẾT CỤC: Bị Đóng Băng (Bad Ending)",
+      "description": "Bạn gục ngã và trở thành một bức tượng băng vĩnh cửu.",
+      "type": "GAME_OVER",
+      "choices": []
+    },
+    "node_08": {
+      "id": "node_08",
+      "title": "KẾT CỤC: Anh Hùng Vương Quốc (Good Ending)",
+      "description": "Bạn tiêu diệt Frost Lord, giải cứu vương quốc khỏi mùa đông vĩnh cửu!",
+      "type": "VICTORY",
+      "choices": []
+    },
+    "node_11": {
+      "id": "node_11",
+      "title": "KẾT CỤC: Giải Thoát Huyền Thoại (True / Secret Ending)",
+      "description": "Bạn hạ gục Rồng Băng, hóa giải triệt để lời nguyền ngàn năm và trở thành Đấng Cứu Thế!",
+      "type": "VICTORY",
       "choices": []
     }
-  ]
+  }
 }

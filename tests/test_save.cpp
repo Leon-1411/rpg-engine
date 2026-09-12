@@ -9,7 +9,6 @@ int main() {
     hero.setMp(15);
     hero.setLevel(3);
     hero.setExp(120);
-
     StoryGraph story;
 
     // Test saving

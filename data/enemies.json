@@ -1,38 +1,62 @@
 {
   "goblin": {
-    "name": "Goblin Trinh Sát",
+    "name": "Goblin",
     "type": "MINION",
-    "hp": 50,
+    "minionType": "GOBLIN",
+    "hp": 60,
     "attack": 12,
-    "defense": 4,
+    "defense": 5,
     "expReward": 40,
-    "goldReward": 15
+    "goldReward": 10,
+    "description": "A small, cunning creature that strikes quickly from the shadows.",
+    "specialSkill": "Quick Strike"
   },
   "skeleton": {
-    "name": "Bộ Xương Chiến Binh",
+    "name": "Skeleton Warrior",
     "type": "MINION",
-    "hp": 70,
-    "attack": 16,
-    "defense": 6,
-    "expReward": 60,
-    "goldReward": 25
+    "minionType": "SKELETON",
+    "hp": 80,
+    "attack": 18,
+    "defense": 8,
+    "expReward": 65,
+    "goldReward": 20,
+    "description": "An undead soldier wielding a rusty sword with relentless determination.",
+    "specialSkill": "Bone Pierce"
   },
-  "dark_orc": {
-    "name": "Orc Thiết Giáp",
+  "orc": {
+    "name": "Orc Berserker",
     "type": "MINION",
-    "hp": 110,
-    "attack": 22,
-    "defense": 10,
-    "expReward": 90,
-    "goldReward": 40
+    "minionType": "ORC",
+    "hp": 120,
+    "attack": 25,
+    "defense": 12,
+    "expReward": 100,
+    "goldReward": 35,
+    "description": "A muscular beast fueled by bloodlust, hitting harder when enraged.",
+    "specialSkill": "Heavy Slam"
   },
-  "dragon_boss": {
-    "name": "Hắc Long Thần Ma",
-    "type": "BOSS",
-    "hp": 250,
-    "attack": 35,
+  "dark_knight": {
+    "name": "Dark Knight",
+    "type": "MINION",
+    "minionType": "DARK_KNIGHT",
+    "hp": 160,
+    "attack": 32,
     "defense": 18,
-    "expReward": 300,
-    "goldReward": 200
+    "expReward": 150,
+    "goldReward": 60,
+    "description": "A fallen warrior encased in cursed armor, wielding dark magic.",
+    "specialSkill": "Shadow Slash"
+  },
+  "dragon_lord": {
+    "name": "Dragon Lord",
+    "type": "BOSS",
+    "hp": 525,
+    "attack": 105,
+    "defense": 50,
+    "expReward": 450,
+    "goldReward": 150,
+    "description": "Ancient dread sovereign with crushing power and fiery fury, 5x stronger than regular minions.",
+    "specialSkill": "Infernal Cataclysm",
+    "healAmount": 25
   }
 }

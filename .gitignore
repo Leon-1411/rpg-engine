@@ -2,6 +2,7 @@
 # Build directories & CMake output
 # ==========================================
 build/
+build*/
 bin/
 out/
 CMakeFiles/
@@ -67,6 +68,7 @@ compile_commands.json
 # ==========================================
 saves/*.json
 !saves/.gitkeep
+data/*_test*.json
 saves_test/
 *.log
 

@@ -5,6 +5,10 @@ FROM ubuntu:22.04 AS builder
 # Tránh prompt tương tác trong quá trình apt-get install
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Chuyển mirror sang mirror Châu Á (mirror.kakao.com) để tải package nhanh và tránh rớt mạng/timeout
+RUN sed -i 's@archive.ubuntu.com@mirror.kakao.com@g' /etc/apt/sources.list \
+    && sed -i 's@security.ubuntu.com@mirror.kakao.com@g' /etc/apt/sources.list
+
 # Cài đặt các công cụ biên dịch C++17 và CMake
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -30,6 +34,9 @@ FROM ubuntu:22.04 AS runner
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN sed -i 's@archive.ubuntu.com@mirror.kakao.com@g' /etc/apt/sources.list \
+    && sed -i 's@security.ubuntu.com@mirror.kakao.com@g' /etc/apt/sources.list
+
 # Cài đặt thư viện runtime cần thiết (nếu có) và libstdc++
 RUN apt-get update && apt-get install -y \
     libstdc++6 \
@@ -42,6 +49,7 @@ RUN mkdir -p /app/saves
 
 # Copy các file đã build và tài nguyên từ builder stage
 COPY --from=builder /app/build /app/build
+COPY --from=builder /app/data /app/data
 COPY --from=builder /app/PROJECT_SPEC.md /app/
 
 # Mặc định chạy game RPG Engine

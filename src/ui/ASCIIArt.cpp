@@ -90,6 +90,7 @@ R"(
 )", BRIGHT_RED) << "\n";
 }
 
+<<<<<<< HEAD
 void printSkeletonArt() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(
@@ -168,6 +169,8 @@ void printBattleVersus(const Hero& hero, const Enemy& enemy) {
     printEnemyArt(enemy);
 }
 
+=======
+>>>>>>> origin/main
 void printBattleBanner() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(
