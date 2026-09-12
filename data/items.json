@@ -65,6 +65,55 @@
       "statValue": 25,
       "healAmount": 25,
       "isMana": true
+    },
+    {
+      "id": "GreaterHealthPotion",
+      "name": "Greater Health Potion",
+      "description": "Bình đại dược hồi phục 70 HP tức thì.",
+      "type": "POTION",
+      "statValue": 70,
+      "healAmount": 70,
+      "isMana": false
+    },
+    {
+      "id": "RoyalInsignia",
+      "name": "Royal Insignia",
+      "description": "Huy hiệu Hoàng Gia nhận từ Nhà Vua, giúp tự do đi qua các trạm gác quân đội.",
+      "type": "ARMOR",
+      "statValue": 2,
+      "defenseBonus": 2
+    },
+    {
+      "id": "FreeForestAmulet",
+      "name": "Free Forest Amulet",
+      "description": "Bùa Hộ Mệnh Rừng Sâu từ Bộ Tộc Tự Do, bảo vệ tâm trí và mở khóa liên minh Bộ Tộc.",
+      "type": "ARMOR",
+      "statValue": 5,
+      "defenseBonus": 5
+    },
+    {
+      "id": "DemonEmpathyRune",
+      "name": "Demon Empathy Rune",
+      "description": "Cổ Phù Thấu Cảm Ma Tộc, giúp thấu hiểu ngôn ngữ quỷ và mở đàm phán hòa bình với Ma Vương.",
+      "type": "ARMOR",
+      "statValue": 3,
+      "defenseBonus": 3
+    },
+    {
+      "id": "AncientCodex",
+      "name": "Ancient Codex",
+      "description": "Mảnh Cổ Thư The Core từ 500 năm trước ghi chép cấu trúc năng lượng, chìa khóa cho True Ending.",
+      "type": "ARMOR",
+      "statValue": 4,
+      "defenseBonus": 4
+    },
+    {
+      "id": "ElenaDiary",
+      "name": "Elena's Diary",
+      "description": "Nhật ký của Công chúa Elena hé lộ sự thật hiến tế linh hồn hoàng gia cho The Core.",
+      "type": "ARMOR",
+      "statValue": 2,
+      "defenseBonus": 2
     }
   ]
 }

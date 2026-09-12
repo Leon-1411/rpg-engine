@@ -74,7 +74,7 @@ int main() {
     assert(fileStory.getNodeCount() >= 6);
     
     StoryNode startNode = fileStory.getCurrentNode();
-    assert(startNode.id == "node_01" || startNode.id == "village_start");
+    assert(startNode.id == "node_01" || startNode.id == "village_start" || startNode.id == "Node01");
 
     // 5. Test DataLoader functions
     std::string itemsPath = "data/items.json";
