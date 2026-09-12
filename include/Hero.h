@@ -26,6 +26,7 @@ protected:
     float critChance;
     float critDamage;
     bool ignoreArmor;
+    int gold;
 
     // Combat-specific resources and states
     int readyArrows;                  // Ranger's ready arrows
@@ -142,6 +143,20 @@ public:
     void setExp(int value);
     void setAttack(int value);
     void setDefense(int value);
+
+    void setName(const std::string& newName);
+    void setHeroClass(HeroClass newClass);
+    void setArmorPenetration(int value);
+    void setCritChance(float value);
+    void setCritDamage(float value);
+    void setIgnoreArmor(bool value);
+
+    int getGold() const;
+    void setGold(int amount);
+    void addGold(int amount);
+
+    const std::vector<int>& getSkillCooldowns() const;
+    void setSkillCooldowns(const std::vector<int>& cds);
 
     void increaseMaxHp(int amount);
     void increaseMaxMp(int amount);
