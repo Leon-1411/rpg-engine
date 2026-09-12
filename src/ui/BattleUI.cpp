@@ -1,7 +1,6 @@
 #include "ui/BattleUI.h"
 #include "ui/ConsoleUI.h"
 #include "ui/ASCIIArt.h"
-<<<<<<< HEAD
 #include "CombatEngine.h"
 #include <iostream>
 #include <iomanip>
@@ -13,16 +12,6 @@ static std::string heroClassToString(HeroClass c) {
         case HeroClass::MAGE:    return "Pháp Sư (Mage)";
         case HeroClass::RANGER:  return "Xạ Thủ (Ranger)";
         default:                 return "Hiệp Sĩ";
-=======
-#include <iostream>
-
-static std::string heroClassToString(HeroClass c) {
-    switch (c) {
-        case HeroClass::WARRIOR: return "Warrior";
-        case HeroClass::MAGE:    return "Mage";
-        case HeroClass::RANGER:  return "Ranger";
-        default:                 return "Unknown";
->>>>>>> origin/main
     }
 }
 
@@ -30,27 +19,14 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     ConsoleUI::clearScreen();
     ASCIIArt::printBattleBanner();
 
-<<<<<<< HEAD
     // Display Hero, VS, and Enemy/Boss ASCII Art
     ASCIIArt::printBattleVersus(hero, enemy);
-=======
-    // Enemy art
-    if (enemy.getType() == EnemyType::BOSS) {
-        ASCIIArt::printBossDragonArt();
-    } else {
-        ASCIIArt::printGoblinArt();
-    }
->>>>>>> origin/main
 
     ConsoleUI::printDivider('=', 64, ConsoleUI::Colors::BRIGHT_RED);
 
     // Hero Status (Left side) & Enemy Status (Right side)
     std::string heroHeader = hero.getName() + " (" + heroClassToString(hero.getHeroClass()) + " Lv." + std::to_string(hero.getLevel()) + ")";
-<<<<<<< HEAD
     std::string enemyHeader = enemy.getName() + (enemy.getType() == EnemyType::BOSS ? " [BOSS TỐI CAO]" : " [Minion]");
-=======
-    std::string enemyHeader = enemy.getName() + (enemy.getType() == EnemyType::BOSS ? " [BOSS]" : " [Minion]");
->>>>>>> origin/main
 
     std::cout << "  " 
               << ConsoleUI::colorize(heroHeader, ConsoleUI::Colors::BRIGHT_GREEN)
@@ -58,24 +34,15 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
               << ConsoleUI::colorize(enemyHeader, ConsoleUI::Colors::BRIGHT_RED)
               << "\n";
 
-<<<<<<< HEAD
     // HP Bars: Rendered in BRIGHT_RED for both Hero and Enemy/Boss
     std::string heroHpBar = ConsoleUI::formatProgressBar(hero.getHp(), hero.getMaxHp(), 14, ConsoleUI::Colors::BRIGHT_RED);
-=======
-    // HP Bars
-    std::string heroHpBar = ConsoleUI::formatProgressBar(hero.getHp(), hero.getMaxHp(), 14);
->>>>>>> origin/main
     std::string enemyHpBar = ConsoleUI::formatProgressBar(enemy.getHp(), enemy.getMaxHp(), 14, ConsoleUI::Colors::BRIGHT_RED);
 
     std::cout << "  HP: " << heroHpBar
               << std::string(std::max(2, 30 - 24), ' ')
               << "HP: " << enemyHpBar << "\n";
 
-<<<<<<< HEAD
     // MP Bar: Rendered in BRIGHT_BLUE for Hero
-=======
-    // MP Bar for Hero
->>>>>>> origin/main
     std::string heroMpBar = ConsoleUI::formatProgressBar(hero.getMp(), hero.getMaxMp(), 14, ConsoleUI::Colors::BRIGHT_BLUE);
     std::cout << "  MP: " << heroMpBar << "\n";
 
@@ -91,16 +58,11 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     // Battle Actions Menu
     std::cout << "\n  " << ConsoleUI::colorize("1. Tấn công (Attack)", ConsoleUI::Colors::BRIGHT_RED)
               << "    " << ConsoleUI::colorize("2. Kỹ năng (Skill)", ConsoleUI::Colors::BRIGHT_BLUE)
-<<<<<<< HEAD
               << "    " << ConsoleUI::colorize("3. Dược phẩm (Item)", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n"
-=======
-              << "    " << ConsoleUI::colorize("3. Vật phẩm (Item)", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n"
->>>>>>> origin/main
               << "  " << ConsoleUI::colorize("4. Phòng thủ (Defend)", ConsoleUI::Colors::CYAN)
               << "   " << ConsoleUI::colorize("5. Bỏ chạy (Run)", ConsoleUI::Colors::DIM) << "\n\n";
 }
 
-<<<<<<< HEAD
 BattleAction BattleUI::getPlayerAction(std::istream& in) {
     int choice = ConsoleUI::getIntInput(1, 5, "Chọn hành động chiến đấu [1-5]: ", in);
     return static_cast<BattleAction>(choice);
@@ -180,13 +142,6 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
     return engine.getState();
 }
 
-=======
-BattleAction BattleUI::getPlayerAction() {
-    int choice = ConsoleUI::getIntInput(1, 5, "Chọn hành động của bạn [1-5]: ");
-    return static_cast<BattleAction>(choice);
-}
-
->>>>>>> origin/main
 void BattleUI::printCombatLog(const std::string& message) {
     std::cout << "  " << ConsoleUI::colorize("» ", ConsoleUI::Colors::CYAN) << message << "\n";
 }
@@ -205,9 +160,5 @@ void BattleUI::showVictory(const Enemy& enemy) {
 void BattleUI::showDefeat() {
     std::cout << "\n";
     ASCIIArt::printGameOverBanner();
-<<<<<<< HEAD
     ConsoleUI::pause("Trò chơi kết thúc. Nhấn Enter để quay lại...");
-=======
-    ConsoleUI::pause("Trò chơi kết thúc. Nhấn Enter...");
->>>>>>> origin/main
 }
