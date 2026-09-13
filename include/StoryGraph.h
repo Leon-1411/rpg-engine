@@ -20,6 +20,33 @@ struct Choice {
     std::string setFlag;
 };
 
+struct DialogueLine {
+    std::string speaker;
+    std::string text;
+};
+
+struct DialogueChoice {
+    std::string text;
+    std::string nextDialogueId;
+    std::string nextNodeId;
+    std::string requiredFlag;
+    std::string setFlag;
+};
+
+struct DialogueNode {
+    std::string id;
+    std::string speaker;
+    std::string text;
+    std::vector<DialogueChoice> choices;
+};
+
+struct DialogueTree {
+    std::string startDialogueId;
+    std::unordered_map<std::string, DialogueNode> nodes;
+
+    bool empty() const { return nodes.empty(); }
+};
+
 struct StoryNode {
     std::string id;
     std::string text;
@@ -38,12 +65,20 @@ struct StoryNode {
     std::string onPassNodeId;
     std::string onFailNodeId;
     std::string nextNodeId;
+
+    // Thuộc tính đối thoại NPC tuyến tính (backward compatibility)
+    std::string npcName;
+    std::vector<DialogueLine> dialogues;
+
+    // Cơ chế Hội thoại rẽ nhánh (Branching Dialogue Tree)
+    DialogueTree dialogueTree;
 };
 
 class StoryGraph {
 private:
     std::unordered_map<std::string, StoryNode> nodes;
     std::string currentNodeId;
+    std::string currentDialogueId;
     std::unordered_map<std::string, bool> storyFlags;
 
 public:
@@ -57,6 +92,12 @@ public:
     bool selectChoice(int choiceIndex);
     bool moveToNode(const std::string& nodeId);
     
+    // Quản lý hội thoại rẽ nhánh
+    bool isInDialogue() const;
+    DialogueNode getCurrentDialogueNode() const;
+    bool selectDialogueChoice(int choiceIndex);
+    void resetDialogue();
+
     void setFlag(const std::string& flag, bool value = true);
     bool getFlag(const std::string& flag) const;
     
