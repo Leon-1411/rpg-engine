@@ -29,7 +29,6 @@ flowchart TD
     F --> G{Event Type}
     G -->|Battle| H[Combat]
     G -->|Item| I[Receive Item]
-    G -->|Shop| J[Shop]
     G -->|Normal| E
     H --> K{Win?}
     K -->|Yes| L[EXP / Reward]

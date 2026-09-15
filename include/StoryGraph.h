@@ -59,7 +59,6 @@ struct StoryNode {
     std::string enemyId;
     std::string onWinNodeId;
     std::string onLoseNodeId;
-    std::vector<std::string> rewardItems;
     int rewardExp = 0;
     std::string requiredItem;
     std::string onPassNodeId;
@@ -72,6 +71,10 @@ struct StoryNode {
 
     // Cơ chế Hội thoại rẽ nhánh (Branching Dialogue Tree)
     DialogueTree dialogueTree;
+
+    StoryNode() : type(EventType::NORMAL), rewardExp(0) {}
+    StoryNode(const std::string& id, const std::string& text, EventType type = EventType::NORMAL, const std::vector<Choice>& choices = {})
+        : id(id), text(text), type(type), choices(choices), rewardExp(0) {}
 };
 
 class StoryGraph {
@@ -87,8 +90,13 @@ public:
 
     void addNode(const StoryNode& node);
     bool loadStoryGraph(const std::string& filePath);
+    bool loadFromJsonString(const std::string& jsonContent);
+    void clear();
+    const std::unordered_map<std::string, StoryNode>& getAllNodes() const;
     
     StoryNode getCurrentNode() const;
+    std::string getCurrentNodeId() const;
+    void setCurrentNodeId(const std::string& nodeId);
     bool selectChoice(int choiceIndex);
     bool moveToNode(const std::string& nodeId);
     
@@ -100,9 +108,11 @@ public:
 
     void setFlag(const std::string& flag, bool value = true);
     bool getFlag(const std::string& flag) const;
+    const std::unordered_map<std::string, bool>& getStoryFlags() const;
+    void setStoryFlags(const std::unordered_map<std::string, bool>& flags);
+    void clearStoryFlags();
     
     bool isEnding() const;
     size_t getNodeCount() const;
-    const std::unordered_map<std::string, StoryNode>& getAllNodes() const;
 };
 

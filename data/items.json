@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "id": "wpn_01",
+      "name": "Iron Sword",
+      "description": "Thanh kiếm sắt cơ bản, độ bền và sát thương ổn định.",
+      "type": "WEAPON",
+      "statValue": 12,
+      "attackBonus": 12
+    },
+    {
+      "id": "wpn_02",
+      "name": "Magic Staff",
+      "description": "Gậy phép khuếch đại năng lượng ma pháp.",
+      "type": "WEAPON",
+      "statValue": 15,
+      "attackBonus": 15
+    },
+    {
+      "id": "wpn_03",
+      "name": "Long Bow",
+      "description": "Cung dài ngắm bắn từ xa với độ chính xác cao.",
+      "type": "WEAPON",
+      "statValue": 10,
+      "attackBonus": 10
+    },
+    {
+      "id": "arm_01",
+      "name": "Iron Armor",
+      "description": "Bộ giáp sắt kiên cố giúp hấp thụ đáng kể sát thương vật lý.",
+      "type": "ARMOR",
+      "statValue": 8,
+      "defenseBonus": 8
+    },
+    {
+      "id": "arm_02",
+      "name": "Magic Robe",
+      "description": "Áo choàng phép thuật giảm thiểu tác động nguyên tố.",
+      "type": "ARMOR",
+      "statValue": 4,
+      "defenseBonus": 4
+    },
+    {
+      "id": "arm_03",
+      "name": "Leather Armor",
+      "description": "Áo giáp da nhẹ nhàng, giữ sự linh hoạt khi di chuyển.",
+      "type": "ARMOR",
+      "statValue": 6,
+      "defenseBonus": 6
+    },
+    {
+      "id": "pot_01",
+      "name": "Health Potion",
+      "description": "Bình thuốc hồi phục 35 HP tức thì.",
+      "type": "POTION",
+      "statValue": 35,
+      "healAmount": 35,
+      "isMana": false
+    },
+    {
+      "id": "pot_02",
+      "name": "Mana Potion",
+      "description": "Bình thuốc hồi phục 25 MP cho các kỹ năng ma thuật.",
+      "type": "POTION",
+      "statValue": 25,
+      "healAmount": 25,
+      "isMana": true
+    }
+  ]
+}
