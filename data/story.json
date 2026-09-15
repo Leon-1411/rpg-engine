@@ -6,6 +6,81 @@
       "title": "Bản Đồ Ngã Ba Đường",
       "description": "Bạn đứng trước hẻm núi tăm tối. Bên trái là Rừng Ma sương mù bao phủ, bên phải là Hang Cổ Băng Giá vang lên tiếng gầm rú.",
       "type": "STORY",
+      "npc": {
+        "name": "Trưởng Làng Eldrin"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d01_start",
+        "nodes": {
+          "d01_start": {
+            "id": "d01_start",
+            "speaker": "Trưởng Làng Eldrin",
+            "text": "Dừng bước, hỡi chàng dũng sĩ! Vùng đất phía trước đang bị ma thuật của Chúa Tể Băng Frost Lord phong tỏa hoàn toàn. Cậu định đi đâu?",
+            "choices": [
+              {
+                "text": "Thưa trưởng làng, Rừng Ma bên trái có hiểm nguy gì?",
+                "next_dialogue_id": "d01_forest_info"
+              },
+              {
+                "text": "Còn Hang Cổ Băng Giá bên phải cất giấu điều gì?",
+                "next_dialogue_id": "d01_cave_info"
+              },
+              {
+                "text": "Tôi tự tin vào kiếm thuật của mình! Tôi tiến vào Rừng Ma ngay. (Đi Rừng Ma)",
+                "next_node_id": "node_02"
+              },
+              {
+                "text": "Tôi muốn tìm kiếm cổ vật trước, tôi chọn vào Hang Cổ! (Đi Hang Cổ)",
+                "next_node_id": "node_03"
+              }
+            ]
+          },
+          "d01_forest_info": {
+            "id": "d01_forest_info",
+            "speaker": "Trưởng Làng Eldrin",
+            "text": "Rừng Ma sương mù dày đặc, có Quỷ Bắt Hồn ẩn nấp trên tán cây để phục kích người đi đường. Lối đi ngắn nhưng nguy hiểm khôn lường!",
+            "choices": [
+              {
+                "text": "Quỷ dữ thì sao chứ? Tôi quyết tâm tiêu diệt quái thú! (Tiến vào Rừng Ma)",
+                "next_node_id": "node_02"
+              },
+              {
+                "text": "Nghe nguy hiểm quá. Thế còn Hang Cổ Băng Giá thì sao thưa trưởng làng?",
+                "next_dialogue_id": "d01_cave_info"
+              }
+            ]
+          },
+          "d01_cave_info": {
+            "id": "d01_cave_info",
+            "speaker": "Trưởng Làng Eldrin",
+            "text": "Hang Cổ chứa cổ vật Chìa Khóa Băng Bất Hoại, nhưng sàn đá chôn đầy cạm bẫy cổ đại. Nếu bất cẩn sẽ bỏ mạng!",
+            "choices": [
+              {
+                "text": "Chìa khóa cổ vật sẽ giúp ích lớn! Tôi chọn đến Hang Cổ. (Khám phá Hang Cổ)",
+                "next_node_id": "node_03"
+              },
+              {
+                "text": "Cạm bẫy quá rủi ro, tôi thà đối đầu với quái vật Rừng Ma! (Đi Rừng Ma)",
+                "next_node_id": "node_02"
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Trưởng Làng Eldrin",
+          "text": "Dừng bước, hỡi chàng dũng sĩ! Vùng đất phía trước đang bị ma thuật của Chúa Tể Băng Frost Lord phong tỏa hoàn toàn."
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Tôi đến đây để giải cứu vương quốc. Thưa trưởng làng, tôi nên chọn lối nào để tiến vào đền băng?"
+        },
+        {
+          "speaker": "Trưởng Làng Eldrin",
+          "text": "Lối Rừng Ma là đường ngắn nhất nhưng đầy quái vật phục kích. Còn Hang Cổ thì quanh co hiểm trở nhưng tương truyền có phong ấn cổ vật quý giá!"
+        }
+      ],
       "choices": [
         {
           "text": "Đi xuyên qua Rừng Ma (Lối đi ngắn, nguy cơ đụng quái cao)",
@@ -22,6 +97,65 @@
       "title": "Rừng Ma - Phục Kích",
       "description": "Một con Quỷ Bắt Hồn (Minion) nhảy ra từ tán cây gieo hãi hùng!",
       "type": "COMBAT",
+      "npc": {
+        "name": "Quỷ Bắt Hồn"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d02_start",
+        "nodes": {
+          "d02_start": {
+            "id": "d02_start",
+            "speaker": "Quỷ Bắt Hồn",
+            "text": "Khè khè khè... Lại một linh hồn ấm áp tự mò đến nộp mạng cho mùa đông vĩnh cửu!",
+            "choices": [
+              {
+                "text": "Lũ quái vật tà ác các ngươi đừng hòng cản bước ta!",
+                "next_dialogue_id": "d02_taunt"
+              },
+              {
+                "text": "Ai phái ngươi ra đây cản đường ta?",
+                "next_dialogue_id": "d02_inquire"
+              }
+            ]
+          },
+          "d02_taunt": {
+            "id": "d02_taunt",
+            "speaker": "Quỷ Bắt Hồn",
+            "text": "To mồm lắm tên người phàm! Để xem thanh kiếm của ngươi có nhanh hơn vuốt sắc của ta không!",
+            "choices": [
+              {
+                "text": "Rút kiếm quyết chiến! (Bắt đầu trận đấu)",
+                "next_dialogue_id": ""
+              }
+            ]
+          },
+          "d02_inquire": {
+            "id": "d02_inquire",
+            "speaker": "Quỷ Bắt Hồn",
+            "text": "Ngươi hỏi quá nhiều rồi! Chúa Tể Băng Frost Lord ra lệnh nuốt trọn mọi kẻ xâm nhập lãnh địa!",
+            "choices": [
+              {
+                "text": "Vậy thì ta sẽ hạ ngươi trước khi tính sổ với Frost Lord! (Giao chiến)",
+                "next_dialogue_id": ""
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Quỷ Bắt Hồn",
+          "text": "Khè khè khè... Lại một linh hồn ấm áp tự mò đến nộp mạng cho mùa đông vĩnh cửu!"
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Lũ quái vật tà ác các ngươi đừng hòng cản bước ta!"
+        },
+        {
+          "speaker": "Quỷ Bắt Hồn",
+          "text": "Hãy để máu của ngươi đông cứng lại làm thức ăn cho ta!"
+        }
+      ],
       "enemy_id": "minion_soul_eater",
       "on_win_node_id": "node_04",
       "on_lose_node_id": "node_06"
@@ -31,6 +165,81 @@
       "title": "Hang Cổ - Bẫy Cổ Đại",
       "description": "Bạn thấy một rương kho báu tỏa ánh sáng xanh lục, bên dưới sàn nhà có các phiến đá khắc ký tự lạ.",
       "type": "STORY",
+      "npc": {
+        "name": "Linh Hồn Thám Hiểm Cổ"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d03_start",
+        "nodes": {
+          "d03_start": {
+            "id": "d03_start",
+            "speaker": "Linh Hồn Thám Hiểm Cổ",
+            "text": "Cẩn trọng... hỡi kẻ bước vào hang... Ta từng là thợ săn kho báu và đã bỏ mạng tại chính căn phòng này...",
+            "choices": [
+              {
+                "text": "Làm sao để tránh bẫy trên sàn đá thưa tiền bối?",
+                "next_dialogue_id": "d03_trap_hint"
+              },
+              {
+                "text": "Trong chiếc rương phát sáng kia chứa thứ gì vậy?",
+                "next_dialogue_id": "d03_chest_info"
+              },
+              {
+                "text": "Tôi tự tin vào phản xạ của mình, tiến lên mở rương ngay! (Mở rương)",
+                "next_node_id": "node_05"
+              },
+              {
+                "text": "Nguy hiểm quá, tôi né bẫy đi thẳng tới sảnh đền! (Né bẫy)",
+                "next_node_id": "node_04"
+              }
+            ]
+          },
+          "d03_trap_hint": {
+            "id": "d03_trap_hint",
+            "speaker": "Linh Hồn Thám Hiểm Cổ",
+            "text": "Các phiến đá khắc hình tuyết là bẫy gai băng. Nếu bước theo các phiến đá ký tự ngọn lửa, ngươi sẽ đến được rương báu an toàn!",
+            "choices": [
+              {
+                "text": "Cảm ơn tiền bối! Tôi tiến đến mở rương kho báu theo chỉ dẫn. (Mở rương)",
+                "next_node_id": "node_05"
+              },
+              {
+                "text": "Tôi vẫn thấy rủi ro, tôi sẽ né bẫy đi thẳng đến lối ra. (Đi tiếp)",
+                "next_node_id": "node_04"
+              }
+            ]
+          },
+          "d03_chest_info": {
+            "id": "d03_chest_info",
+            "speaker": "Linh Hồn Thám Hiểm Cổ",
+            "text": "Trong rương cất giữ 'Chìa Khóa Băng Bất Hoại' - vật mở ra căn phòng giam Thần Thú Băng Cổ Đại tại sảnh đền!",
+            "choices": [
+              {
+                "text": "Chìa khóa cổ vật này rất quan trọng! Tôi sẽ mở rương. (Mở rương)",
+                "next_node_id": "node_05"
+              },
+              {
+                "text": "Mục tiêu của tôi chỉ là tiêu diệt Frost Lord, tôi đi thẳng tới đền! (Né bẫy)",
+                "next_node_id": "node_04"
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Linh Hồn Thám Hiểm Cổ",
+          "text": "Cẩn trọng... hỡi kẻ bước vào hang... Ta từng là thợ săn kho báu và đã bỏ mạng tại chính căn phòng này..."
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Chiếc rương kia chứa đựng điều gì mà nguy hiểm đến vậy?"
+        },
+        {
+          "speaker": "Linh Hồn Thám Hiểm Cổ",
+          "text": "Trong rương cất giữ 'Chìa Khóa Băng Bất Hoại', nhưng sàn đá bên dưới chôn bẫy gai băng trí mạng. Nếu dám liều lĩnh, hãy tiến lên mở rương; nếu không, hãy né bẫy đi thẳng tới sảnh đền!"
+        }
+      ],
       "choices": [
         {
           "text": "Táo bạo tiến đến mở rương kho báu",
@@ -47,6 +256,54 @@
       "title": "Cổ Vật Cổ Đại",
       "description": "Bạn tìm thấy 'Chìa Khóa Băng Bất Hoại' cùng 1 Bình Thuốc Máu Lớn!",
       "type": "REWARD",
+      "npc": {
+        "name": "Tinh Linh Băng Tinh"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d05_start",
+        "nodes": {
+          "d05_start": {
+            "id": "d05_start",
+            "speaker": "Tinh Linh Băng Tinh",
+            "text": "Keng... Lời nguyền phong ấn khẽ rung động! Ngươi quả là một lữ khách dũng cảm khi vượt qua cạm bẫy để mở rương.",
+            "choices": [
+              {
+                "text": "Cảm ơn tinh linh! Ngươi có lời khuyên nào trước khi ta vào Đền Băng không?",
+                "next_dialogue_id": "d05_advice"
+              },
+              {
+                "text": "Cầm lấy chìa khóa và dược phẩm, nhanh chóng tiến về Sảnh Đền!",
+                "next_node_id": "node_04"
+              }
+            ]
+          },
+          "d05_advice": {
+            "id": "d05_advice",
+            "speaker": "Tinh Linh Băng Tinh",
+            "text": "Tại sảnh ngoài đền băng, hãy chú ý lối đi bí mật bên hông. Chìa Khóa Băng này sẽ giúp ngươi mở ra cội nguồn thực sự của lời nguyền ngàn năm!",
+            "choices": [
+              {
+                "text": "Tôi hiểu rồi! Lên đường tới Sảnh Đền thôi.",
+                "next_node_id": "node_04"
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Tinh Linh Băng Tinh",
+          "text": "Keng... Lời nguyền phong ấn khẽ rung động! Ngươi quả là một lữ khách dũng cảm khi vượt qua cạm bẫy."
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Chiếc chìa khóa này phát ra ánh hào quang thật kỳ lạ, nó mở cánh cửa nào?"
+        },
+        {
+          "speaker": "Tinh Linh Băng Tinh",
+          "text": "Nó sẽ mở lối vào Hành Lang Phong Ấn bí mật tại Đền Băng. Nơi đó cất giấu bí ẩn lớn nhất về nguồn gốc bão tuyết!"
+        }
+      ],
       "rewards": {
         "items": [
           "IceKey",
@@ -61,6 +318,62 @@
       "title": "Sảnh Ngoài Đền Băng",
       "description": "Bạn đến được trước sảnh đền. Điện chính dẫn thẳng tới ngai vàng, nhưng bên hông có một lối đi bí mật bị phong ấn.",
       "type": "STORY",
+      "npc": {
+        "name": "Chiến Binh Canh Tàn Tích"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d04_start",
+        "nodes": {
+          "d04_start": {
+            "id": "d04_start",
+            "speaker": "Chiến Binh Canh Tàn Tích",
+            "text": "Dừng lại! Phía sau đại môn Điện Chính là Frost Lord tàn độc. Còn bên hông là Hành Lang Phong Ấn. Ngươi chọn đường nào?",
+            "choices": [
+              {
+                "text": "Kể cho tôi nghe về Hành Lang Phong Ấn bên hông.",
+                "next_dialogue_id": "d04_corridor_info"
+              },
+              {
+                "text": "Đẩy cửa vào Điện Chính đối đầu trực diện Frost Lord!",
+                "next_node_id": "node_07"
+              },
+              {
+                "text": "Rẽ sang kiểm tra Hành Lang Bí Mật bên hông!",
+                "next_node_id": "node_09"
+              }
+            ]
+          },
+          "d04_corridor_info": {
+            "id": "d04_corridor_info",
+            "speaker": "Chiến Binh Canh Tàn Tích",
+            "text": "Hành lang ấy bị khóa bởi ổ khóa bông tuyết ngàn năm. Nếu không có Chìa Khóa Băng từ Hang Cổ, ngươi sẽ không thể mở được cánh cổng đá.",
+            "choices": [
+              {
+                "text": "Tôi muốn sang thử vận may với cánh cổng phong ấn! (Rẽ sang hành lang)",
+                "next_node_id": "node_09"
+              },
+              {
+                "text": "Không cần vòng vo, tôi tiến vào Điện Chính đối đầu Frost Lord! (Vào Điện Chính)",
+                "next_node_id": "node_07"
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Chiến Binh Canh Tàn Tích",
+          "text": "Dừng lại! Phía sau đại môn Điện Chính chính là nơi ngự trị của Chúa Tể Băng Frost Lord tàn độc."
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Còn lối đi phủ đầy băng tuyết và xích sắt bên hông kia dẫn đến đâu?"
+        },
+        {
+          "speaker": "Chiến Binh Canh Tàn Tích",
+          "text": "Đó là ngục tối cổ đại bị niêm phong. Nếu ngươi không có Chìa Khóa Băng, cánh cổng đá ngàn năm ấy sẽ không bao giờ mở ra."
+        }
+      ],
       "choices": [
         {
           "text": "Đẩy cửa vào Điện Chính đối đầu trực diện",
@@ -77,6 +390,19 @@
       "title": "Hành Lang Phong Ấn",
       "description": "Một cánh cửa đá cổ đại chắn đường với ổ khóa hình bông tuyết huyền bí.",
       "type": "REQUIREMENT_CHECK",
+      "npc": {
+        "name": "Phù Điêu Ma Thuật Phong Ấn"
+      },
+      "dialogues": [
+        {
+          "speaker": "Phù Điêu Ma Thuật Phong Ấn",
+          "text": "Phàm nhân kia... Hãy đưa cổ vật chứng minh tư cách trước khi bước vào cấm địa tối thượng!"
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Hãy nhận diện chìa khóa này và mở cổng ra!"
+        }
+      ],
       "required_item": "IceKey",
       "on_pass_node_id": "node_10",
       "on_fail_node_id": "node_07_no_key"
@@ -86,6 +412,19 @@
       "title": "Cửa Khóa - Quay Lại Sảnh",
       "description": "Bạn không có chìa khóa để mở cánh cửa này! Đành phải quay lại điện chính.",
       "type": "STORY",
+      "npc": {
+        "name": "Ảo Ảnh Hộ Vệ Đền"
+      },
+      "dialogues": [
+        {
+          "speaker": "Ảo Ảnh Hộ Vệ Đền",
+          "text": "Ổ khóa bông tuyết vẫn im lìm bất động. Ngươi chưa có Chìa Khóa Băng tại Hang Cổ rồi!"
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Không còn đường lui, ta chỉ còn cách đối mặt trực diện với Frost Lord tại Điện Chính."
+        }
+      ],
       "choices": [
         {
           "text": "Tiến vào Điện Chính",
@@ -98,6 +437,65 @@
       "title": "Chúa Tể Băng Giá",
       "description": "Chúa Tể Băng Frost Lord triệu hồi bão tuyết! Cuộc chiến sinh tử bắt đầu.",
       "type": "COMBAT",
+      "npc": {
+        "name": "Frost Lord"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d07_start",
+        "nodes": {
+          "d07_start": {
+            "id": "d07_start",
+            "speaker": "Frost Lord",
+            "text": "Hahaha! Lại một sinh linh yếu ớt dám bước chân vào lãnh địa băng hà của ta!",
+            "choices": [
+              {
+                "text": "Tại sao ngươi lại gieo rắc mùa đông vĩnh cửu lên vô tội?",
+                "next_dialogue_id": "d07_motive"
+              },
+              {
+                "text": "Băng giá của ngươi đã tàn phá quá lâu rồi, hôm nay là ngày tàn của ngươi!",
+                "next_dialogue_id": "d07_battle"
+              }
+            ]
+          },
+          "d07_motive": {
+            "id": "d07_motive",
+            "speaker": "Frost Lord",
+            "text": "Vì băng tuyết là sự vĩnh cửu tuyệt đối! Không suy tàn, không phản bội! Trái tim ngươi cũng sẽ sớm thành khối băng trong bộ sưu tập của ta!",
+            "choices": [
+              {
+                "text": "Ta sẽ đập tan sự vĩnh cửu điên cuồng đó! (Quyết chiến)",
+                "next_dialogue_id": ""
+              }
+            ]
+          },
+          "d07_battle": {
+            "id": "d07_battle",
+            "speaker": "Frost Lord",
+            "text": "Ngông cuồng! Hãy đón nhận cơn cuồng nộ của bão tuyết!",
+            "choices": [
+              {
+                "text": "Vung kiếm nghênh chiến! (Bắt đầu chiến đấu)",
+                "next_dialogue_id": ""
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Frost Lord",
+          "text": "Hahaha! Lại một sinh linh yếu ớt dám bước chân vào lãnh địa băng hà của ta!"
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Frost Lord! Băng giá của ngươi đã tàn phá vương quốc quá lâu rồi, hôm nay là ngày tàn của ngươi!"
+        },
+        {
+          "speaker": "Frost Lord",
+          "text": "Ngông cuồng! Trái tim ngươi sẽ sớm hóa thành khối băng lạnh lẽo trong bộ sưu tập của ta!"
+        }
+      ],
       "enemy_id": "boss_frost_lord",
       "on_win_node_id": "node_08",
       "on_lose_node_id": "node_06"
@@ -107,6 +505,65 @@
       "title": "Thần Thú Cổ Đại (Bí Mật)",
       "description": "Chìa khóa kích hoạt! Bạn bước vào phòng giam Rồng Băng Cổ Đại - nguồn gốc thực sự của lời nguyền!",
       "type": "COMBAT",
+      "npc": {
+        "name": "Rồng Băng Cổ Đại"
+      },
+      "dialogue_tree": {
+        "start_dialogue_id": "d10_start",
+        "nodes": {
+          "d10_start": {
+            "id": "d10_start",
+            "speaker": "Rồng Băng Cổ Đại",
+            "text": "GRÀOOOOO! Kẻ nào... kẻ nào dám phá vỡ phong ấn giam cầm giấc ngủ của ta?!",
+            "choices": [
+              {
+                "text": "Ngươi chính là cội nguồn của bão tuyết tai ương sao?!",
+                "next_dialogue_id": "d10_origin"
+              },
+              {
+                "text": "Ta đến đây mang theo thanh gươm giải thoát cho linh hồn ngươi!",
+                "next_dialogue_id": "d10_liberate"
+              }
+            ]
+          },
+          "d10_origin": {
+            "id": "d10_origin",
+            "speaker": "Rồng Băng Cổ Đại",
+            "text": "Ta bị ma thuật hắc ám phong ấn tâm trí suốt vạn năm, biến sức mạnh thành tai họa... Cơn đau đớn khiến ta phát điên!",
+            "choices": [
+              {
+                "text": "Hãy kiềm chế cơn giận, ta sẽ dùng kiếm thuật thanh tẩy lời nguyền!",
+                "next_dialogue_id": "d10_liberate"
+              }
+            ]
+          },
+          "d10_liberate": {
+            "id": "d10_liberate",
+            "speaker": "Rồng Băng Cổ Đại",
+            "text": "Cơ thể ta đang mất kiểm soát... Hãy hạ gục ta trong trận chiến để giải thoát ta, hoặc tan thành bụi tuyết!",
+            "choices": [
+              {
+                "text": "Tiến lên giải thoát Thần Thú Cổ Đại! (Vào trận chiến)",
+                "next_dialogue_id": ""
+              }
+            ]
+          }
+        }
+      },
+      "dialogues": [
+        {
+          "speaker": "Rồng Băng Cổ Đại",
+          "text": "GRÀOOOOO! Kẻ nào... kẻ nào dám phá vỡ phong ấn giam cầm giấc ngủ của ta?!"
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Ngươi chính là cội nguồn sức mạnh băng giá cổ đại sao?!"
+        },
+        {
+          "speaker": "Rồng Băng Cổ Đại",
+          "text": "Ta bị cơn cuồng loạn xiềng xích suốt vạn năm... Hãy chiến đấu để giải thoát cho ta, hoặc tan thành bụi tuyết!"
+        }
+      ],
       "enemy_id": "boss_ice_dragon",
       "on_win_node_id": "node_11",
       "on_lose_node_id": "node_06"
@@ -116,6 +573,23 @@
       "title": "KẾT CỤC: Bị Đóng Băng (Bad Ending)",
       "description": "Bạn gục ngã và trở thành một bức tượng băng vĩnh cửu.",
       "type": "GAME_OVER",
+      "npc": {
+        "name": "Thần Chết Băng Giá"
+      },
+      "dialogues": [
+        {
+          "speaker": "Thần Chết Băng Giá",
+          "text": "Thêm một kẻ liều lĩnh chìm vào giấc ngủ ngàn thu dưới lớp tuyết lạnh vĩnh hằng..."
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Ý thức... đang dần chìm vào bóng tối buốt giá..."
+        },
+        {
+          "speaker": "Thần Chết Băng Giá",
+          "text": "Hành trình của ngươi dừng lại ở đây rồi. Hãy an nghỉ trong băng giá."
+        }
+      ],
       "choices": []
     },
     "node_08": {
@@ -123,6 +597,23 @@
       "title": "KẾT CỤC: Anh Hùng Vương Quốc (Good Ending)",
       "description": "Bạn tiêu diệt Frost Lord, giải cứu vương quốc khỏi mùa đông vĩnh cửu!",
       "type": "VICTORY",
+      "npc": {
+        "name": "Đức Vua & Dân Làng"
+      },
+      "dialogues": [
+        {
+          "speaker": "Đức Vua & Dân Làng",
+          "text": "Chúa Tể Băng Frost Lord đã bị tiêu diệt! Ánh mặt trời ấm áp đang rọi chiếu trở lại khắp muôn nơi!"
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Mùa đông vĩnh cửu cuối cùng đã lùi xa, vương quốc đã hòa bình trở lại."
+        },
+        {
+          "speaker": "Đức Vua & Dân Làng",
+          "text": "Toàn thể thần dân xin đời đời ghi nhớ công ơn của Đại Anh Hùng cứu thế!"
+        }
+      ],
       "choices": []
     },
     "node_11": {
@@ -130,6 +621,23 @@
       "title": "KẾT CỤC: Giải Thoát Huyền Thoại (True / Secret Ending)",
       "description": "Bạn hạ gục Rồng Băng, hóa giải triệt để lời nguyền ngàn năm và trở thành Đấng Cứu Thế!",
       "type": "VICTORY",
+      "npc": {
+        "name": "Linh Hồn Rồng Băng Giác Ngộ"
+      },
+      "dialogues": [
+        {
+          "speaker": "Linh Hồn Rồng Băng Giác Ngộ",
+          "text": "Cảm tạ ngươi... Tâm trí ta cuối cùng đã thoát khỏi bóng tối của cơn điên loạn ngàn năm."
+        },
+        {
+          "speaker": "Người chơi",
+          "text": "Cội nguồn của bão tuyết đã được hóa giải, mảnh đất này sẽ tràn ngập sinh cơ trở lại!"
+        },
+        {
+          "speaker": "Linh Hồn Rồng Băng Giác Ngộ",
+          "text": "Hãy đón nhận phước lành vĩnh cửu của Thần Thú. Danh xưng 'Đấng Cứu Thế' sẽ mãi rạng ngời cùng sử thi non sông!"
+        }
+      ],
       "choices": []
     }
   }
