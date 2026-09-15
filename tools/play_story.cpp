@@ -40,6 +40,70 @@ int main() {
         std::cout << "------------------------------------------------------------\n";
         std::cout << node.text << "\n\n";
 
+        // Xử lý cơ chế Hội thoại rẽ nhánh (Branching Dialogue)
+        if (story.isInDialogue()) {
+            std::cout << "┌──────────────────────────────────────────────────────────┐\n";
+            std::cout << "│ 💬 HỘI THOẠI RẼ NHÁNH" 
+                      << (!node.npcName.empty() ? (" - [" + node.npcName + "]") : "") 
+                      << "\n";
+            std::cout << "└──────────────────────────────────────────────────────────┘\n";
+
+            while (story.isInDialogue()) {
+                DialogueNode dNode = story.getCurrentDialogueNode();
+                std::cout << "  🗣️  [" << dNode.speaker << "]:\n";
+                std::cout << "     \"" << dNode.text << "\"\n\n";
+
+                if (dNode.choices.empty()) {
+                    break;
+                }
+
+                std::cout << "  👉 Đáp thoại của bạn:\n";
+                for (size_t cIdx = 0; cIdx < dNode.choices.size(); ++cIdx) {
+                    std::cout << "    [" << (cIdx + 1) << "] " << dNode.choices[cIdx].text << "\n";
+                }
+
+                int dChoice = 0;
+                while (true) {
+                    std::cout << "\n  👉 Chọn đáp thoại (1-" << dNode.choices.size() << "): ";
+                    if (std::cin >> dChoice && dChoice >= 1 && dChoice <= static_cast<int>(dNode.choices.size())) {
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        break;
+                    }
+                    if (std::cin.eof()) return 0;
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cout << "  Lựa chọn không hợp lệ, vui lòng nhập lại!\n";
+                }
+
+                std::cout << "------------------------------------------------------------\n";
+                std::string prevNodeId = story.getCurrentNode().id;
+                story.selectDialogueChoice(dChoice - 1);
+
+                // Nếu đáp thoại đã chuyển sang StoryNode khác
+                if (story.getCurrentNode().id != prevNodeId) {
+                    break;
+                }
+            }
+
+            // Nếu việc chọn đáp thoại đã chuyển sang node tiếp theo, tiếp tục vòng lặp chính
+            if (story.getCurrentNode().id != node.id) {
+                continue;
+            }
+        }
+        else if (!node.dialogues.empty()) {
+            // Hiển thị đối thoại tuyến tính cho các node không dùng cây phân nhánh
+            std::cout << "┌──────────────────────────────────────────────────────────┐\n";
+            std::cout << "│ 💬 ĐỐI THOẠI" 
+                      << (!node.npcName.empty() ? (" - [" + node.npcName + "]") : "") 
+                      << "\n";
+            std::cout << "└──────────────────────────────────────────────────────────┘\n";
+            for (const auto& d : node.dialogues) {
+                std::cout << "  🗣️  " << d.speaker << ":\n";
+                std::cout << "     \"" << d.text << "\"\n\n";
+            }
+            std::cout << "------------------------------------------------------------\n";
+        }
+
         // Xử lý các loại sự kiện theo data/story.json
         if (node.rawType == "STORY") {
             if (node.choices.empty()) {
@@ -55,8 +119,10 @@ int main() {
             while (true) {
                 std::cout << "\n👉 Chọn hành động (1-" << node.choices.size() << "): ";
                 if (std::cin >> choice && choice >= 1 && choice <= static_cast<int>(node.choices.size())) {
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     break;
                 }
+                if (std::cin.eof()) return 0;
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Lựa chọn không hợp lệ, vui lòng nhập lại!\n";
@@ -73,8 +139,10 @@ int main() {
             while (true) {
                 std::cout << "\n👉 Chọn kết quả trận đấu thử nghiệm (1: Thắng, 2: Thua): ";
                 if (std::cin >> action && (action == 1 || action == 2)) {
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     break;
                 }
+                if (std::cin.eof()) return 0;
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             }
@@ -99,8 +167,10 @@ int main() {
             }
 
             std::cout << "\nNhấn Enter để tiếp tục hành trình...";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cin.get();
+            if (!std::cin.eof()) {
+                std::string line;
+                std::getline(std::cin, line);
+            }
 
             story.moveToNode(node.nextNodeId);
         }
@@ -112,14 +182,18 @@ int main() {
             if (hasItem) {
                 std::cout << "✅ Bạn ĐÃ CÓ [" << node.requiredItem << "] trong túi đồ! Cánh cửa mở ra...\n";
                 std::cout << "\nNhấn Enter để đi tiếp...";
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cin.get();
+                if (!std::cin.eof()) {
+                    std::string line;
+                    std::getline(std::cin, line);
+                }
                 story.moveToNode(node.onPassNodeId);
             } else {
                 std::cout << "❌ Bạn CHƯA CÓ [" << node.requiredItem << "]! Không thể mở cửa phong ấn.\n";
                 std::cout << "\nNhấn Enter để đi tiếp...";
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cin.get();
+                if (!std::cin.eof()) {
+                    std::string line;
+                    std::getline(std::cin, line);
+                }
                 story.moveToNode(node.onFailNodeId);
             }
         }
@@ -136,7 +210,10 @@ int main() {
             std::cout << "  [2] Thoát\n";
             std::cout << "\n👉 Lựa chọn: ";
             int endChoice = 0;
-            std::cin >> endChoice;
+            if (!(std::cin >> endChoice) || std::cin.eof()) {
+                break;
+            }
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (endChoice == 1) {
                 inventory.clear();
                 exp = 0;

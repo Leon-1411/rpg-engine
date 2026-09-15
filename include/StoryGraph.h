@@ -20,10 +20,37 @@ struct Choice {
     std::string setFlag;
 };
 
+struct DialogueLine {
+    std::string speaker;
+    std::string text;
+};
+
+struct DialogueChoice {
+    std::string text;
+    std::string nextDialogueId;
+    std::string nextNodeId;
+    std::string requiredFlag;
+    std::string setFlag;
+};
+
+struct DialogueNode {
+    std::string id;
+    std::string speaker;
+    std::string text;
+    std::vector<DialogueChoice> choices;
+};
+
+struct DialogueTree {
+    std::string startDialogueId;
+    std::unordered_map<std::string, DialogueNode> nodes;
+
+    bool empty() const { return nodes.empty(); }
+};
+
 struct StoryNode {
     std::string id;
     std::string text;
-    EventType type;
+    EventType type = EventType::NORMAL;
     std::vector<Choice> choices;
 
     // Thuộc tính mở rộng từ file JSON
@@ -33,13 +60,20 @@ struct StoryNode {
     std::string onWinNodeId;
     std::string onLoseNodeId;
     std::vector<std::string> rewardItems;
-    int rewardExp;
+    int rewardExp = 0;
     std::string requiredItem;
     std::vector<std::string> requiredItems;
     std::string requiredHeroClass;
     std::string onPassNodeId;
     std::string onFailNodeId;
     std::string nextNodeId;
+
+    // Thuộc tính đối thoại NPC tuyến tính (backward compatibility)
+    std::string npcName;
+    std::vector<DialogueLine> dialogues;
+
+    // Cơ chế Hội thoại rẽ nhánh (Branching Dialogue Tree)
+    DialogueTree dialogueTree;
 
     StoryNode() : type(EventType::NORMAL), rewardExp(0) {}
     StoryNode(const std::string& id, const std::string& text, EventType type = EventType::NORMAL, const std::vector<Choice>& choices = {})
@@ -50,6 +84,7 @@ class StoryGraph {
 private:
     std::unordered_map<std::string, StoryNode> nodes;
     std::string currentNodeId;
+    std::string currentDialogueId;
     std::unordered_map<std::string, bool> storyFlags;
 
 public:
@@ -63,11 +98,22 @@ public:
     const std::unordered_map<std::string, StoryNode>& getAllNodes() const;
     
     StoryNode getCurrentNode() const;
+    std::string getCurrentNodeId() const;
+    void setCurrentNodeId(const std::string& nodeId);
     bool selectChoice(int choiceIndex);
     bool moveToNode(const std::string& nodeId);
     
+    // Quản lý hội thoại rẽ nhánh
+    bool isInDialogue() const;
+    DialogueNode getCurrentDialogueNode() const;
+    bool selectDialogueChoice(int choiceIndex);
+    void resetDialogue();
+
     void setFlag(const std::string& flag, bool value = true);
     bool getFlag(const std::string& flag) const;
+    const std::unordered_map<std::string, bool>& getStoryFlags() const;
+    void setStoryFlags(const std::unordered_map<std::string, bool>& flags);
+    void clearStoryFlags();
     
     bool isEnding() const;
     size_t getNodeCount() const;
