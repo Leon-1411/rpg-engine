@@ -59,6 +59,7 @@ struct StoryNode {
     std::string enemyId;
     std::string onWinNodeId;
     std::string onLoseNodeId;
+    std::vector<std::string> rewardItems;
     int rewardExp = 0;
     std::string requiredItem;
     std::string onPassNodeId;

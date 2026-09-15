@@ -60,7 +60,9 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
 
         if (j.contains("nodes")) {
             if (j["nodes"].is_object()) {
-                for (auto& [key, nodeJson] : j["nodes"].items()) {
+                for (auto item : j["nodes"].items()) {
+                    std::string key = item.key();
+                    const auto& nodeJson = item.value();
                     StoryNode node;
                     node.id = key;
                     if (nodeJson.contains("id")) node.id = nodeJson["id"].get<std::string>();
@@ -127,7 +129,9 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                         auto dtJson = nodeJson["dialogue_tree"];
                         node.dialogueTree.startDialogueId = dtJson.value("start_dialogue_id", dtJson.value("start_id", ""));
                         if (dtJson.contains("nodes") && dtJson["nodes"].is_object()) {
-                            for (auto& [dKey, dVal] : dtJson["nodes"].items()) {
+                            for (auto dItem : dtJson["nodes"].items()) {
+                                std::string dKey = dItem.key();
+                                const auto& dVal = dItem.value();
                                 DialogueNode dn;
                                 dn.id = dKey;
                                 if (dVal.contains("id")) dn.id = dVal["id"].get<std::string>();
@@ -198,7 +202,9 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                         auto dtJson = nodeJson["dialogue_tree"];
                         node.dialogueTree.startDialogueId = dtJson.value("start_dialogue_id", dtJson.value("start_id", ""));
                         if (dtJson.contains("nodes") && dtJson["nodes"].is_object()) {
-                            for (auto& [dKey, dVal] : dtJson["nodes"].items()) {
+                            for (auto dItem : dtJson["nodes"].items()) {
+                                std::string dKey = dItem.key();
+                                const auto& dVal = dItem.value();
                                 DialogueNode dn;
                                 dn.id = dKey;
                                 if (dVal.contains("id")) dn.id = dVal["id"].get<std::string>();
