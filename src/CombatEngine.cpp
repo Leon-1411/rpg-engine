@@ -106,6 +106,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " succumbed to deadly poison!\n";
         hero.addExp(enemy.getExpReward());
+        hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -198,6 +199,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
         hero.addExp(enemy.getExpReward());
+        hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -209,6 +211,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
         hero.addExp(enemy.getExpReward());
+        hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }

@@ -958,3 +958,52 @@ Good / Bad Ending
 
 Project Æ°u tiÃªn **code rÃµ rÃ ng, OOP Ä‘Ãºng, module Ä‘á»™c láº­p, dá»… chia viá»‡c
 cho 7 thÃ nh viÃªn vÃ  dá»… má»Ÿ rá»™ng** hÆ¡n viá»‡c thÃªm quÃ¡ nhiá»u tÃ­nh nÄƒng.
+---
+
+## 23. Há»‡ Thá»‘ng Tiá»n Tá»‡ & Kinh Táº¿ (Gold Economy)
+
+### 23.1. Tá»•ng Quan Vá» Tiá»n Tá»‡ (Gold)
+`gold` lÃ  Ä‘Æ¡n vá»‹ tiá»n tá»‡ chÃ­nh trong Eldoria, thuá»™c quyá»n sá»Ÿ há»¯u cá»§a `Hero` vÃ  Ä‘Æ°á»£c lÆ°u trá»¯ liÃªn tá»¥c trong `SavedGameState` (`savegame.json`).
+
+### 23.2. Nguá»“n Thu VÃ ng (Gold Inflow)
+1. **Pháº§n thÆ°á»Ÿng chiáº¿n Ä‘áº¥u (`Enemy::goldReward`):**
+   - **Minion thÃ´ng thÆ°á»ng (Normal Minions):** `10 - 25 Gold` (Goblin: 10, Skeleton: 20, v.v.).
+   - **Minion cao cáº¥p (Elite Minions):** `35 - 60 Gold` (Orc: 35, Dark Knight: 60).
+   - **Thá»§ lÄ©nh phe phÃ¡i (Faction Bosses):** `150 - 300 Gold` (Valen, Zephyr, v.v.).
+   - **TrÃ¹m cuá»‘i (Final Bosses):** `500 Gold` (Maelgath, Ignis).
+2. **Sá»± kiá»‡n cá»‘t truyá»‡n & RÆ°Æ¡ng bÃ¡u (`StoryNode::rewardGold`):**
+   - ThÆ°á»ng khi hÃ n thÃ nh nhiá»‡m vá»¥, giáº£i cá»©u NPC hoáº·c khÃ¡m phÃ¡ kho bj[°ƒ†ê¥¸¸4(4(ŒŒŒ€ÈÌ¸Ì¸Q§©ÔQ£†î”[¹œ€¡½±=ÕÑ™±½Ü€¼M¥¹­Ì¤4(Ä¸€¨©#†îÑ£†îE¹œ†îµ„£¹œ€˜Q£Ã…¹œ¹£‰¸€¡M¡½Á€€¼5•É¡…¹Ñ€¤è¨¨4(€€€´€¨©[†êµĞÁ£†ê¥´£†îM¤Á£†î•Œ€¡A½Ñ¥½¹Ì¤è¨¨4(€€€€€´!•…±Ñ A½Ñ¥½¸€¡#†îM¤€ÔÀ!@¤è€ÈÔ½±‘€4(€€€€€´É•…Ñ•È!•…±Ñ A½Ñ¥½¸€¡#†îM¤€ÄÀÀ!@¤è€ÔÀ½±‘€
+     - Mana Potion (Há»“i 30 MP): `30 Gold`
+     - Elixir of Vitality (Há»“i Ä‘áº§y HP & MP): `100 Gold`
+   - **Trang bá»‹ (Weapons & Armors):**
+     - Iron Sword (+8 ATK): `80 Gold`
+     - Steel Plate (+6 DEF): `100 Gold`
+     - Mythril Blade (+20 ATK): `250 Gold`
+     - Dragon Armor (+15 DEF): `300 Gold`
+   - **Tá»· lá»‡ bÃ¡n láº¡i (Resell Rate):** NgÆ°á»‘i chÆ¡i cÃ³ thá»ƒ bÃ¡n váº­t pháº©m trong tÃºi Ä‘á»“ cho thÆ°Æ¡ng nhÃ¢n Ä‘á»ƒ nháº­n láº¡i **50% giÃ¡ mua ni§Ãªm yáº³t**
+2. **Ráº½ nhÃ¡nh cá»‘t truyá»‡n & TÆ°Æ¡ng tÃ¡c ngoáº¡i giao (`StoryNode` / `Choice`):**
+   - **Äiá»u kiá»‡n vÃ ng (`requiredGold`):** NgÆ°á»i chÆ¡i pháº£i sá»Ÿ há»¯u tá»‘i thiá»ƒu má»™t lÆ°á»£ng vÃ ng nháº¥t Ä‘á»‹nh Ä‘á»ƒ má»Ÿ khÃ¡a lá»±a chá»n Ä‘áº·c biá»‡t (vÃ­ dá»¥: chá»©ng minh Ä‘á»‹a vá»‹, tiáº¿p cáº­n quÃ½ tá»™c).
+   - **TiÃªu hao vÃ ng (`goldCost`):** Kháº¥u trá»« trá»±c tiáºŸp sá»‘ vÃ ng khi lá»±a chá»n (vÃ­ dá»¥: tráº£ tiá»n qua cá»•ng biãªn giá»›i, thuÃª thÃ¡m tá»­ mua tin tá»©c, há»‘i lá»™ lÃ­nh gÃ¡c, quyÃªn gÃ³p cho Ä‘á»n thá»).
+
+### 23.4. Cáº¥u TrÃºc Dá»¯ Liá»‡u & API
+```cpp // Shop Interface
+class Shop {
+public:
+    void addItem(std::shared_ptr<Item> item, int buyPrice, int sellPrice = 0, int stock; = -1);
+    bool buyItem(int shopIndex, Hero& hero);
+    bool sellItem(int inventoryIndex, Hero& hero);
+    void displayShop(const Hero& hero) const;
+};
+
+// Story Choice Gold Extension
+struct Choice {
+    std::string text;
+    std::string nextNodeId;
+    std::string requiredFlag;
+    std::string setFlag;
+    int requiredGold = 0;
+    int goldCost = 0;
+    std::string requiredHeroClass;
+    std::vector<std::string> requiredItems;
+};
+```

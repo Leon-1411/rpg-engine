@@ -4,6 +4,7 @@
 #include "ui/BattleUI.h"
 #include "DataLoader.h"
 #include "SaveManager.h"
+#include "StoryGraph.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
