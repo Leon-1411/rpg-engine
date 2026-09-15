@@ -15,7 +15,7 @@ int main() {
     assert(story.selectChoice(0) == true);
     assert(story.getCurrentNode().id == "forest_path");
 
-    // 2. Test JSON parsing from string
+    // 2. Test JSON parsing from string with flags and types
     std::string testJson = R"({
         "startNodeId": "room1",
         "nodes": [
@@ -44,39 +44,79 @@ int main() {
         ]
     })";
 
-    StoryGraph jsonStory;
-    assert(jsonStory.loadFromJsonString(testJson) == true);
-    assert(jsonStory.getCurrentNode().id == "room1");
-    assert(jsonStory.getCurrentNode().choices.size() == 1);
+    StoryGraph jsonStringStory;
+    assert(jsonStringStory.loadFromJsonString(testJson) == true);
+    assert(jsonStringStory.getCurrentNode().id == "room1");
+    assert(jsonStringStory.getCurrentNode().choices.size() == 1);
     
     // Test selecting choice
-    assert(jsonStory.selectChoice(0) == true);
-    assert(jsonStory.getCurrentNode().id == "room2");
-    assert(jsonStory.getFlag("visited_room1") == true);
-    assert(jsonStory.getCurrentNode().type == EventType::ITEM);
+    assert(jsonStringStory.selectChoice(0) == true);
+    assert(jsonStringStory.getCurrentNode().id == "room2");
+    assert(jsonStringStory.getFlag("visited_room1") == true);
+    assert(jsonStringStory.getCurrentNode().type == EventType::ITEM);
 
     // Test moving to ending
-    assert(jsonStory.selectChoice(0) == true);
-    assert(jsonStory.getCurrentNode().id == "exit_room");
-    assert(jsonStory.isEnding() == true);
+    assert(jsonStringStory.selectChoice(0) == true);
+    assert(jsonStringStory.getCurrentNode().id == "exit_room");
+    assert(jsonStringStory.isEnding() == true);
 
-    // 3. Test invalid JSON handling
+    // 3. Test SaveManager getter/setter helper functions
+    jsonStringStory.setCurrentNodeId("room1");
+    assert(jsonStringStory.getCurrentNodeId() == "room1");
+    std::unordered_map<std::string, bool> customFlags = {{"boss_defeated", true}, {"key_found", false}};
+    jsonStringStory.setStoryFlags(customFlags);
+    assert(jsonStringStory.getStoryFlags().size() == 2);
+    assert(jsonStringStory.getFlag("boss_defeated") == true);
+    jsonStringStory.clearStoryFlags();
+    assert(jsonStringStory.getStoryFlags().empty());
+
+    // 4. Test invalid JSON handling
     StoryGraph brokenStory;
     assert(brokenStory.loadFromJsonString("{ invalid json content ...") == false);
     assert(brokenStory.loadFromJsonString("{\"nodes\": []}") == false);
 
-    // 4. Kiểm thử nạp data/story.json
+    // 5. Kiểm thử nạp data/story.json thực tế
     std::string storyPath = "data/story.json";
     if (!std::ifstream(storyPath).good()) storyPath = "../data/story.json";
-    StoryGraph fileStory;
-    bool loadedStory = fileStory.loadStoryGraph(storyPath);
-    assert(loadedStory == true);
-    assert(fileStory.getNodeCount() >= 6);
+    StoryGraph jsonStory;
+    bool loaded = jsonStory.loadStoryGraph(storyPath);
+    assert(loaded == true);
+    assert(jsonStory.getNodeCount() >= 6);
     
-    StoryNode startNode = fileStory.getCurrentNode();
-    assert(startNode.id == "node_01" || startNode.id == "village_start");
+    StoryNode startNode = jsonStory.getCurrentNode();
+    assert(startNode.id == "node_01");
+    assert(startNode.choices.size() >= 2);
 
-    // 5. Test DataLoader functions
+    // Kiểm thử nạp NPC và Dialogues từ data/story.json
+    assert(startNode.npcName == "Trưởng Làng Eldrin");
+    assert(startNode.dialogues.size() >= 2);
+
+    // 6. Kiểm thử cơ chế Hội thoại rẽ nhánh (Branching Dialogue Tree)
+    jsonStory.moveToNode("node_01");
+    assert(jsonStory.isInDialogue() == true);
+    DialogueNode dNode1 = jsonStory.getCurrentDialogueNode();
+    assert(dNode1.id == "d01_start");
+    assert(dNode1.choices.size() == 4);
+
+    // Đáp thoại [0]: Hỏi về Rừng Ma -> Rẽ sang nhánh thoại d01_forest_info
+    assert(jsonStory.selectDialogueChoice(0) == true);
+    assert(jsonStory.isInDialogue() == true);
+    assert(jsonStory.getCurrentDialogueNode().id == "d01_forest_info");
+
+    // Đáp thoại [0] của d01_forest_info: Quyết tâm vào rừng -> Dẫn tới Story Node node_02 (COMBAT)
+    assert(jsonStory.selectDialogueChoice(0) == true);
+    assert(jsonStory.getCurrentNode().id == "node_02");
+    assert(jsonStory.getCurrentNode().type == EventType::BATTLE);
+
+    // Tại node_02: Hội thoại với Quỷ Bắt Hồn
+    assert(jsonStory.isInDialogue() == true);
+    assert(jsonStory.getCurrentDialogueNode().id == "d02_start");
+    assert(jsonStory.selectDialogueChoice(1) == true);
+    assert(jsonStory.getCurrentDialogueNode().id == "d02_inquire");
+    assert(jsonStory.selectDialogueChoice(0) == true);
+    assert(jsonStory.isInDialogue() == false);
+
+    // 7. Test DataLoader functions
     std::string itemsPath = "data/items.json";
     if (!std::ifstream(itemsPath).good()) itemsPath = "../data/items.json";
     auto items = DataLoader::loadItems(itemsPath);
@@ -87,6 +127,6 @@ int main() {
     auto enemies = DataLoader::loadEnemies(enemiesPath);
     assert(!enemies.empty());
 
-    std::cout << "[PASS] All StoryGraph unit tests (including JSON loader) passed successfully!\n";
+    std::cout << "[PASS] All StoryGraph unit tests (including Branching Dialogue Tree & SaveManager helpers) passed successfully!\n";
     return 0;
 }

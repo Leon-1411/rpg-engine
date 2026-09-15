@@ -5,8 +5,8 @@
  */
 
 #include "StoryGraph.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <nlohmann/json.hpp>
 
@@ -36,6 +36,7 @@ void StoryGraph::addNode(const StoryNode& node) {
 void StoryGraph::clear() {
     nodes.clear();
     currentNodeId.clear();
+    currentDialogueId.clear();
     storyFlags.clear();
 }
 
@@ -59,9 +60,9 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
 
         if (j.contains("nodes")) {
             if (j["nodes"].is_object()) {
-                for (auto it : j["nodes"].items()) {
-                    std::string key = it.key();
-                    const auto& nodeJson = it.value();
+                for (auto item : j["nodes"].items()) {
+                    std::string key = item.key();
+                    const auto& nodeJson = item.value();
                     StoryNode node;
                     node.id = key;
                     if (nodeJson.contains("id")) node.id = nodeJson["id"].get<std::string>();
@@ -102,6 +103,56 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                         }
                     }
 
+                    if (nodeJson.contains("npc")) {
+                        if (nodeJson["npc"].is_string()) {
+                            node.npcName = nodeJson["npc"].get<std::string>();
+                        } else if (nodeJson["npc"].is_object()) {
+                            node.npcName = nodeJson["npc"].value("name", "");
+                        }
+                    }
+
+                    if (nodeJson.contains("dialogues") && nodeJson["dialogues"].is_array()) {
+                        for (auto& d : nodeJson["dialogues"]) {
+                            DialogueLine line;
+                            if (d.is_object()) {
+                                line.speaker = d.value("speaker", node.npcName.empty() ? "NPC" : node.npcName);
+                                line.text = d.value("text", "");
+                            } else if (d.is_string()) {
+                                line.speaker = node.npcName.empty() ? "NPC" : node.npcName;
+                                line.text = d.get<std::string>();
+                            }
+                            node.dialogues.push_back(line);
+                        }
+                    }
+
+                    if (nodeJson.contains("dialogue_tree") && nodeJson["dialogue_tree"].is_object()) {
+                        auto dtJson = nodeJson["dialogue_tree"];
+                        node.dialogueTree.startDialogueId = dtJson.value("start_dialogue_id", dtJson.value("start_id", ""));
+                        if (dtJson.contains("nodes") && dtJson["nodes"].is_object()) {
+                            for (auto dItem : dtJson["nodes"].items()) {
+                                std::string dKey = dItem.key();
+                                const auto& dVal = dItem.value();
+                                DialogueNode dn;
+                                dn.id = dKey;
+                                if (dVal.contains("id")) dn.id = dVal["id"].get<std::string>();
+                                dn.speaker = dVal.value("speaker", node.npcName.empty() ? "NPC" : node.npcName);
+                                dn.text = dVal.value("text", "");
+                                if (dVal.contains("choices") && dVal["choices"].is_array()) {
+                                    for (auto& ch : dVal["choices"]) {
+                                        DialogueChoice dc;
+                                        dc.text = ch.value("text", "");
+                                        dc.nextDialogueId = ch.value("next_dialogue_id", ch.value("nextDialogueId", ""));
+                                        dc.nextNodeId = ch.value("next_node_id", ch.value("nextNodeId", ""));
+                                        dc.requiredFlag = ch.value("required_flag", ch.value("requiredFlag", ""));
+                                        dc.setFlag = ch.value("set_flag", ch.value("setFlag", ""));
+                                        dn.choices.push_back(dc);
+                                    }
+                                }
+                                node.dialogueTree.nodes[dn.id] = dn;
+                            }
+                        }
+                    }
+
                     nodes[node.id] = node;
                 }
             } else if (j["nodes"].is_array()) {
@@ -124,6 +175,57 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                             node.choices.push_back(choice);
                         }
                     }
+
+                    if (nodeJson.contains("npc")) {
+                        if (nodeJson["npc"].is_string()) {
+                            node.npcName = nodeJson["npc"].get<std::string>();
+                        } else if (nodeJson["npc"].is_object()) {
+                            node.npcName = nodeJson["npc"].value("name", "");
+                        }
+                    }
+
+                    if (nodeJson.contains("dialogues") && nodeJson["dialogues"].is_array()) {
+                        for (auto& d : nodeJson["dialogues"]) {
+                            DialogueLine line;
+                            if (d.is_object()) {
+                                line.speaker = d.value("speaker", node.npcName.empty() ? "NPC" : node.npcName);
+                                line.text = d.value("text", "");
+                            } else if (d.is_string()) {
+                                line.speaker = node.npcName.empty() ? "NPC" : node.npcName;
+                                line.text = d.get<std::string>();
+                            }
+                            node.dialogues.push_back(line);
+                        }
+                    }
+
+                    if (nodeJson.contains("dialogue_tree") && nodeJson["dialogue_tree"].is_object()) {
+                        auto dtJson = nodeJson["dialogue_tree"];
+                        node.dialogueTree.startDialogueId = dtJson.value("start_dialogue_id", dtJson.value("start_id", ""));
+                        if (dtJson.contains("nodes") && dtJson["nodes"].is_object()) {
+                            for (auto dItem : dtJson["nodes"].items()) {
+                                std::string dKey = dItem.key();
+                                const auto& dVal = dItem.value();
+                                DialogueNode dn;
+                                dn.id = dKey;
+                                if (dVal.contains("id")) dn.id = dVal["id"].get<std::string>();
+                                dn.speaker = dVal.value("speaker", node.npcName.empty() ? "NPC" : node.npcName);
+                                dn.text = dVal.value("text", "");
+                                if (dVal.contains("choices") && dVal["choices"].is_array()) {
+                                    for (auto& ch : dVal["choices"]) {
+                                        DialogueChoice dc;
+                                        dc.text = ch.value("text", "");
+                                        dc.nextDialogueId = ch.value("next_dialogue_id", ch.value("nextDialogueId", ""));
+                                        dc.nextNodeId = ch.value("next_node_id", ch.value("nextNodeId", ""));
+                                        dc.requiredFlag = ch.value("required_flag", ch.value("requiredFlag", ""));
+                                        dc.setFlag = ch.value("set_flag", ch.value("setFlag", ""));
+                                        dn.choices.push_back(dc);
+                                    }
+                                }
+                                node.dialogueTree.nodes[dn.id] = dn;
+                            }
+                        }
+                    }
+
                     nodes[node.id] = node;
                 }
             }
@@ -137,6 +239,7 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
             currentNodeId = nodes.begin()->first;
         }
 
+        resetDialogue();
         return true;
     } catch (const std::exception& e) {
         std::cerr << "[StoryGraph] JSON Parse error: " << e.what() << "\n";
@@ -150,10 +253,15 @@ bool StoryGraph::loadStoryGraph(const std::string& filePath) {
         std::cerr << "[StoryGraph] Error: Could not open file " << filePath << "\n";
         return false;
     }
+
     std::string content((std::istreambuf_iterator<char>(file)),
                          std::istreambuf_iterator<char>());
     file.close();
-    return loadFromJsonString(content);
+    bool ok = loadFromJsonString(content);
+    if (ok) {
+        std::cout << "[StoryGraph] Successfully loaded " << nodes.size() << " nodes from " << filePath << ".\n";
+    }
+    return ok;
 }
 
 StoryNode StoryGraph::getCurrentNode() const {
@@ -162,6 +270,15 @@ StoryNode StoryGraph::getCurrentNode() const {
         return it->second;
     }
     return {};
+}
+
+std::string StoryGraph::getCurrentNodeId() const {
+    return currentNodeId;
+}
+
+void StoryGraph::setCurrentNodeId(const std::string& nodeId) {
+    currentNodeId = nodeId;
+    resetDialogue();
 }
 
 bool StoryGraph::selectChoice(int choiceIndex) {
@@ -179,9 +296,70 @@ bool StoryGraph::selectChoice(int choiceIndex) {
 bool StoryGraph::moveToNode(const std::string& nodeId) {
     if (nodes.find(nodeId) != nodes.end()) {
         currentNodeId = nodeId;
+        resetDialogue();
         return true;
     }
     return false;
+}
+
+void StoryGraph::resetDialogue() {
+    auto it = nodes.find(currentNodeId);
+    if (it != nodes.end() && !it->second.dialogueTree.empty()) {
+        currentDialogueId = it->second.dialogueTree.startDialogueId;
+    } else {
+        currentDialogueId.clear();
+    }
+}
+
+bool StoryGraph::isInDialogue() const {
+    if (currentDialogueId.empty()) return false;
+    auto it = nodes.find(currentNodeId);
+    if (it != nodes.end()) {
+        return it->second.dialogueTree.nodes.find(currentDialogueId) != it->second.dialogueTree.nodes.end();
+    }
+    return false;
+}
+
+DialogueNode StoryGraph::getCurrentDialogueNode() const {
+    auto it = nodes.find(currentNodeId);
+    if (it != nodes.end()) {
+        auto dIt = it->second.dialogueTree.nodes.find(currentDialogueId);
+        if (dIt != it->second.dialogueTree.nodes.end()) {
+            return dIt->second;
+        }
+    }
+    return {};
+}
+
+bool StoryGraph::selectDialogueChoice(int choiceIndex) {
+    if (!isInDialogue()) return false;
+    DialogueNode dNode = getCurrentDialogueNode();
+    if (choiceIndex < 0 || choiceIndex >= static_cast<int>(dNode.choices.size())) {
+        return false;
+    }
+
+    const DialogueChoice& choice = dNode.choices[choiceIndex];
+    if (!choice.setFlag.empty()) {
+        setFlag(choice.setFlag, true);
+    }
+
+    // Nếu đáp thoại dẫn tiếp sang nhánh thoại kế tiếp của NPC
+    if (!choice.nextDialogueId.empty()) {
+        auto it = nodes.find(currentNodeId);
+        if (it != nodes.end() && it->second.dialogueTree.nodes.find(choice.nextDialogueId) != it->second.dialogueTree.nodes.end()) {
+            currentDialogueId = choice.nextDialogueId;
+            return true;
+        }
+    }
+
+    // Nếu đáp thoại kết thúc hội thoại và dẫn sang Story Node tiếp theo
+    if (!choice.nextNodeId.empty()) {
+        return moveToNode(choice.nextNodeId);
+    }
+
+    // Không có nextDialogueId lẫn nextNodeId: kết thúc cây thoại tại node hiện tại
+    currentDialogueId.clear();
+    return true;
 }
 
 void StoryGraph::setFlag(const std::string& flag, bool value) {
@@ -192,6 +370,18 @@ bool StoryGraph::getFlag(const std::string& flag) const {
     auto it = storyFlags.find(flag);
     if (it != storyFlags.end()) return it->second;
     return false;
+}
+
+const std::unordered_map<std::string, bool>& StoryGraph::getStoryFlags() const {
+    return storyFlags;
+}
+
+void StoryGraph::setStoryFlags(const std::unordered_map<std::string, bool>& flags) {
+    storyFlags = flags;
+}
+
+void StoryGraph::clearStoryFlags() {
+    storyFlags.clear();
 }
 
 bool StoryGraph::isEnding() const {
