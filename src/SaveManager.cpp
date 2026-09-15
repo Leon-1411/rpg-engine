@@ -12,20 +12,23 @@
 #include <fstream>
 #include <cstdio>
 #include <algorithm>
-#include <filesystem>
 #include <set>
 #include <regex>
 
+#ifdef _WIN32
+#include <direct.h>
+#include <io.h>
+#define MKDIR(dir) _mkdir(dir)
+#else
+#include <sys/stat.h>
+#define MKDIR(dir) mkdir(dir, 0755)
+#endif
+
 using json = nlohmann::json;
-namespace fs = std::filesystem;
 
 static void ensureDirectoryExists(const std::string& path) {
-    try {
-        if (!path.empty() && !fs::exists(path)) {
-            fs::create_directories(path);
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "[SaveManager] Warning: Failed to create directory " << path << ": " << e.what() << "\n";
+    if (!path.empty()) {
+        MKDIR(path.c_str());
     }
 }
 
@@ -324,11 +327,6 @@ bool SaveManager::saveGameState(int slot, const SavedGameState& state) const {
 
 bool SaveManager::loadGameState(int slot, SavedGameState& outState) const {
     std::string filePath = getSlotFilePath(slot);
-    if (!fs::exists(filePath)) {
-        std::cerr << "[SaveManager] Error: File does not exist: " << filePath << "\n";
-        return false;
-    }
-
     try {
         std::ifstream inFile(filePath);
         if (!inFile.is_open()) {
@@ -458,15 +456,11 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
 
 bool SaveManager::slotExists(int slot) const {
     std::string filePath = getSlotFilePath(slot);
-    try {
-        if (!fs::exists(filePath)) {
-            return false;
-        }
-        return fs::file_size(filePath) > 0;
-    } catch (...) {
-        std::ifstream inFile(filePath);
-        return inFile.good();
+    std::ifstream inFile(filePath, std::ios::binary | std::ios::ate);
+    if (!inFile.is_open()) {
+        return false;
     }
+    return inFile.tellg() > 0;
 }
 
 bool SaveManager::deleteSlot(int slot) {
@@ -474,38 +468,38 @@ bool SaveManager::deleteSlot(int slot) {
         return false;
     }
     std::string filePath = getSlotFilePath(slot);
-    try {
-        return fs::remove(filePath);
-    } catch (...) {
-        return std::remove(filePath.c_str()) == 0;
-    }
+    return std::remove(filePath.c_str()) == 0;
 }
 
 std::vector<int> SaveManager::getExistingSlots() const {
     std::set<int> slots;
-
-    try {
-        if (fs::exists(saveDirectory) && fs::is_directory(saveDirectory)) {
-            std::regex slotRegex(R"(slot(\d+)\.json)", std::regex_constants::icase);
-            for (const auto& entry : fs::directory_iterator(saveDirectory)) {
-                if (entry.is_regular_file()) {
-                    std::string filename = entry.path().filename().string();
-                    std::smatch match;
-                    if (std::regex_match(filename, match, slotRegex)) {
-                        try {
-                            int slotNum = std::stoi(match[1].str());
-                            slots.insert(slotNum);
-                        } catch (...) {}
-                    }
-                }
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "[SaveManager] Error reading directory: " << e.what() << "\n";
+    std::string dir = saveDirectory;
+    if (!dir.empty() && dir.back() != '/' && dir.back() != '\\') {
+        dir += "/";
     }
 
-    // Fallback checks for common slot numbers 1..9
-    for (int i = 1; i <= 9; ++i) {
+#ifdef _WIN32
+    std::string searchPattern = dir + "slot*.json";
+    struct _finddata_t fileInfo;
+    intptr_t handle = _findfirst(searchPattern.c_str(), &fileInfo);
+    if (handle != -1) {
+        std::regex slotRegex(R"(slot(\d+)\.json)", std::regex_constants::icase);
+        do {
+            std::string filename = fileInfo.name;
+            std::smatch match;
+            if (std::regex_match(filename, match, slotRegex)) {
+                try {
+                    int slotNum = std::stoi(match[1].str());
+                    slots.insert(slotNum);
+                } catch (...) {}
+            }
+        } while (_findnext(handle, &fileInfo) == 0);
+        _findclose(handle);
+    }
+#endif
+
+    // Fallback checks for slot numbers 1..20
+    for (int i = 1; i <= 20; ++i) {
         if (slotExists(i)) {
             slots.insert(i);
         }
