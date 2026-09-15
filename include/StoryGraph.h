@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <iostream>
 
 enum class EventType {
     NORMAL,
@@ -97,7 +96,7 @@ struct StoryNode {
     std::string onFailNodeId;
     std::string nextNodeId;
 
-    // Thuoc tinh doi thoai NPC tuyen tinh (backward compatibility)
+    // Thuoc tinh doi thoai NOC tuyen tinh (backward compatibility)
     std::string npcName;
     std::vector<DialogueLine> dialogues;
 
