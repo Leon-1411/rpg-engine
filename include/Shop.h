@@ -27,6 +27,7 @@ public:
     ~Shop() = default;
 
     void addItem(std::shared_ptr<Item> item, int buyPrice, int sellPrice = 0, int stock = -1);
+    void loadDefaultStock();
     void clear();
 
     const std::vector<ShopItem>& getGoods() const;

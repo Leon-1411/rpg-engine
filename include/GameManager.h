@@ -12,6 +12,7 @@ enum class GameState {
     STORY_MODE,
     BATTLE_MODE,
     INVENTORY_MODE,
+    SHOP_MODE,
     GAME_OVER,
     EXIT
 };
@@ -33,6 +34,7 @@ private:
     void handleStoryMode();
     void handleBattleMode();
     void handleInventoryMode();
+    void handleShopMode();
     void handleGameOver();
 
     // Helper functions

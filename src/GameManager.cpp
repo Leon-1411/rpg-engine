@@ -9,6 +9,7 @@
 #include "Mage.h"
 #include "Ranger.h"
 #include "DataLoader.h"
+#include "Shop.h"
 #include <iostream>
 
 GameManager::GameManager() 
@@ -32,6 +33,9 @@ void GameManager::run() {
             case GameState::INVENTORY_MODE:
                 handleInventoryMode();
                 break;
+            case GameState::SHOP_MODE:
+                handleShopMode();
+                break;
             case GameState::GAME_OVER:
                 handleGameOver();
                 break;
@@ -47,6 +51,7 @@ void GameManager::changeState(GameState newState) {
 }
 
 void GameManager::handleInit() {
+    story.loadStoryGraph("data/story.json");
     changeState(GameState::MAIN_MENU);
 }
 
@@ -146,6 +151,7 @@ void GameManager::loadGame() {
     
     if (slotToLoad != -1) {
         playerHero = std::make_shared<Hero>("Blank", HeroClass::WARRIOR, 1, 1, 1, 1);
+        story.loadStoryGraph("data/story.json");
         if (saveManager.loadGame(slotToLoad, *playerHero, story)) {
             ConsoleUI::printSuccess("Tải game thành công!");
             ConsoleUI::pause();
@@ -239,7 +245,7 @@ void GameManager::handleStoryMode() {
         };
         ConsoleUI::printBox(rewardBox, 65, ConsoleUI::Colors::BRIGHT_GREEN);
 
-        if (!current.rewardItems.empty() || current.rewardExp > 0) {
+        if (!current.rewardItems.empty() || current.rewardExp > 0 || current.rewardGold > 0) {
             std::cout << "\n" << ConsoleUI::colorize("★ PHẦN THƯỞNG NHẬN ĐƯỢC:", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
             for (const auto& itmId : current.rewardItems) {
                 giveItemById(itmId);
@@ -247,6 +253,10 @@ void GameManager::handleStoryMode() {
             if (current.rewardExp > 0 && playerHero) {
                 playerHero->setExp(playerHero->getExp() + current.rewardExp);
                 std::cout << "  + " << current.rewardExp << " EXP\n";
+            }
+            if (current.rewardGold > 0 && playerHero) {
+                playerHero->addGold(current.rewardGold);
+                std::cout << "  + " << current.rewardGold << " Vàng (Hiện có: " << playerHero->getGold() << " Vàng)\n";
             }
         }
 
@@ -265,6 +275,46 @@ void GameManager::handleStoryMode() {
             current.text
         };
         ConsoleUI::printBox(storyBox, 65, ConsoleUI::Colors::BRIGHT_MAGENTA);
+    }
+
+    // 3.1. Check if Node is IN DIALOGUE (Branching Dialogue Tree)
+    if (story.isInDialogue()) {
+        DialogueNode dNode = story.getCurrentDialogueNode();
+        std::string speakerName = current.npcName.empty() ? dNode.speaker : current.npcName;
+        std::vector<std::string> dialogueBox = {
+            "HỘI THOẠI RẼ NHÁNH - [" + speakerName + "]",
+            "",
+            "[" + dNode.speaker + "]:",
+            "\"" + dNode.text + "\""
+        };
+        ConsoleUI::printBox(dialogueBox, 65, ConsoleUI::Colors::BRIGHT_CYAN);
+
+        if (dNode.choices.empty()) {
+            ConsoleUI::pause();
+            story.resetDialogue();
+            return;
+        }
+
+        std::cout << "\n" << ConsoleUI::colorize("Đáp thoại của bạn:", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+        for (size_t cIdx = 0; cIdx < dNode.choices.size(); ++cIdx) {
+            std::cout << "  " << (cIdx + 1) << ". " << dNode.choices[cIdx].text << "\n";
+        }
+
+        int dChoice = ConsoleUI::getIntInput(1, static_cast<int>(dNode.choices.size()), "\nChọn đáp thoại (1-" + std::to_string(dNode.choices.size()) + "): ");
+        story.selectDialogueChoice(dChoice - 1);
+        return;
+    }
+
+    // 3.2. Check if Node is SHOP
+    if (current.type == EventType::SHOP || current.rawType == "SHOP") {
+        std::cout << "\n" << ConsoleUI::colorize("Trạm Thương Gia lưu động sẵn sàng phục vụ!", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+        std::cout << "1. Bước vào Cửa Hàng tiếp tế (Mua/Bán vật phẩm)\n";
+        std::cout << "2. Tiếp tục hành trình theo các ngã rẽ\n";
+        int sOpt = ConsoleUI::getIntInput(1, 2, "Lựa chọn của bạn: ");
+        if (sOpt == 1) {
+            changeState(GameState::SHOP_MODE);
+            return;
+        }
     }
 
     // 4. Check if Node is COMBAT
@@ -402,6 +452,47 @@ void GameManager::handleInventoryMode() {
         }
     }
     changeState(GameState::STORY_MODE);
+}
+
+void GameManager::handleShopMode() {
+    ConsoleUI::clearScreen();
+    ConsoleUI::printHeader("CỬA HÀNG TIẾP TẾ (MERCHANT OUTPOST)", 65, ConsoleUI::Colors::BRIGHT_YELLOW);
+
+    Shop shop("Trạm Tiếp Tế Biên Giới Trăng Máu", "Nơi cung cấp dược phẩm và trang bị hỗ trợ hiệp sĩ.");
+    shop.loadDefaultStock();
+    shop.displayShop(*playerHero);
+
+    std::cout << "\n--- HÀNH ĐỘNG ---\n";
+    std::cout << "1. Mua vật phẩm\n";
+    std::cout << "2. Bán vật phẩm từ túi đồ\n";
+    std::cout << "3. Rời khỏi Cửa Hàng\n";
+
+    int action = ConsoleUI::getIntInput(1, 3, "Lựa chọn của bạn: ");
+    if (action == 1) {
+        int goodsCount = static_cast<int>(shop.getGoods().size());
+        if (goodsCount > 0) {
+            int buyChoice = ConsoleUI::getIntInput(1, goodsCount, "Chọn vật phẩm muốn mua (1-" + std::to_string(goodsCount) + "): ");
+            shop.buyItem(buyChoice - 1, *playerHero);
+        }
+        ConsoleUI::pause();
+    } else if (action == 2) {
+        const Inventory& inv = playerHero->getInventory();
+        if (inv.getItemCount() == 0) {
+            ConsoleUI::printWarning("Túi đồ của bạn đang trống, không có gì để bán!");
+            ConsoleUI::pause();
+        } else {
+            std::cout << "\nDanh sách vật phẩm trong túi:\n";
+            for (int i = 0; i < inv.getItemCount(); ++i) {
+                auto itm = inv.getItemPtr(i);
+                std::cout << "  [" << (i + 1) << "] " << itm->getName() << " (" << itm->getDescription() << ")\n";
+            }
+            int sellChoice = ConsoleUI::getIntInput(1, inv.getItemCount(), "Chọn vật phẩm muốn bán (1-" + std::to_string(inv.getItemCount()) + "): ");
+            shop.sellItem(sellChoice - 1, *playerHero);
+            ConsoleUI::pause();
+        }
+    } else if (action == 3) {
+        changeState(GameState::STORY_MODE);
+    }
 }
 
 void GameManager::handleGameOver() {

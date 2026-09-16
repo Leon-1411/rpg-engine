@@ -4,7 +4,7 @@
 #include "Hero.h"
 #include <string>
 
-    namespace ASCIIArt {
+namespace ASCIIArt {
 
   // Main Title Art
   void printTitleLogo();
@@ -20,6 +20,14 @@
   void printSkeletonArt();
   void printOrcArt();
   void printBossDragonArt();
+  
+  // Fractured Crown Faction Bosses
+  void printDemonMalakorArt();
+  void printGeneralAldricArt();
+  void printCoreGuardianArt();
+  void printArchmageMorvathArt();
+  void printMultiFactionArt();
+
   void printEnemyArt(const Enemy &enemy);
 
   // Battle & Outcome Banners

@@ -5,10 +5,51 @@
       "id": "Node01",
       "title": "Hoàng Thành Eldoria",
       "type": "REWARD",
+      "npc": "Nhà Vua Eldoria",
       "description": "Tại đại điện Eldoria nguy nga, Nhà Vua trao mật lệnh: Công chúa Elena đã bị Ma Vương bắt cóc trong đêm Trăng Máu. Ngài trao cho bạn Huy hiệu Hoàng Gia và lệnh xuất chinh giải cứu công chúa.",
+      "dialogue_tree": {
+        "start_dialogue_id": "king_01",
+        "nodes": {
+          "king_01": {
+            "speaker": "Nhà Vua Eldoria",
+            "text": "Hỡi dũng sĩ! Đêm Trăng Máu vừa qua, Công chúa Elena đã biến mất khỏi hoàng cung. Ta trao cho ngươi Huy Hiệu Hoàng Gia và mệnh lệnh tối mật: Hãy tới Vùng đất Ma tộc giải cứu con gái ta!",
+            "choices": [
+              {
+                "text": "Thưa Bệ Hạ, thần xin thề sẽ hoàn thành sứ mệnh bằng cả danh dự!",
+                "next_dialogue_id": "king_honor"
+              },
+              {
+                "text": "Có manh mối nào về kẻ đã bắt cóc Công chúa không, thưa Bệ Hạ?",
+                "next_dialogue_id": "king_clue"
+              }
+            ]
+          },
+          "king_honor": {
+            "speaker": "Nhà Vua Eldoria",
+            "text": "Tốt lắm! Lòng trung thành của ngươi là niềm hy vọng lớn nhất của vương quốc. Cầm lấy Huy hiệu này, lính canh các trạm tiền tiêu sẽ mở đường cho ngươi.",
+            "choices": [
+              {
+                "text": "Thần xin cáo lui lên đường ngay lập tức!",
+                "next_node_id": "Node02"
+              }
+            ]
+          },
+          "king_clue": {
+            "speaker": "Nhà Vua Eldoria",
+            "text": "Ma Vương Malakor đã thèm khát huyết mạch vương tộc từ lâu. Hắn muốn dùng máu Elena để phá giải phong ấn The Core. Đừng tin bất kỳ lời mê hoặc nào của loài quỷ dữ!",
+            "choices": [
+              {
+                "text": "Thần đã rõ, thần sẽ lên đường hướng về biên giới.",
+                "next_node_id": "Node02"
+              }
+            ]
+          }
+        }
+      },
       "rewards": {
         "items": ["RoyalInsignia"],
-        "exp": 50
+        "exp": 50,
+        "gold": 50
       },
       "next_node_id": "Node02",
       "choices": [
@@ -25,6 +66,10 @@
       "description": "Bầu trời đỏ rực ánh Trăng Máu. Trước mắt bạn là ngã ba ranh giới giữa các thế lực xung đột. Bạn sẽ chọn hướng đi nào để tiếp cận lâu đài Ma Vương?",
       "choices": [
         {
+          "text": "Ghé thăm Trạm Tiếp Tế Biên Giới (Cửa hàng mua sắm/tiếp tế)",
+          "next_node_id": "Node02_Shop"
+        },
+        {
           "text": "Hướng Rừng Sâu Bộ Tộc Tự Do (Gặp gỡ thợ săn du mục)",
           "next_node_id": "Node03"
         },
@@ -35,6 +80,18 @@
         {
           "text": "Đột kích Tiền đồn Ma Tộc (Truy lùng dấu vết trinh sát quỷ)",
           "next_node_id": "Node05"
+        }
+      ]
+    },
+    "Node02_Shop": {
+      "id": "Node02_Shop",
+      "title": "Trạm Tiếp Tế Biên Giới Trăng Máu",
+      "type": "SHOP",
+      "description": "Một trạm thương đoàn lưu động dựng tạm bên rìa rừng, cung cấp dược phẩm và trang bị cho các hiệp sĩ và lính đánh thuê trước khi bước vào vùng chiến sự.",
+      "choices": [
+        {
+          "text": "Rời trạm tiếp tế, quay lại Ngã ba Biên Giới",
+          "next_node_id": "Node02"
         }
       ]
     },
@@ -58,7 +115,7 @@
           "next_node_id": "Node04_Check"
         },
         {
-          "text": "Bỏ qua phế tích, trực tiếp tiến về Thung Lũng Răng Quỷ",
+          "text": "Bỏ qua phế tích, trực tiếp tiến về Thung Lũng Rồng Quỷ",
           "next_node_id": "Node09"
         }
       ]
@@ -97,15 +154,56 @@
       "id": "Node06",
       "title": "Tộc Trưởng Trao Tặng",
       "type": "REWARD",
+      "npc": "Tộc Trưởng Rừng Sâu",
       "description": "Nhận thấy lòng dũng cảm của bạn, Tộc Trưởng Bộ Tộc Tự Do đã trao tặng Bùa Hộ Mệnh Rừng Sâu và bình đại dược tăng cường sinh lực.",
+      "dialogue_tree": {
+        "start_dialogue_id": "chief_01",
+        "nodes": {
+          "chief_01": {
+            "speaker": "Tộc Trưởng Rừng Sâu",
+            "text": "Ngươi đã đánh bại thợ săn của ta nhưng không hạ sát họ. Ngươi đến Rừng Rậm Huyết Nguyệt này không phải để phục vụ cho dã tâm của Nhà Vua, đúng chứ?",
+            "choices": [
+              {
+                "text": "Tôi chỉ tìm đường đến Lâu đài Ma Vương để tìm sự thật về Công chúa Elena.",
+                "next_dialogue_id": "chief_truth"
+              },
+              {
+                "text": "Bộ Tộc Tự Do có quan hệ gì với cuộc chiến giữa Vương Quốc và Ma Tộc?",
+                "next_dialogue_id": "chief_lore"
+              }
+            ]
+          },
+          "chief_truth": {
+            "speaker": "Tộc Trưởng Rừng Sâu",
+            "text": "Sự thật thường cay đắng hơn những lời hoa mỹ nơi cung điện. Hãy cầm lấy Bùa Hộ Mệnh Rừng Sâu này. Nó sẽ bảo vệ linh hồn ngươi và là tín vật nếu một ngày ngươi muốn sát cánh cùng tự do!",
+            "choices": [
+              {
+                "text": "Cảm ơn Tộc trưởng. Tôi sẽ tiếp tục tiến vào Thung Lũng.",
+                "next_node_id": "Node09"
+              }
+            ]
+          },
+          "chief_lore": {
+            "speaker": "Tộc Trưởng Rừng Sâu",
+            "text": "The Core là cội nguồn nhưng cũng là lời nguyền. Cả Nhà Vua lẫn Hội đồng Pháp sư đều chỉ muốn chiếm đoạt nó. Bộ Tộc Tự Do chúng ta chỉ muốn phong ấn nó vĩnh viễn để trả lại bình yên!",
+            "choices": [
+              {
+                "text": "Tôi hiểu rồi. Xin nhận lấy tín vật này và tiến vào Thung Lũng.",
+                "next_node_id": "Node09"
+              }
+            ]
+          }
+        }
+      },
       "rewards": {
         "items": ["FreeForestAmulet", "GreaterHealthPotion"],
-        "exp": 100
+        "exp": 100,
+        "gold": 100
       },
       "next_node_id": "Node09",
       "choices": [
         {
-          "text": "Tiến vào Thung Lũng Răng Quỷ",
+          "text": "Tiến vào Thung Lũng Rồng Quỷ",
           "next_node_id": "Node09"
         }
       ]
@@ -117,12 +215,13 @@
       "description": "Bằng sự thông thái ma pháp, bạn đã giải mã thành công Cổ Thư The Core (AncientCodex), ghi chép cơ chế vận hành gốc của năng lượng ma thuật 500 năm trước!",
       "rewards": {
         "items": ["AncientCodex"],
-        "exp": 120
+        "exp": 120,
+        "gold": 120
       },
       "next_node_id": "Node09",
       "choices": [
         {
-          "text": "Cất giữ Cổ Thư và tiến vào Thung Lũng Răng Quỷ",
+          "text": "Cất giữ Cổ Thư và tiến vào Thung Lũng Rồng Quỷ",
           "next_node_id": "Node09"
         }
       ]
@@ -134,21 +233,22 @@
       "description": "Từ tàn tích tiền đồn, bạn tìm thấy Cổ Phù Thấu Cảm Ma Tộc (DemonEmpathyRune), cho phép thấu hiểu và giao tiếp với loài Quỷ.",
       "rewards": {
         "items": ["DemonEmpathyRune"],
-        "exp": 100
+        "exp": 100,
+        "gold": 100
       },
       "next_node_id": "Node09",
       "choices": [
         {
-          "text": "Nắm giữ Cổ Phù và tiến vào Thung Lũng Răng Quỷ",
+          "text": "Nắm giữ Cổ Phù và tiến vào Thung Lũng Rồng Quỷ",
           "next_node_id": "Node09"
         }
       ]
     },
     "Node09": {
       "id": "Node09",
-      "title": "Thung Lũng Răng Quỷ (Devil's Gorge)",
+      "title": "Thung Lũng Rồng Quỷ (Devil's Gorge)",
       "type": "STORY",
-      "description": "Bạn đã đến trước cổng Ma Điện khổng lồ nằm sâu trong Thung Lũng Răng Quỷ. Khí tức hắc ám bao trùm khắp nơi.",
+      "description": "Bạn đã đến trước cổng Ma Điện khổng lồ nằm sâu trong Thung Lũng Rồng Quỷ. Khí tức hắc ám bao trùm khắp nơi.",
       "choices": [
         {
           "text": "Tiến vào đại sảnh Ma Điện",
@@ -169,10 +269,61 @@
       "id": "Node11",
       "title": "Hội Kiến Ma Vương & Công Chúa Elena",
       "type": "REWARD",
+      "npc": "Công chúa Elena & Ma Vương Malakor",
       "description": "BẤT NGỜ! Công chúa Elena không hề bị giam cầm. Nàng cùng Ma Vương Malakor tiết lộ: Nàng tự nguyện ra đi để ngăn nghi thức hiến tế sinh mạng hoàng gia nuôi sống The Core. Elena trao cho bạn cuốn Nhật Ký của nàng.",
+      "dialogue_tree": {
+        "start_dialogue_id": "elena_01",
+        "nodes": {
+          "elena_01": {
+            "speaker": "Công chúa Elena",
+            "text": "Ngươi đã đến... Xin đừng rút kiếm! Ta không hề bị bắt cóc. Ta tự nguyện trốn chạy cùng Ma Vương để ngăn chặn nghi lễ tàn bạo của cha ta!",
+            "choices": [
+              {
+                "text": "Nghi lễ tàn bạo ư? Sự thật đằng sau The Core rốt cuộc là gì?",
+                "next_dialogue_id": "elena_core"
+              },
+              {
+                "text": "Nhà Vua và Vương quốc đang chờ người trở về, thưa Công chúa!",
+                "next_dialogue_id": "elena_king"
+              }
+            ]
+          },
+          "elena_core": {
+            "speaker": "Công chúa Elena",
+            "text": "Cứ mỗi 500 năm, The Core cạn kiệt và đòi hỏi phải hiến tế một linh hồn mang dòng máu vương thất để duy trì ma lực cho Eldoria. Cha ta chuẩn bị đẩy ta vào đài hiến tế! Cuốn nhật ký này ghi chép tất cả.",
+            "choices": [
+              {
+                "text": "Vậy chúng ta phải đưa ra quyết định gì trước số phận của The Core?",
+                "next_dialogue_id": "malakor_choice"
+              }
+            ]
+          },
+          "elena_king": {
+            "speaker": "Ma Vương Malakor",
+            "text": "Trở về để làm vật hiến tế ư? Vị vua mà ngươi tôn kính đã che giấu sự thịnh vượng của Eldoria trên đống xương tàn của những đứa con mình! Hãy đọc nhật ký của Elena đi rồi hãy phán xét.",
+            "choices": [
+              {
+                "text": "Hãy cho tôi xem cuốn nhật ký ấy.",
+                "next_dialogue_id": "malakor_choice"
+              }
+            ]
+          },
+          "malakor_choice": {
+            "speaker": "Công chúa Elena",
+            "text": "Hãy cầm lấy cuốn nhật ký này. Giờ đây ngươi đã biết sự thật, vận mệnh của toàn cõi Eldoria đặt cả vào sự lựa chọn của ngươi tại ngã rẽ phía trước!",
+            "choices": [
+              {
+                "text": "Nhận lấy Nhật ký Elena và bước vào Ngã Rẽ Định Mệnh.",
+                "next_node_id": "Node13"
+              }
+            ]
+          }
+        }
+      },
       "rewards": {
         "items": ["ElenaDiary"],
-        "exp": 150
+        "exp": 150,
+        "gold": 150
       },
       "next_node_id": "Node13",
       "choices": [
@@ -240,7 +391,7 @@
       "id": "End1",
       "title": "ENDING 1: Vương Quyền Xiềng Xích (Crown of Chains)",
       "type": "ENDING",
-      "description": "Elena bị đưa lên đài hiến tế, linh hồn bị The Core nuốt chửng. Eldoria tiếp tục thịnh vượng thêm 500 năm trong sự che đậy và tội ác giả dối.",
+      "description": "Elena bị đưa lên đài hiến tế, linh hồn bị The Core nuốt chửng. Eldoria tiếp tục thịnh vượng thêm 500 năm trong sự che đậy và tội ác giấu giếm.",
       "choices": []
     },
     "Node16": {
@@ -346,7 +497,7 @@
       "id": "Node22",
       "title": "Loạn Chiến 4 Phe",
       "type": "COMBAT",
-      "description": "Một trận huyết chiến hỗn loạn nổ ra trước cổng phong ấn giữa tàn quân Hoàng Gia, Ma tộc và Pháp Sư nhằm tranh đoạt Core!",
+      "description": "Một trận huyết chiến hỗn loạn nổ ra trước cổng phong ấn giữa tàn quân Hoàng Gia, Ma Tộc và Pháp Sư nhằm tranh đoạt Core!",
       "enemy_id": "Multi-Faction Battle",
       "on_win_node_id": "End4",
       "on_lose_node_id": "GameOver"
