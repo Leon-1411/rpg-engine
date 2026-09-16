@@ -5,8 +5,50 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 class Minion;
+
+/**
+ * @struct BossSkill
+ * @brief Represents a special skill for a BossMonster with cooldown mechanics.
+ */
+struct BossSkill {
+    std::string name;
+    std::string description;
+    int cooldown;            // Base cooldown in turns
+    int currentCooldown;     // Remaining turns until ready (0 = ready)
+    double damageMultiplier; // Damage multiplier (e.g. 1.3x, 1.6x, 2.2x)
+
+    BossSkill(const std::string& name = "",
+              const std::string& description = "",
+              int cooldown = 0,
+              double damageMultiplier = 1.4,
+              int currentCooldown = 0)
+        : name(name),
+          description(description),
+          cooldown(cooldown),
+          currentCooldown(currentCooldown),
+          damageMultiplier(damageMultiplier) {}
+
+    bool isReady() const {
+        return currentCooldown <= 0;
+    }
+
+    void trigger() {
+        currentCooldown = cooldown;
+    }
+
+    void updateCooldown(int amount = 1) {
+        if (currentCooldown > 0) {
+            currentCooldown = std::max(0, currentCooldown - amount);
+        }
+    }
+
+    void resetCooldown() {
+        currentCooldown = 0;
+    }
+};
 
 class BossMonster : public Enemy {
 protected:
@@ -18,6 +60,12 @@ protected:
     bool enraged;
     int healAmount;
     int actionCounter;
+
+    // 3 Special Skills with Cooldowns
+    std::vector<BossSkill> skills;
+    int activeSkillIndex;
+
+    void initializeDefaultSkills(const std::string& primarySkill);
 
 public:
     // Default constructor: 5x average minion stats
@@ -46,6 +94,24 @@ public:
     void heal(int amount);
     void regenerate();
     void resetEnrage();
+
+    // Skill & Cooldown Management
+    const std::vector<BossSkill>& getSkills() const;
+    std::vector<BossSkill>& getSkills();
+    const BossSkill* getSkill(size_t index) const;
+    BossSkill* getSkill(size_t index);
+    bool isSkillReady(size_t index) const;
+    int getSkillRemainingCooldown(size_t index) const;
+    int getSkillBaseCooldown(size_t index) const;
+    void setSkillCooldown(size_t index, int turns);
+    void updateCooldowns(int amount = 1);
+    void resetCooldowns();
+    bool useSkill(size_t index);
+    void setSkills(const std::vector<BossSkill>& newSkills);
+    void addSkill(const BossSkill& skill);
+    int getActiveSkillIndex() const;
+    const BossSkill* getActiveSkill() const;
+    double getActiveSkillMultiplier() const;
 
     // Getters and Setters
     std::string getId() const;

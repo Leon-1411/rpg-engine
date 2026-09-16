@@ -1,6 +1,6 @@
 /**
  * @file BossMonster.cpp
- * @brief Implementation of BossMonster class and BossFactory.
+ * @brief Implementation of BossMonster class and BossFactory with 3-skill cooldown system.
  */
 
 #include "BossMonster.h"
@@ -27,7 +27,27 @@ BossMonster::BossMonster(const std::string& id,
       baseDefense(defense),
       enraged(false),
       healAmount(healAmount),
-      actionCounter(0) {}
+      actionCounter(0),
+      activeSkillIndex(-1) {
+    initializeDefaultSkills(specialSkill);
+}
+
+void BossMonster::initializeDefaultSkills(const std::string& primarySkill) {
+    skills.clear();
+    std::string ultimateSkill = primarySkill.empty() ? "Infernal Cataclysm" : primarySkill;
+
+    if (ultimateSkill == "Infernal Cataclysm") {
+        // Default Dragon Lord skill set
+        skills.emplace_back("Flame Breath", "Scorches foes with an expansive cone of fire.", 2, 1.3, 2);
+        skills.emplace_back("Dragon Roar", "Emits a concussive shockwave that shatters defenses.", 3, 1.6, 3);
+        skills.emplace_back("Infernal Cataclysm", "Rains molten apocalyptic meteors upon the battlefield.", 5, 2.2, 5);
+    } else {
+        // Themed skills based on the provided primary skill name
+        skills.emplace_back(ultimateSkill + " Strike", "A swift, concentrated blast of focused energy.", 2, 1.3, 2);
+        skills.emplace_back(ultimateSkill + " Shockwave", "Releases a crushing shockwave across the surroundings.", 3, 1.6, 3);
+        skills.emplace_back(ultimateSkill, "Unleashes the full apocalyptic potential of " + ultimateSkill + ".", 5, 2.2, 5);
+    }
+}
 
 int BossMonster::chooseAction() {
     actionCounter++;
@@ -36,19 +56,30 @@ int BossMonster::chooseAction() {
     if (enraged) {
         // In enraged state, boss has slight healing capability
         regenerate();
-
-        // Enraged combat pattern: higher skill frequency
-        if (actionCounter % 2 == 0) {
-            return 2; // Unleash empowered special skill
-        }
-        return 1;
-    } else {
-        // Standard combat pattern: skill every 3rd turn
-        if (!specialSkillName.empty() && actionCounter % 3 == 0) {
-            return 2;
-        }
-        return 1;
     }
+
+    // Progress cooldowns for all skills
+    // In enraged mode, the boss's fury accelerates cooldown recovery
+    updateCooldowns(enraged ? 2 : 1);
+
+    // AI selection: prioritize Ultimate (index 2) -> Medium (index 1) -> Light (index 0)
+    int chosenIndex = -1;
+    for (int i = static_cast<int>(skills.size()) - 1; i >= 0; --i) {
+        if (skills[i].isReady()) {
+            chosenIndex = i;
+            break;
+        }
+    }
+
+    if (chosenIndex != -1) {
+        skills[chosenIndex].trigger();
+        activeSkillIndex = chosenIndex;
+        return 2; // Unleash special skill
+    }
+
+    // All skills are currently on cooldown -> execute normal attack
+    activeSkillIndex = -1;
+    return 1;
 }
 
 void BossMonster::takeDamage(int damage) {
@@ -72,10 +103,16 @@ void BossMonster::triggerEnrage() {
         attack = static_cast<int>(baseAttack * 1.5);
         defense = static_cast<int>(baseDefense * 1.5);
 
+        // Enrage refreshes ultimate skill cooldown to immediately threaten the party
+        if (!skills.empty()) {
+            skills.back().resetCooldown();
+        }
+
         std::cout << "\n>>> [BOSS ENRAGE TRIGGERED] " << name
                   << "'s HP dropped below 30% (" << hp << "/" << maxHp << ")!\n"
                   << ">>> " << name << " enters Berserk mode: ATK increased to "
-                  << attack << " (+50%), DEF increased to " << defense << " (+50%)!\n\n";
+                  << attack << " (+50%), DEF increased to " << defense << " (+50%)!\n"
+                  << ">>> " << name << "'s ultimate skill [" << skills.back().name << "] cooldown reset!\n\n";
     }
 }
 
@@ -109,15 +146,113 @@ void BossMonster::displayStats() const {
     std::cout << "HP: " << hp << "/" << maxHp
               << " | ATK: " << attack << (enraged ? " (+50% Berserk)" : "")
               << " | DEF: " << defense << (enraged ? " (+50% Berserk)" : "") << "\n";
-    if (!specialSkillName.empty()) {
-        std::cout << "Special Skill: " << specialSkillName << "\n";
-    }
     std::cout << "Heal Amount (Enraged Regen): " << healAmount << " HP/turn\n";
     std::cout << "EXP: " << expReward << " | Gold: " << goldReward << "\n";
+
+    if (!skills.empty()) {
+        std::cout << "Special Skills (with Cooldowns):\n";
+        for (size_t i = 0; i < skills.size(); ++i) {
+            std::cout << "  [" << (i + 1) << "] " << skills[i].name
+                      << " (CD: " << skills[i].cooldown << " turns";
+            if (skills[i].isReady()) {
+                std::cout << " - READY)";
+            } else {
+                std::cout << " - " << skills[i].currentCooldown << " turns remaining)";
+            }
+            std::cout << " [x" << skills[i].damageMultiplier << " DMG] | " << skills[i].description << "\n";
+        }
+    } else if (!specialSkillName.empty()) {
+        std::cout << "Special Skill: " << specialSkillName << "\n";
+    }
 }
 
 std::string BossMonster::getSpecialSkillName() const {
+    if (activeSkillIndex >= 0 && activeSkillIndex < static_cast<int>(skills.size())) {
+        return skills[activeSkillIndex].name;
+    }
+    if (!skills.empty()) {
+        return skills.back().name;
+    }
     return specialSkillName;
+}
+
+const std::vector<BossSkill>& BossMonster::getSkills() const { return skills; }
+std::vector<BossSkill>& BossMonster::getSkills() { return skills; }
+
+const BossSkill* BossMonster::getSkill(size_t index) const {
+    if (index < skills.size()) return &skills[index];
+    return nullptr;
+}
+
+BossSkill* BossMonster::getSkill(size_t index) {
+    if (index < skills.size()) return &skills[index];
+    return nullptr;
+}
+
+bool BossMonster::isSkillReady(size_t index) const {
+    if (index < skills.size()) return skills[index].isReady();
+    return false;
+}
+
+int BossMonster::getSkillRemainingCooldown(size_t index) const {
+    if (index < skills.size()) return skills[index].currentCooldown;
+    return -1;
+}
+
+int BossMonster::getSkillBaseCooldown(size_t index) const {
+    if (index < skills.size()) return skills[index].cooldown;
+    return -1;
+}
+
+void BossMonster::setSkillCooldown(size_t index, int turns) {
+    if (index < skills.size()) {
+        skills[index].currentCooldown = std::max(0, turns);
+    }
+}
+
+void BossMonster::updateCooldowns(int amount) {
+    for (auto& s : skills) {
+        s.updateCooldown(amount);
+    }
+}
+
+void BossMonster::resetCooldowns() {
+    for (auto& s : skills) {
+        s.resetCooldown();
+    }
+}
+
+bool BossMonster::useSkill(size_t index) {
+    if (index < skills.size() && skills[index].isReady()) {
+        skills[index].trigger();
+        activeSkillIndex = static_cast<int>(index);
+        return true;
+    }
+    return false;
+}
+
+void BossMonster::setSkills(const std::vector<BossSkill>& newSkills) {
+    skills = newSkills;
+}
+
+void BossMonster::addSkill(const BossSkill& skill) {
+    skills.push_back(skill);
+}
+
+int BossMonster::getActiveSkillIndex() const {
+    return activeSkillIndex;
+}
+
+const BossSkill* BossMonster::getActiveSkill() const {
+    if (activeSkillIndex >= 0 && activeSkillIndex < static_cast<int>(skills.size())) {
+        return &skills[activeSkillIndex];
+    }
+    return nullptr;
+}
+
+double BossMonster::getActiveSkillMultiplier() const {
+    const BossSkill* s = getActiveSkill();
+    return s ? s->damageMultiplier : 1.0;
 }
 
 std::string BossMonster::getId() const { return id; }
@@ -164,7 +299,22 @@ std::shared_ptr<BossMonster> BossFactory::createFromJsonObject(const std::string
     std::string skill = j.value("specialSkill", "Infernal Cataclysm");
     int healAmount = j.value("healAmount", 25);
 
-    return std::make_shared<BossMonster>(id, name, hp, attack, defense, expReward, goldReward, desc, skill, healAmount);
+    auto boss = std::make_shared<BossMonster>(id, name, hp, attack, defense, expReward, goldReward, desc, skill, healAmount);
+
+    if (j.contains("skills") && j["skills"].is_array() && !j["skills"].empty()) {
+        std::vector<BossSkill> loadedSkills;
+        for (const auto& sj : j["skills"]) {
+            std::string sName = sj.value("name", "Special Skill");
+            std::string sDesc = sj.value("description", "");
+            int sCd = sj.value("cooldown", 3);
+            double sMult = sj.value("damageMultiplier", 1.4);
+            int sInitCd = sj.value("currentCooldown", sCd);
+            loadedSkills.emplace_back(sName, sDesc, sCd, sMult, sInitCd);
+        }
+        boss->setSkills(loadedSkills);
+    }
+
+    return boss;
 }
 
 std::shared_ptr<BossMonster> BossFactory::createFromJson(const std::string& id, const std::string& filepath) {
@@ -226,5 +376,18 @@ nlohmann::json BossFactory::bossToJson(const BossMonster& boss) {
     j["description"] = boss.getDescription();
     j["specialSkill"] = boss.getSpecialSkillName();
     j["healAmount"] = boss.getHealAmount();
+
+    nlohmann::json skillsJson = nlohmann::json::array();
+    for (const auto& skill : boss.getSkills()) {
+        nlohmann::json sj;
+        sj["name"] = skill.name;
+        sj["description"] = skill.description;
+        sj["cooldown"] = skill.cooldown;
+        sj["currentCooldown"] = skill.currentCooldown;
+        sj["damageMultiplier"] = skill.damageMultiplier;
+        skillsJson.push_back(sj);
+    }
+    j["skills"] = skillsJson;
+
     return j;
 }
