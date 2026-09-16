@@ -452,3 +452,14 @@ void Hero::addGold(int amount) { gold = std::max(0, gold + amount); }
 
 const std::vector<int>& Hero::getSkillCooldowns() const { return skillCooldowns; }
 void Hero::setSkillCooldowns(const std::vector<int>& cds) { skillCooldowns = cds; }
+
+void Hero::removeGold(int amount) {
+    gold = std::max(0, gold - amount);
+}
+
+bool Hero::spendGold(int amount) {
+    if (amount <= 0) return true;
+    if (gold < amount) return false;
+    gold -= amount;
+    return true;
+}

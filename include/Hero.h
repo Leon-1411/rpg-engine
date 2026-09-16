@@ -154,6 +154,8 @@ public:
     int getGold() const;
     void setGold(int amount);
     void addGold(int amount);
+    void removeGold(int amount);
+    bool spendGold(int amount);
 
     const std::vector<int>& getSkillCooldowns() const;
     void setSkillCooldowns(const std::vector<int>& cds);
@@ -163,4 +165,3 @@ public:
     void increaseAttack(int amount);
     void increaseDefense(int amount);
 };
-

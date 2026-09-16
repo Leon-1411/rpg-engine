@@ -81,6 +81,16 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                             choice.nextNodeId = c.value("next_node_id", c.value("nextNodeId", ""));
                             choice.requiredFlag = c.value("required_flag", c.value("requiredFlag", ""));
                             choice.setFlag = c.value("set_flag", c.value("setFlag", ""));
+                            choice.requiredGold = c.value("required_gold", c.value("requiredGold", 0));
+                            choice.goldCost = c.value("gold_cost", c.value("goldCost", 0));
+                            choice.requiredHeroClass = c.value("requiredHeroClass", c.value("required_class", ""));
+                            if (c.contains("requiredItems") && c["requiredItems"].is_array()) {
+                                for (const auto& item : c["requiredItems"]) {
+                                    choice.requiredItems.push_back(item.get<std::string>());
+                                }
+                            } else if (c.contains("requiredItem") && c["requiredItem"].is_string()) {
+                                choice.requiredItems.push_back(c["requiredItem"].get<std::string>());
+                            }
                             node.choices.push_back(choice);
                         }
                     }
@@ -89,6 +99,14 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                     node.onWinNodeId = nodeJson.value("on_win_node_id", "");
                     node.onLoseNodeId = nodeJson.value("on_lose_node_id", "");
                     node.requiredItem = nodeJson.value("required_item", "");
+                    node.requiredHeroClass = nodeJson.value("required_hero_class", "");
+                    if (nodeJson.contains("required_items") && nodeJson["required_items"].is_array()) {
+                        for (auto& itm : nodeJson["required_items"]) {
+                            node.requiredItems.push_back(itm.get<std::string>());
+                        }
+                    } else if (!node.requiredItem.empty()) {
+                        node.requiredItems.push_back(node.requiredItem);
+                    }
                     node.onPassNodeId = nodeJson.value("on_pass_node_id", "");
                     node.onFailNodeId = nodeJson.value("on_fail_node_id", "");
                     node.nextNodeId = nodeJson.value("next_node_id", "");
@@ -96,6 +114,7 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                     if (nodeJson.contains("rewards") && nodeJson["rewards"].is_object()) {
                         auto rew = nodeJson["rewards"];
                         node.rewardExp = rew.value("exp", 0);
+                        node.rewardGold = rew.value("gold", rew.value("rewardGold", 0));
                         if (rew.contains("items") && rew["items"].is_array()) {
                             for (auto& item : rew["items"]) {
                                 node.rewardItems.push_back(item.get<std::string>());
@@ -145,6 +164,8 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                                         dc.nextNodeId = ch.value("next_node_id", ch.value("nextNodeId", ""));
                                         dc.requiredFlag = ch.value("required_flag", ch.value("requiredFlag", ""));
                                         dc.setFlag = ch.value("set_flag", ch.value("setFlag", ""));
+                                        dc.requiredGold = ch.value("required_gold", ch.value("requiredGold", 0));
+                                        dc.goldCost = ch.value("gold_cost", ch.value("goldCost", 0));
                                         dn.choices.push_back(dc);
                                     }
                                 }
@@ -165,6 +186,33 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                     node.rawType = typeStr;
                     node.type = stringToEventType(typeStr);
 
+                    node.enemyId = nodeJson.value("enemy_id", "");
+                    node.onWinNodeId = nodeJson.value("on_win_node_id", "");
+                    node.onLoseNodeId = nodeJson.value("on_lose_node_id", "");
+                    node.requiredItem = nodeJson.value("required_item", "");
+                    node.requiredHeroClass = nodeJson.value("required_hero_class", "");
+                    if (nodeJson.contains("required_items") && nodeJson["required_items"].is_array()) {
+                        for (auto& itm : nodeJson["required_items"]) {
+                            node.requiredItems.push_back(itm.get<std::string>());
+                        }
+                    } else if (!node.requiredItem.empty()) {
+                        node.requiredItems.push_back(node.requiredItem);
+                    }
+                    node.onPassNodeId = nodeJson.value("on_pass_node_id", "");
+                    node.onFailNodeId = nodeJson.value("on_fail_node_id", "");
+                    node.nextNodeId = nodeJson.value("next_node_id", "");
+
+                    if (nodeJson.contains("rewards") && nodeJson["rewards"].is_object()) {
+                        auto rew = nodeJson["rewards"];
+                        node.rewardExp = rew.value("exp", 0);
+                        node.rewardGold = rew.value("gold", rew.value("rewardGold", 0));
+                        if (rew.contains("items") && rew["items"].is_array()) {
+                            for (auto& item : rew["items"]) {
+                                node.rewardItems.push_back(item.get<std::string>());
+                            }
+                        }
+                    }
+
                     if (nodeJson.contains("choices") && nodeJson["choices"].is_array()) {
                         for (auto& c : nodeJson["choices"]) {
                             Choice choice;
@@ -172,6 +220,16 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                             choice.nextNodeId = c.value("next_node_id", c.value("nextNodeId", ""));
                             choice.requiredFlag = c.value("required_flag", c.value("requiredFlag", ""));
                             choice.setFlag = c.value("set_flag", c.value("setFlag", ""));
+                            choice.requiredGold = c.value("required_gold", c.value("requiredGold", 0));
+                            choice.goldCost = c.value("gold_cost", c.value("goldCost", 0));
+                            choice.requiredHeroClass = c.value("requiredHeroClass", c.value("required_class", ""));
+                            if (c.contains("requiredItems") && c["requiredItems"].is_array()) {
+                                for (const auto& item : c["requiredItems"]) {
+                                    choice.requiredItems.push_back(item.get<std::string>());
+                                }
+                            } else if (c.contains("requiredItem") && c["requiredItem"].is_string()) {
+                                choice.requiredItems.push_back(c["requiredItem"].get<std::string>());
+                            }
                             node.choices.push_back(choice);
                         }
                     }
@@ -218,6 +276,8 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
                                         dc.nextNodeId = ch.value("next_node_id", ch.value("nextNodeId", ""));
                                         dc.requiredFlag = ch.value("required_flag", ch.value("requiredFlag", ""));
                                         dc.setFlag = ch.value("set_flag", ch.value("setFlag", ""));
+                                        dc.requiredGold = ch.value("required_gold", ch.value("requiredGold", 0));
+                                        dc.goldCost = ch.value("gold_cost", ch.value("goldCost", 0));
                                         dn.choices.push_back(dc);
                                     }
                                 }
