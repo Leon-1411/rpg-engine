@@ -1,4 +1,4 @@
-# RPG Engine --- Project Specification
+﻿# RPG Engine --- Project Specification
 
 ## 1. Tổng quan
 
@@ -47,23 +47,16 @@ flowchart TD
 
 Phiên bản hoàn chỉnh cần có:
 
--   3 Hero: Warrior, Mage, Ranger
--   Skill riêng cho từng Hero
--   Minion và BossMonster
--   Enemy AI / Boss attack pattern
--   Turn-Based Combat
--   Damage, Defense, Cooldown, Status Effect
--   Inventory
--   Weapon, Armor, Potion
--   EXP, Level, Stat Progression
--   Branching Narrative
--   StoryNode và Choice
--   Ít nhất 2 Ending
--   Save/Load nhiều slot
--   Console UI
--   ASCII Art
--   Dữ liệu game bằng JSON
--   Input validation
+-   **3 Hero Lớp Nhân Vật:** Warrior (Arthur), Mage (Morrigan), Ranger (Lyra) với hệ thống chỉ số và cây kỹ năng riêng biệt.
+-   **Kẻ địch & 6 Faction Bosses:** 3 Minions (`Wild_Mercenary`, `Demon_Scout`, `Demon_Berserker`) và 6 Bosses có AI attack pattern theo cốt truyện.
+-   **Turn-Based Combat:** Tính toán Damage, Defense, Cooldown, và Status Effects (Burn, Freeze, Poison, Stun, Bleed, DefenseBuff).
+-   **Inventory & Equipment:** Weapon, Armor, Potion (hồi HP/MP), và Key Items cốt truyện.
+-   **EXP, Level & Stat Progression:** Tăng trưởng chỉ số khi lên cấp.
+-   **Hệ Thống Tiền Tệ & Cửa Hàng (Gold Economy):** Mua bán vật phẩm, thưởng vàng sau trận đấu và các lựa chọn tiêu tốn vàng.
+-   **Branching Narrative (Fractured Crown):** 22 Story Nodes, 4 nhánh rẽ quyết định Hồi 3, và 5 Kết cục (4 Faction Endings + 1 True Ending).
+-   **Save/Load Hệ Thống:** Hỗ trợ nhiều save slots định dạng JSON, lưu trạng thái Hero, Inventory, Story flags, và Gold.
+-   **Console UI & ASCII Art:** Giao diện console trực quan với ASCII Art cho Hero, Enemy, Boss, và validation input an toàn.
+-   **Data-Driven Design:** Cấu hình toàn bộ dữ liệu game (Enemies, Items, Skills, Story) bằng file JSON ngoài.
 
 ------------------------------------------------------------------------
 
@@ -222,37 +215,6 @@ RPGEngine/
 ```
 
 ------------------------------------------------------------------------
-
-## 5. Hero System
-
-### Class hierarchy
-
-``` mermaid
-classDiagram
-    class Hero {
-        <<abstract>>
-        -string name
-        -int level
-        -int exp
-        -int hp
-        -int maxHp
-        -int mp
-        -int maxMp
-        -int attack
-        -int defense
-        +normalAttack()
-        +useSkill()*
-        +takeDamage()
-        +isAlive()
-    }
-
-    Hero <|-- Warrior
-    Hero <|-- Mage
-    Hero <|-- Ranger
-
-    Hero o-- Inventory
-    Hero o-- Skill
-```
 
 ## 5. Hero System
 
@@ -465,7 +427,9 @@ flowchart TD
 
     %% ------------------- NHÁNH 4: PHE BỘ TỘC TỰ DO -------------------
     Node13 -->|Lựa chọn 4: Theo Free People phong ấn vĩnh viễn Core| Route_Free["Node 21: [REQUIREMENT_CHECK]<br/>Kiểm tra Item: FreeForestAmulet"]
-    Route_Free -->|Thành công| Node22["Node 22: [COMBAT] Loạn Chiến 4 Phe<br/>Boss: Multi-Faction Battle"]
+    Route_Free -->|Thành công (Có Amulet)| Node22["Node 22: [COMBAT] Loạn Chiến 4 Phe<br/>Boss: Multi-Faction Battle"]
+    Route_Free -->|Thất bại (Thiếu Amulet)| Node21_Fail["Node 21_Fail: [STORY] Thiếu Tín Vật Rừng Sâu<br/>Tộc trưởng từ chối -> Quay lại Node 13"]
+    Node21_Fail --> Node13
     Node22 -->|Thắng trận| End4["★ ENDING 4: Tự Do Vang Vọng (Echoes of Freedom)<br/>(Core bị phong ấn - Eldoria phân rã thành các bộ tộc tự do)"]
 
     %% Bad Ending nhánh Combat
@@ -485,7 +449,7 @@ flowchart TD
 | **Node 03** | Hero vs Minion `Wild_Mercenary` | Trận chiến Turn-based tại Rừng Rậm | Thắng $\rightarrow$ Node 06 |
 | **Node 04** | Hero: `Mage` hoặc Skill Check | Kiểm tra class `Mage` hoặc điểm kỹ năng | Thành công $\rightarrow$ Node 07 |
 | **Node 05** | Hero vs Minion `Demon_Scout` | Trận chiến Turn-based tại Tiền Đồn Ma Tộc | Thắng $\rightarrow$ Node 08 |
-| **Node 06** | Hero + Tộc Trưởng Rừng Sâu | Trao thưởng sau khi chứng minh thực lực | Nhận `FreeForestAmulet` + Potion |
+| **Node 06** | Hero + Tộc Trưởng Rừng Sâu | Trao thưởng sau khi chứng minh thực lực | Nhận `FreeForestAmulet` + `GreaterHealthPotion` |
 | **Node 07** | Hero + Tháp Viện Cổ | Giải mã văn tự cổ ngữ | Nhận Key Item: `AncientCodex` |
 | **Node 08** | Hero + Trinh Sát Quỷ | Thu thập chiến lợi phẩm | Nhận Key Item: `DemonEmpathyRune` |
 | **Node 09** | Hero | Thâm nhập Thung Lũng Răng Quỷ | Chuyển tiếp tới Node 10 |
@@ -498,7 +462,7 @@ flowchart TD
 | **Node 18** | Hero vs Boss `The_Core_Guardian` | Đấu Cỗ Máy Vệ Thần bảo vệ Core | Thắng $\rightarrow$ Kiểm tra Cổ vật |
 | **Check Secret** | Item: `AncientCodex` + `ElenaDiary` | Kiểm tra đủ cả 2 Key Items | Đủ $\rightarrow$ **True Ending**; Thiếu $\rightarrow$ **Ending 2** |
 | **Node 19-20** | Hero vs Boss `Archmage_Morvath` | Tranh đoạt Core và diệt Pháp Sư Trưởng | Thắng $\rightarrow$ **Ending 3** |
-| **Node 21-22** | Item: `FreeForestAmulet` + Boss `Multi-Faction` | Check Bùa Rừng Sâu và Loạn chiến 4 phe | Thắng $\rightarrow$ **Ending 4** |
+| **Node 21-22** | Item: `FreeForestAmulet` + Boss `Multi-Faction` | Check Bùa Rừng Sâu: Có Amulet $\rightarrow$ Node 22 (Loạn chiến); Thiếu $\rightarrow$ Node 21_Fail (Quay lại Node 13) | Thắng $\rightarrow$ **Ending 4** |
 | **Combat Nodes** | Bất kỳ trận đấu nào | Hero HP $\le 0$ | Dẫn đến **💀 GAME OVER** |
 
 ### 10.5. Ý nghĩa 5 Kết cục (Endings)
@@ -516,13 +480,13 @@ flowchart TD
 
 ``` json
 {
-  "goblin": {
-    "name": "Goblin",
-    "hp": 60,
-    "attack": 12,
-    "defense": 5,
-    "expReward": 40,
-    "goldReward": 10
+  "wild_mercenary": {
+    "name": "Wild Mercenary",
+    "hp": 80,
+    "attack": 15,
+    "defense": 6,
+    "expReward": 45,
+    "goldReward": 20
   }
 }
 ```
@@ -854,28 +818,22 @@ Hoàn thiện story, boss, endings và demo flow.
 
 Project chỉ được xem là hoàn thành khi:
 
--   [ ] Build thành công bằng CMake.
--   [ ] Có Warrior, Mage, Ranger.
--   [ ] Mỗi Hero có skill riêng.
--   [ ] Có ít nhất 3 loại Minion.
--   [ ] Có ít nhất 1 Boss với AI/pattern.
--   [ ] Combat turn-based hoạt động.
--   [ ] Có damage, defense, skill, cooldown.
--   [ ] Có ít nhất một Status Effect.
--   [ ] Inventory hoạt động.
--   [ ] Weapon, Armor, Potion hoạt động.
--   [ ] Có EXP và Level Up.
--   [ ] Có StoryNode + Choice.
--   [ ] Có branching story.
--   [ ] Có ít nhất 2 endings.
--   [ ] Save/Load hoạt động.
--   [ ] Có nhiều save slot.
--   [ ] Console UI có input validation.
--   [ ] Hero/Enemy/Boss có thể hiển thị ASCII Art.
--   [ ] Enemy/Item/Skill/Story được đọc từ JSON ở các phần phù hợp.
--   [ ] Không có circular dependency nghiêm trọng.
--   [ ] Các module chính có test.
--   [ ] Game có thể chơi từ New Game đến Ending mà không crash.
+-   [ ] Build thành công bằng CMake (hoặc qua Docker toolchain).
+-   [ ] Có đủ 3 Hero: Warrior (Arthur), Mage (Morrigan), Ranger (Lyra) với các bộ skill riêng biệt.
+-   [ ] Có đủ 3 loại Minion cốt truyện: `Wild_Mercenary`, `Demon_Scout`, `Demon_Berserker`.
+-   [ ] Có đủ 6 Faction Bosses với AI/attack pattern riêng: `Demon_King_Malakor`, `General_Aldric`, `The_Core_Guardian`, `Arcane_Council_Enforcers`, `Archmage_Morvath`, `Multi-Faction Battle`.
+-   [ ] Combat turn-based hoàn chỉnh với damage, defense, skill cooldown và status effects.
+-   [ ] Inventory & Equipment: Weapon, Armor, Potion và 5 Key Items cốt truyện hoạt động đúng tính năng.
+-   [ ] Hệ thống EXP, Level Up và chỉ số thăng tiến hoạt động ổn định.
+-   [ ] Hệ thống Tiền tệ (Gold Economy) & Shop mua bán vật phẩm hoạt động đúng.
+-   [ ] 22 Story Nodes kết nối chính xác theo sơ đồ kịch bản Eldoria (Fractured Crown).
+-   [ ] Toàn bộ 5 Endings (Ending 1, 2, 3, 4 và ★ True Ending) có thể kích hoạt và trải nghiệm trọn vẹn theo lựa chọn/vật phẩm.
+-   [ ] Save/Load hoạt động đa slot, lưu đầy đủ Hero, Inventory, Story flags và Gold.
+-   [ ] Console UI có input validation an toàn và hiển thị ASCII Art đầy đủ.
+-   [ ] Toàn bộ dữ liệu Enemy, Item, Skill, Story được nạp từ file JSON ngoài.
+-   [ ] Không có circular dependency trong kiến trúc Feature-based.
+-   [ ] Toàn bộ các Unit Test trong thư mục `tests/` pass 100%.
+-   [ ] Game có thể chơi từ New Game đến bất kỳ Ending nào mà không crash.
 
 ------------------------------------------------------------------------
 
@@ -967,23 +925,35 @@ cho 7 thành viên và dễ mở rộng** hơn việc thêm quá nhiều tính n
 
 ### 23.2. Nguồn Thu Vàng (Gold Inflow)
 1. **Phần thưởng chiến đấu (`Enemy::goldReward`):**
-   - **Minion thông thường (Normal Minions):** `10 - 25 Gold` (Goblin: 10, Skeleton: 20, v.v.).
-   - **Minion cao cấp (Elite Minions):** `35 - 60 Gold` (Orc: 35, Dark Knight: 60).
-   - **Thủ lĩnh phe phái (Faction Bosses):** `150 - 300 Gold` (Valen, Zephyr, v.v.).
-   - **Trùm cuối (Final Bosses):** `500 Gold` (Maelgath, Ignis).
+   - **Minion thông thường (Normal Minions):** `15 - 25 Gold` (`Wild_Mercenary`: 20G, `Demon_Scout`: 25G).
+   - **Cấm vệ quỷ (Elite Minion):** `45 Gold` (`Demon_Berserker`: 45G).
+   - **Thủ lĩnh phe phái (Faction Bosses Hồi 3):** `250 - 400 Gold`
+     - `Arcane_Council_Enforcers`: 250 Gold
+     - `Demon_King_Malakor`: 300 Gold
+     - `General_Aldric`: 300 Gold
+     - `The_Core_Guardian`: 350 Gold
+     - `Archmage_Morvath`: 350 Gold
+     - `Multi-Faction Battle`: 400 Gold
 2. **Sự kiện cốt truyện & Rương báu (`StoryNode::rewardGold`):**
-   - Thường khi hàn thành nhiệm vụ, giải cứu NPC hoặc khám phá kho bj[����ꥸ�4(4(�����̸̸�Q��ԁQ��[���������=�љ��܀��M���̤4(ĸ���#���ѣ��E������������Q�������������M��������5�ɍ���р�訨4(�������[��Ё���ꥴ����M�������A�ѥ��̤訨4(�������!���Ѡ�A�ѥ����#��M�����!@�聀�ԁ����4(�������ɕ�ѕȁ!���Ѡ�A�ѥ����#��M������!@�聀�������
-     - Mana Potion (Hồi 30 MP): `30 Gold`
-     - Elixir of Vitality (Hồi đầy HP & MP): `100 Gold`
+   - Thưởng khi hoàn thành nhiệm vụ, giải cứu NPC hoặc khám phá các rương cổ vật trong rừng sâu/tàn tích: `50 - 150 Gold`.
+
+### 23.3. Nguồn Tiêu Vàng (Gold Outflow)
+1. **Mua vật phẩm từ Thương nhân / Cửa hàng (`Shop`):**
+   - **Dược phẩm (Potions):**
+     - Health Potion (Hồi 35 HP): `20 Gold`
+     - Mana Potion (Hồi 25 MP): `25 Gold`
+     - Greater Health Potion (Hồi 70 HP): `60 Gold`
    - **Trang bị (Weapons & Armors):**
-     - Iron Sword (+8 ATK): `80 Gold`
-     - Steel Plate (+6 DEF): `100 Gold`
-     - Mythril Blade (+20 ATK): `250 Gold`
-     - Dragon Armor (+15 DEF): `300 Gold`
-   - **Tỷ lệ bán lại (Resell Rate):** Ngưối chơi có thể bán vật phẩm trong túi đồ cho thương nhân để nhận lại **50% giá mua ni�êm yẳt**
+     - Iron Sword (+12 ATK): `80 Gold`
+     - Magic Staff (+15 ATK): `120 Gold`
+     - Long Bow (+10 ATK): `75 Gold`
+     - Iron Armor (+8 DEF): `90 Gold`
+     - Magic Robe (+4 DEF): `50 Gold`
+     - Leather Armor (+6 DEF): `70 Gold`
+   - **Tỷ lệ bán lại (Resell Rate):** Người chơi có thể bán vật phẩm trong túi đồ cho thương nhân để nhận lại **50% giá mua niêm yết**.
 2. **Rẽ nhánh cốt truyện & Tương tác ngoại giao (`StoryNode` / `Choice`):**
-   - **Điều kiện vàng (`requiredGold`):** Người chơi phải sở hữu tối thiểu một lượng vàng nhất định để mở kháa lựa chọn đặc biệt (ví dụ: chứng minh địa vị, tiếp cận quý tộc).
-   - **Tiêu hao vàng (`goldCost`):** Khấu trừ trực tiẟp số vàng khi lựa chọn (ví dụ: trả tiền qua cổng bi�n giới, thuê thám tử mua tin tức, hối lộ lính gác, quyên góp cho đền thờ).
+   - **Điều kiện vàng (`requiredGold`):** Người chơi phải sở hữu tối thiểu một lượng vàng nhất định để mở khóa lựa chọn đặc biệt (ví dụ: chứng minh địa vị, tiếp cận quý tộc).
+   - **Tiêu hao vàng (`goldCost`):** Khấu trừ trực tiếp số vàng khi lựa chọn (ví dụ: trả tiền qua cổng biên giới, thuê thám tử mua tin tức, hối lộ lính gác, quyên góp cho đền thờ).
 
 ### 23.4. Cấu Trúc Dữ Liệu & API
 ```cpp // Shop Interface
