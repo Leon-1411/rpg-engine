@@ -1,8 +1,8 @@
-# RPG Engine
+﻿# RPG Engine
 
 Game nhập vai Console dựa trên C++17 với kiến trúc Mô-đun (Feature-Based Architecture).
 
-## 📁 Cấu trúc Thư mục & Phân công Thành viên
+## 📂 Cấu trúc Thư mục & Phân công Thành viên
 
 ```text
 rpg-engine/
@@ -18,14 +18,14 @@ rpg-engine/
 │   ├── StoryGraph.h
 │   └── SaveManager.h
 ├── src/                     <-- Thư mục chứa code triển khai .cpp
-│   ├── Hero.cpp             (Phụ trách: Quý)
-│   ├── Enemy.cpp            (Phụ trách: Nhật)
-│   ├── Item.cpp             (Phụ trách: Sang)
-│   ├── Inventory.cpp        (Phụ trách: Sang)
-│   ├── CombatEngine.cpp     (Phụ trách: Lợi)
-│   ├── StoryGraph.cpp       (Phụ trách: Nghĩa)
-│   ├── SaveManager.cpp      (Phụ trách: Phong)
-│   └── main.cpp             (Phụ trách: Quang - Ráp nối toàn bộ)
+│   ├── Hero.cpp            
+│   ├── Enemy.cpp           
+│   ├── Item.cpp             
+│   ├── Inventory.cpp        
+│   ├── CombatEngine.cpp   
+│   ├── StoryGraph.cpp      
+│   ├── SaveManager.cpp     
+│   └── main.cpp             
 └── tests/                   <-- Thư mục test độc lập
     ├── test_hero.cpp
     ├── test_enemy.cpp
@@ -100,4 +100,3 @@ cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ./build/rpg_engine
 ```
-
