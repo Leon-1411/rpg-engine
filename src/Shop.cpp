@@ -10,6 +10,19 @@ void Shop::addItem(std::shared_ptr<Item> item, int buyPrice, int sellPrice, int 
     }
 }
 
+void Shop::loadDefaultStock() {
+    goods.clear();
+    goods.emplace_back(std::make_shared<Potion>("pot_01", "Health Potion", "Binh thuoc hoi phuc 35 HP", 35, false), 30, 15, -1);
+    goods.emplace_back(std::make_shared<Potion>("pot_02", "Mana Potion", "Binh thuoc hoi phuc 25 MP", 25, true), 30, 15, -1);
+    goods.emplace_back(std::make_shared<Potion>("GreaterHealthPotion", "Greater Health Potion", "Binh dai duoc hoi phuc 70 HP", 70, false), 60, 30, 5);
+    goods.emplace_back(std::make_shared<Weapon>("wpn_01", "Iron Sword", "Thanh kiem sat co ban, ATK +12", 12), 80, 40, 2);
+    goods.emplace_back(std::make_shared<Weapon>("wpn_02", "Magic Staff", "Gay phep khuech dai ma thuat, ATK +15", 15), 100, 50, 2);
+    goods.emplace_back(std::make_shared<Weapon>("wpn_03", "Long Bow", "Cung dai ngam ban tu xa, ATK +10", 10), 75, 35, 2);
+    goods.emplace_back(std::make_shared<Armor>("arm_01", "Iron Armor", "Bo giap sat kien co, DEF +8", 8), 70, 35, 2);
+    goods.emplace_back(std::make_shared<Armor>("arm_02", "Magic Robe", "Ao choang phap thuat, DEF +4", 4), 60, 30, 2);
+    goods.emplace_back(std::make_shared<Armor>("arm_03", "Leather Armor", "Ao giap da nhe nhang, DEF +6", 6), 55, 25, 2);
+}
+
 void Shop::clear() {
     goods.clear();
 }

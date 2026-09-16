@@ -122,6 +122,75 @@ R"(
 )", GREEN) << "\n";
 }
 
+void printDemonMalakorArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+        ( \.-./ )
+         / _ _ \
+        ( (o).(o) )
+         )  _  (       [ DEMON KING MALAKOR ]
+        /       \      Hellfire Sovereign & Shadow Master
+       / /     \ \
+      ( (       ) )
+       \ \_._._/ /
+)", BRIGHT_RED) << "\n";
+}
+
+void printGeneralAldricArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+          [===]
+         ( \./ )
+         /|===|\
+        /_|===|_\      [ GENERAL ALDRIC ]
+       (  |===|  )     The Iron Shield of Eldoria
+       /  |===|  \
+         (_____)
+)", BRIGHT_YELLOW) << "\n";
+}
+
+void printCoreGuardianArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+         .-------.
+        /  (o o)  \
+       |  [ CORE ] |   [ THE CORE GUARDIAN ]
+        \  \===/  /    Ancient Arcane Automaton
+       .-'-------'-.
+      /  |       |  \
+     (___|_______|___)
+)", BRIGHT_CYAN) << "\n";
+}
+
+void printArchmageMorvathArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+           /\
+          /  \
+         /____\
+        (  o.o )       [ ARCHMAGE MORVATH ]
+        /| === |\      Supreme Tyrant of the Mage Council
+       / | ___ | \
+         (_____)
+)", BRIGHT_MAGENTA) << "\n";
+}
+
+void printMultiFactionArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+         \  |  /
+        --- * ---      [ MULTI-FACTION BATTLE ]
+         /  |  \       Kingdom vs Demon vs Mages vs Free People
+        / \   / \
+       /___\ /___\
+)", BRIGHT_WHITE) << "\n";
+}
+
 void printHeroArt(HeroClass heroClass) {
     switch (heroClass) {
         case HeroClass::WARRIOR:
@@ -140,16 +209,39 @@ void printHeroArt(HeroClass heroClass) {
 }
 
 void printEnemyArt(const Enemy& enemy) {
+    std::string name = enemy.getName();
+    if (name.find("Malakor") != std::string::npos || name.find("Demon_King") != std::string::npos || name.find("Demon Berserker") != std::string::npos) {
+        printDemonMalakorArt();
+        return;
+    }
+    if (name.find("Aldric") != std::string::npos) {
+        printGeneralAldricArt();
+        return;
+    }
+    if (name.find("Core Guardian") != std::string::npos || name.find("Core_Guardian") != std::string::npos) {
+        printCoreGuardianArt();
+        return;
+    }
+    if (name.find("Morvath") != std::string::npos || name.find("Arcane") != std::string::npos) {
+        printArchmageMorvathArt();
+        return;
+    }
+    if (name.find("Multi") != std::string::npos || name.find("Faction") != std::string::npos) {
+        printMultiFactionArt();
+        return;
+    }
+
     if (enemy.getType() == EnemyType::BOSS) {
         printBossDragonArt();
         return;
     }
 
-    std::string name = enemy.getName();
-    if (name.find("Skeleton") != std::string::npos || name.find("Xương") != std::string::npos) {
+    if (name.find("Skeleton") != std::string::npos || name.find("Xuong") != std::string::npos) {
         printSkeletonArt();
-    } else if (name.find("Orc") != std::string::npos) {
+    } else if (name.find("Orc") != std::string::npos || name.find("Mercenary") != std::string::npos) {
         printOrcArt();
+    } else if (name.find("Demon") != std::string::npos || name.find("Scout") != std::string::npos) {
+        printDemonMalakorArt();
     } else {
         printGoblinArt();
     }

@@ -26,6 +26,12 @@ Makefile
 *.dylib
 *.lib
 *.a
+rpg_engine
+test_save
+test_story
+test_shop
+test_ui
+test_e2e
 
 # ==========================================
 # Debugging & Symbol files

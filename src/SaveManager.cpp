@@ -21,6 +21,7 @@
 #define MKDIR(dir) _mkdir(dir)
 #else
 #include <sys/stat.h>
+#include <dirent.h>
 #define MKDIR(dir) mkdir(dir, 0755)
 #endif
 
@@ -478,12 +479,13 @@ std::vector<int> SaveManager::getExistingSlots() const {
         dir += "/";
     }
 
+    std::regex slotRegex(R"(slot(\d+)\.json)", std::regex_constants::icase);
+
 #ifdef _WIN32
     std::string searchPattern = dir + "slot*.json";
     struct _finddata_t fileInfo;
     intptr_t handle = _findfirst(searchPattern.c_str(), &fileInfo);
     if (handle != -1) {
-        std::regex slotRegex(R"(slot(\d+)\.json)", std::regex_constants::icase);
         do {
             std::string filename = fileInfo.name;
             std::smatch match;
@@ -496,10 +498,26 @@ std::vector<int> SaveManager::getExistingSlots() const {
         } while (_findnext(handle, &fileInfo) == 0);
         _findclose(handle);
     }
+#else
+    DIR* dp = opendir(dir.empty() ? "." : dir.c_str());
+    if (dp != nullptr) {
+        struct dirent* entry;
+        while ((entry = readdir(dp)) != nullptr) {
+            std::string filename = entry->d_name;
+            std::smatch match;
+            if (std::regex_match(filename, match, slotRegex)) {
+                try {
+                    int slotNum = std::stoi(match[1].str());
+                    slots.insert(slotNum);
+                } catch (...) {}
+            }
+        }
+        closedir(dp);
+    }
 #endif
 
-    // Fallback checks for slot numbers 1..20
-    for (int i = 1; i <= 20; ++i) {
+    // Fallback checks for slot numbers 1..100
+    for (int i = 1; i <= 100; ++i) {
         if (slotExists(i)) {
             slots.insert(i);
         }
