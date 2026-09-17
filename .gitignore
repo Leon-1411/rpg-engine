@@ -2,6 +2,7 @@
 # Build directories & CMake output
 # ==========================================
 build/
+build*/
 bin/
 out/
 CMakeFiles/
@@ -25,6 +26,12 @@ Makefile
 *.dylib
 *.lib
 *.a
+rpg_engine
+test_save
+test_story
+test_shop
+test_ui
+test_e2e
 
 # ==========================================
 # Debugging & Symbol files
@@ -67,6 +74,8 @@ compile_commands.json
 # ==========================================
 saves/*.json
 !saves/.gitkeep
+data/*_test*.json
+saves_test/
 *.log
 
 # ==========================================
