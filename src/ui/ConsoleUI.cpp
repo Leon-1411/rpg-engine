@@ -128,7 +128,7 @@ std::string formatProgressBar(int current, int max, int width,
     std::string emptyBar(emptyLength, '-');
 
     std::string result = "[" + colorize(filledBar, color) + colorize(emptyBar, emptyColor) + "] "
-                       + colorize(std::to_string(current), color) + "/" + std::to_string(max);
+                       + colorize(std::to_string(current) + "/" + std::to_string(max), color);
     return result;
 }
 

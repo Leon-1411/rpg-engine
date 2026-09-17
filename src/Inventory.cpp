@@ -120,8 +120,13 @@ bool Inventory::useItem(int index, Hero& hero) {
             return true;
         }
     }
-    }
     return false;
+}
+
+void Inventory::clear() {
+    items.clear();
+    equippedWeaponIndex = -1;
+    equippedArmorIndex = -1;
 }
 
 // ==========================================

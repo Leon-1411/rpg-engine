@@ -30,7 +30,6 @@ std::string SaveManager::getSaveDirectory() const {
 }
 
 bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
-bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
     std::error_code ec;
     if (!fs::exists(saveDirectory, ec)) {
         fs::create_directories(saveDirectory, ec);
@@ -109,6 +108,10 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         inFile.close();
 
         // Restore hero attributes
+        if (j.contains("maxHp")) hero.setMaxHp(j["maxHp"].get<int>());
+        if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
+        if (j.contains("attack")) hero.setAttack(j["attack"].get<int>());
+        if (j.contains("defense")) hero.setDefense(j["defense"].get<int>());
         if (j.contains("level")) hero.setLevel(j["level"].get<int>());
         if (j.contains("exp")) hero.setExp(j["exp"].get<int>());
         if (j.contains("hp")) hero.setHp(j["hp"].get<int>());
@@ -133,11 +136,17 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
                 int qty = itemJ.value("quantity", 1);
 
                 if (type == ItemType::POTION) {
-                    Item potion(id, name, desc, type, statVal, qty);
-                    inv.addItem(potion);
+                    auto pot = std::make_shared<Potion>(id, name, desc, statVal, false, qty);
+                    inv.addItem(pot);
+                } else if (type == ItemType::WEAPON) {
+                    auto wep = std::make_shared<Weapon>(id, name, desc, statVal);
+                    inv.addItem(wep);
+                } else if (type == ItemType::ARMOR) {
+                    auto arm = std::make_shared<Armor>(id, name, desc, statVal);
+                    inv.addItem(arm);
                 } else {
-                    Item equip(id, name, desc, type, statVal);
-                    inv.addItem(equip);
+                    auto itm = std::make_shared<Item>(id, name, desc, type, statVal);
+                    inv.addItem(itm);
                 }
             }
             if (j.contains("equippedWeaponIndex")) {
@@ -155,7 +164,6 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         std::cerr << "[SaveManager] Exception during load: " << e.what() << "\n";
         return false;
     }
-}
 }
 
 bool SaveManager::slotExists(int slot) const {

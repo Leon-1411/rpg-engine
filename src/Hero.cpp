@@ -58,6 +58,9 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
     }
 }
 
+Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense)
+    : Hero(name, heroClass, hp, attack, defense, 10, 0.25f, 0.25f, false) {}
+
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
     : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(50), maxMp(50),
@@ -201,9 +204,7 @@ bool Hero::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
 
 void Hero::takeDamage(int damage) {
     if (damage <= 0) return;
-    // Dùng getEffectiveDefense() để cộng dồn bonus Armor đang trang bị
-    int effectiveDamage = std::max(1, damage - getEffectiveDefense());
-    hp = std::max(0, hp - effectiveDamage);
+    hp = std::max(0, hp - damage);
 }
 
 void Hero::heal(int amount) {
@@ -271,7 +272,6 @@ void Hero::resetCombatStances() {
 
 void Hero::lockSkills(int turns) {
     skillLockTurns = turns;
-}
 }
 
 bool Hero::isAlive() const {

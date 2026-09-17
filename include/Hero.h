@@ -19,10 +19,10 @@ protected:
     int exp;
     int hp;
     int maxHp;
-    int attack;
-    int defense;
     int mp;
     int maxMp;
+    int attack;
+    int defense;
     int armorPenetration;
     float critChance;
     float critDamage;
@@ -51,8 +51,9 @@ public:
     Hero(const std::string& name, HeroClass heroClass);
 
     // Full custom setup
+    Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense);
     Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
-         int armorPen = 10, float critChance = 0.25f, float critDamage = 0.25f, bool ignoreArmor = false);
+         int armorPen, float critChance, float critDamage, bool ignoreArmor = false);
     Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense,
          int armorPen = 10, float critChance = 0.25f, float critDamage = 0.25f, bool ignoreArmor = false);
 
@@ -72,7 +73,6 @@ public:
     void reduceCooldowns();
     bool isSkillReady(int skillIndex) const;
     int getSkillCooldown(int skillIndex) const;
-    std::string getSkillName(int skillIndex) const;
     void resetCombatStances();
     void lockSkills(int turns);
 
