@@ -65,18 +65,63 @@ int main() {
     assert(brokenStory.loadFromJsonString("{ invalid json content ...") == false);
     assert(brokenStory.loadFromJsonString("{\"nodes\": []}") == false);
 
-    // 4. Kiểm thử nạp data/story.json
+    // 4. Kiểm thử nạp data/story.json & Toàn vẹn đồ thị (Dead-end & Link verification)
     std::string storyPath = "data/story.json";
     if (!std::ifstream(storyPath).good()) storyPath = "../data/story.json";
     StoryGraph fileStory;
     bool loadedStory = fileStory.loadStoryGraph(storyPath);
     assert(loadedStory == true);
-    assert(fileStory.getNodeCount() >= 6);
+    assert(fileStory.getNodeCount() >= 22);
     
     StoryNode startNode = fileStory.getCurrentNode();
-    assert(startNode.id == "node_01" || startNode.id == "village_start" || startNode.id == "Node01");
+    assert(startNode.id == "Node01");
 
-    // 5. Test DataLoader functions
+    // Kiểm tra validateGraph trên file dữ liệu chính thức
+    std::vector<std::string> validationErrors;
+    bool isValid = fileStory.validateGraph(validationErrors);
+    if (!isValid) {
+        for (const auto& err : validationErrors) {
+            std::cerr << "[StoryGraph Error] " << err << "\n";
+        }
+    }
+    assert(isValid == true);
+    assert(validationErrors.empty());
+
+    // 5. Kiểm tra tính năng phát hiện Dead-end và Broken link
+    StoryGraph brokenGraph;
+    brokenGraph.addNode({"dead_node", "A lonely room with no exit", EventType::NORMAL, {}});
+    brokenGraph.setCurrentNodeId("dead_node");
+    std::vector<std::string> brokenErrors;
+    assert(brokenGraph.validateGraph(brokenErrors) == false);
+    assert(!brokenErrors.empty());
+
+    StoryGraph danglingGraph;
+    danglingGraph.addNode({"start_node", "Start", EventType::NORMAL, {{"Go to nowhere", "ghost_node"}}});
+    danglingGraph.setCurrentNodeId("start_node");
+    std::vector<std::string> danglingErrors;
+    assert(danglingGraph.validateGraph(danglingErrors) == false);
+    assert(!danglingErrors.empty());
+
+    // 6. Kiểm tra canSelectChoice và requiredFlag
+    StoryGraph flagGraph;
+    StoryNode fNode("flag_room", "Locked room", EventType::NORMAL);
+    fNode.choices.push_back({"Mở cửa (cần chìa khóa)", "next_room", "has_key", "unlocked"});
+    flagGraph.addNode(fNode);
+    flagGraph.addNode({"next_room", "Next room", EventType::ENDING, {}});
+    flagGraph.setCurrentNodeId("flag_room");
+
+    assert(flagGraph.canSelectChoice(0) == false);
+    assert(flagGraph.selectChoice(0) == false);
+    assert(flagGraph.getCurrentNodeId() == "flag_room");
+
+    flagGraph.setFlag("has_key", true);
+    assert(flagGraph.canSelectChoice(0) == true);
+    assert(flagGraph.selectChoice(0) == true);
+    assert(flagGraph.getCurrentNodeId() == "next_room");
+    assert(flagGraph.getFlag("unlocked") == true);
+    assert(flagGraph.isEnding() == true);
+
+    // 7. Test DataLoader functions
     std::string itemsPath = "data/items.json";
     if (!std::ifstream(itemsPath).good()) itemsPath = "../data/items.json";
     auto items = DataLoader::loadItems(itemsPath);
@@ -87,6 +132,6 @@ int main() {
     auto enemies = DataLoader::loadEnemies(enemiesPath);
     assert(!enemies.empty());
 
-    std::cout << "[PASS] All StoryGraph unit tests (including JSON loader) passed successfully!\n";
+    std::cout << "[PASS] All StoryGraph unit tests (validateGraph, Dead-ends, Choices & Flags) passed successfully!\n";
     return 0;
 }
