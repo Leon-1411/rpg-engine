@@ -29,4 +29,9 @@ public:
 
     int getEquippedWeaponBonus() const;
     int getEquippedArmorBonus() const;
+
+    int getEquippedWeaponIndex() const;
+    int getEquippedArmorIndex() const;
+    const std::vector<Item>& getItems() const;
+    void clear();
 };

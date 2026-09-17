@@ -3,7 +3,7 @@
 #include <iostream>
 #include <iomanip>
 
-static std::string itemTypeToString(ItemType t) {
+static std::string formatItemTypeTag(ItemType t) {
     switch (t) {
         case ItemType::WEAPON: return ConsoleUI::colorize("Vũ khí", ConsoleUI::Colors::BRIGHT_RED);
         case ItemType::ARMOR:  return ConsoleUI::colorize("Giáp  ", ConsoleUI::Colors::BRIGHT_BLUE);
@@ -45,7 +45,7 @@ void InventoryUI::renderInventory(const Inventory& inventory) {
 
         std::cout << "  "
                   << "[" << ConsoleUI::colorize(std::to_string(i + 1), ConsoleUI::Colors::BRIGHT_CYAN) << "]   "
-                  << std::left << std::setw(18) << itemTypeToString(item.getType())
+                  << std::left << std::setw(18) << formatItemTypeTag(item.getType())
                   << std::left << std::setw(20) << ConsoleUI::colorize(item.getName(), ConsoleUI::Colors::BRIGHT_WHITE)
                   << std::left << std::setw(10) << ConsoleUI::colorize(statStr, ConsoleUI::Colors::BRIGHT_YELLOW)
                   << ConsoleUI::colorize(item.getDescription(), ConsoleUI::Colors::DIM)

@@ -9,7 +9,17 @@
 #include <algorithm>
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense)
-    : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(mp), maxMp(mp), attack(attack), defense(defense) {}
+    : name(name),
+      heroClass(heroClass),
+      level(1),
+      exp(0),
+      hp(hp),
+      maxHp(hp),
+      mp(mp),
+      maxMp(mp),
+      attack(attack),
+      defense(defense),
+      gold(0) {}
 
 int Hero::normalAttack() {
     return attack;
@@ -54,6 +64,7 @@ void Hero::displayStats() const {
     std::cout << "--- " << name << " (Level " << level << ") ---\n"
               << "HP: " << hp << "/" << maxHp << " | MP: " << mp << "/" << maxMp << "\n"
               << "ATK: " << attack << " | DEF: " << defense 
+              << " | VÀNG: " << gold << "G"
               << " | EXP: " << exp << "/" << getExpToNextLevel() << "\n";
 }
 
@@ -78,11 +89,14 @@ int Hero::getMp() const { return mp; }
 int Hero::getMaxMp() const { return maxMp; }
 int Hero::getAttack() const { return attack; }
 int Hero::getDefense() const { return defense; }
+int Hero::getGold() const { return gold; }
 
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
 void Hero::setLevel(int value) { level = value; }
 void Hero::setExp(int value) { exp = value; }
+void Hero::setGold(int value) { gold = std::max(0, value); }
+void Hero::addGold(int amount) { gold = std::max(0, gold + amount); }
 
 void Hero::setMaxHp(int value) { maxHp = std::max(1, value); hp = std::min(hp, maxHp); }
 void Hero::setMaxMp(int value) { maxMp = std::max(0, value); mp = std::min(mp, maxMp); }

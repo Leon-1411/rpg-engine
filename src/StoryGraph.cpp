@@ -1,20 +1,24 @@
 /**
  * @file StoryGraph.cpp
- * @brief Implement StoryGraph class methods.
- * @author Nghĩa
+ * @brief Implement StoryGraph class methods with full JSON data loading and branching flags.
  */
 
 #include "StoryGraph.h"
+#include <fstream>
+#include <iostream>
 
 StoryGraph::StoryGraph() : currentNodeId("start") {
-    // Default initial graph skeleton
-    StoryNode startNode;
-    startNode.id = "start";
-    startNode.text = "You awaken in a mysterious forest glade.";
-    startNode.type = EventType::NORMAL;
-    startNode.choices.push_back({"Walk into the dark forest", "forest_path", "", ""});
-    startNode.choices.push_back({"Follow the river trail", "river_trail", "", ""});
-    nodes["start"] = startNode;
+    // Attempt to load from default story file
+    if (!loadStoryGraph("data/story.json")) {
+        // Default initial fallback graph if data file is absent
+        StoryNode startNode;
+        startNode.id = "start";
+        startNode.text = "You awaken in a mysterious forest glade.";
+        startNode.type = EventType::NORMAL;
+        startNode.choices.push_back({"Walk into the dark forest", "forest_path", "", ""});
+        startNode.choices.push_back({"Follow the river trail", "river_trail", "", ""});
+        nodes["start"] = startNode;
+    }
 }
 
 void StoryGraph::addNode(const StoryNode& node) {
@@ -22,8 +26,50 @@ void StoryGraph::addNode(const StoryNode& node) {
 }
 
 bool StoryGraph::loadStoryGraph(const std::string& filePath) {
-    std::cout << "[StoryGraph] Loading story data from " << filePath << "...\n";
-    return true;
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        return false;
+    }
+
+    try {
+        nlohmann::json data;
+        file >> data;
+
+        nodes.clear();
+        for (auto& [nodeId, val] : data.items()) {
+            StoryNode node;
+            node.id = nodeId;
+            node.text = val.value("text", "");
+            node.type = stringToEventType(val.value("type", "NORMAL"));
+            node.enemyId = val.value("enemyId", "");
+            node.rewardItemId = val.value("rewardItemId", "");
+            node.rewardGold = val.value("rewardGold", 0);
+
+            if (val.contains("choices") && val["choices"].is_array()) {
+                for (const auto& cVal : val["choices"]) {
+                    Choice choice;
+                    choice.text = cVal.value("text", "");
+                    choice.nextNodeId = cVal.value("nextNodeId", "");
+                    choice.requiredFlag = cVal.value("requiredFlag", "");
+                    choice.setFlag = cVal.value("setFlag", "");
+                    node.choices.push_back(choice);
+                }
+            }
+
+            nodes[nodeId] = node;
+        }
+
+        if (nodes.find("start") != nodes.end()) {
+            currentNodeId = "start";
+        } else if (!nodes.empty()) {
+            currentNodeId = nodes.begin()->first;
+        }
+
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "[StoryGraph] Error loading story JSON: " << e.what() << "\n";
+        return false;
+    }
 }
 
 StoryNode StoryGraph::getCurrentNode() const {
@@ -34,10 +80,22 @@ StoryNode StoryGraph::getCurrentNode() const {
     return {};
 }
 
+std::string StoryGraph::getCurrentNodeId() const {
+    return currentNodeId;
+}
+
 bool StoryGraph::selectChoice(int choiceIndex) {
     auto node = getCurrentNode();
     if (choiceIndex >= 0 && choiceIndex < static_cast<int>(node.choices.size())) {
         const Choice& choice = node.choices[choiceIndex];
+
+        // Check required flag if specified
+        if (!choice.requiredFlag.empty()) {
+            if (!getFlag(choice.requiredFlag)) {
+                return false;
+            }
+        }
+
         if (!choice.setFlag.empty()) {
             setFlag(choice.setFlag, true);
         }
@@ -64,6 +122,18 @@ bool StoryGraph::getFlag(const std::string& flag) const {
     return false;
 }
 
+const std::unordered_map<std::string, bool>& StoryGraph::getFlags() const {
+    return storyFlags;
+}
+
+void StoryGraph::setFlags(const std::unordered_map<std::string, bool>& flags) {
+    storyFlags = flags;
+}
+
 bool StoryGraph::isEnding() const {
     return getCurrentNode().type == EventType::ENDING;
+}
+
+const std::unordered_map<std::string, StoryNode>& StoryGraph::getAllNodes() const {
+    return nodes;
 }

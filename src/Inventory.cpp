@@ -38,7 +38,11 @@ bool Inventory::useItem(int index, Hero& hero) {
     }
     const Item& item = items[index];
     if (item.getType() == ItemType::POTION) {
-        hero.heal(item.getStatValue());
+        if (item.getId().find("pot_02") != std::string::npos || item.getName().find("Mana") != std::string::npos) {
+            hero.restoreMp(item.getStatValue());
+        } else {
+            hero.heal(item.getStatValue());
+        }
         removeItem(index);
         return true;
     }
@@ -91,4 +95,22 @@ int Inventory::getEquippedArmorBonus() const {
         return items[equippedArmorIndex].getStatValue();
     }
     return 0;
+}
+
+int Inventory::getEquippedWeaponIndex() const {
+    return equippedWeaponIndex;
+}
+
+int Inventory::getEquippedArmorIndex() const {
+    return equippedArmorIndex;
+}
+
+const std::vector<Item>& Inventory::getItems() const {
+    return items;
+}
+
+void Inventory::clear() {
+    items.clear();
+    equippedWeaponIndex = -1;
+    equippedArmorIndex = -1;
 }

@@ -1,0 +1,50 @@
+{
+  "pot_01": {
+    "name": "Health Potion",
+    "description": "Bình thuốc đỏ phục hồi 40 HP ngay lập tức.",
+    "type": "POTION",
+    "statValue": 40
+  },
+  "pot_02": {
+    "name": "Mana Potion",
+    "description": "Bình tiên dược lam phục hồi 30 MP.",
+    "type": "POTION",
+    "statValue": 30
+  },
+  "wpn_iron_sword": {
+    "name": "Thanh Kiếm Sắt",
+    "description": "Vũ khí rèn từ sắt thô kiên cố, tăng 15 ATK.",
+    "type": "WEAPON",
+    "statValue": 15
+  },
+  "wpn_magic_staff": {
+    "name": "Trượng Pha Lê Cổ",
+    "description": "Quyền trượng ma pháp cổ xưa, tăng 22 ATK phép.",
+    "type": "WEAPON",
+    "statValue": 22
+  },
+  "wpn_long_bow": {
+    "name": "Cung Gỗ Tinh Linh",
+    "description": "Cung tên thiện xạ chuẩn xác, tăng 18 ATK.",
+    "type": "WEAPON",
+    "statValue": 18
+  },
+  "arm_iron_plate": {
+    "name": "Giáp Sắt Hiệp Sĩ",
+    "description": "Bộ giáp phiến bảo hộ dày dặn, tăng 10 DEF.",
+    "type": "ARMOR",
+    "statValue": 10
+  },
+  "arm_magic_robe": {
+    "name": "Áo Choàng Pháp Sư",
+    "description": "Áo choàng dệt bằng tơ ma thuật, tăng 8 DEF.",
+    "type": "ARMOR",
+    "statValue": 8
+  },
+  "arm_leather_vest": {
+    "name": "Áo Giáp Da Rừng",
+    "description": "Áo giáp da dẻo dai và nhẹ nhàng, tăng 7 DEF.",
+    "type": "ARMOR",
+    "statValue": 7
+  }
+}

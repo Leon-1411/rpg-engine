@@ -1,0 +1,115 @@
+{
+  "start": {
+    "text": "Bạn tỉnh dậy tại một khu phế tích bí ẩn ven Rừng Cổ Đại. Tiếng gầm thét từ phía đỉnh núi vọng lại...",
+    "type": "NORMAL",
+    "choices": [
+      {
+        "text": "Tiến sâu vào Rừng Cổ Đại để tìm lối lên núi",
+        "nextNodeId": "forest_path",
+        "requiredFlag": "",
+        "setFlag": "entered_forest"
+      },
+      {
+        "text": "Men theo con đường ven sông tìm trạm tiếp tế",
+        "nextNodeId": "river_trail",
+        "requiredFlag": "",
+        "setFlag": "followed_river"
+      }
+    ]
+  },
+  "forest_path": {
+    "text": "Trong bụi rậm, một tên Goblin hung hãn bất ngờ nhảy ra cầm dao găm chặn đường!",
+    "type": "BATTLE",
+    "enemyId": "goblin",
+    "choices": [
+      {
+        "text": "Chiến đấu với tên Goblin!",
+        "nextNodeId": "goblin_defeated",
+        "requiredFlag": "",
+        "setFlag": "defeated_goblin"
+      }
+    ]
+  },
+  "goblin_defeated": {
+    "text": "Sau khi hạ gục Goblin, bạn phát hiện một chiếc rương cổ giấu sau tảng đá.",
+    "type": "ITEM",
+    "rewardItemId": "wpn_iron_sword",
+    "rewardGold": 50,
+    "choices": [
+      {
+        "text": "Mở rương lấy Thanh Kiếm Sắt và tiếp tục hành trình tới Hang Quái",
+        "nextNodeId": "orc_dungeon",
+        "requiredFlag": "",
+        "setFlag": "has_iron_sword"
+      }
+    ]
+  },
+  "river_trail": {
+    "text": "Ven bờ sông, bạn gặp một thương nhân lang thang. Ông ta trao cho bạn một Bình Máu hồi phục sinh lực và cảnh báo về Lãnh Chúa Rồng.",
+    "type": "ITEM",
+    "rewardItemId": "pot_01",
+    "rewardGold": 30,
+    "choices": [
+      {
+        "text": "Cảm ơn thương nhân và tiến về phía Hầm Ngục",
+        "nextNodeId": "orc_dungeon",
+        "requiredFlag": "",
+        "setFlag": "talked_to_merchant"
+      }
+    ]
+  },
+  "orc_dungeon": {
+    "text": "Cửa hang dẫn lên đỉnh núi bị canh giữ bởi một tên Orc Berserker khổng lồ đầy giận dữ!",
+    "type": "BATTLE",
+    "enemyId": "orc",
+    "choices": [
+      {
+        "text": "Khai chiến tiêu diệt Orc Berserker!",
+        "nextNodeId": "boss_approach",
+        "requiredFlag": "",
+        "setFlag": "defeated_orc"
+      }
+    ]
+  },
+  "boss_approach": {
+    "text": "Bạn đã leo lên đến Đỉnh Núi Diệt Vong. Cổng vòm dung nham rực lửa mở ra trước mắt. Lãnh Chúa Rồng (Dragon Lord) đang chờ đợi!",
+    "type": "NORMAL",
+    "choices": [
+      {
+        "text": "Hiên ngang bước vào quyết chiến với Boss Rồng!",
+        "nextNodeId": "boss_battle",
+        "requiredFlag": "",
+        "setFlag": "challenged_boss"
+      },
+      {
+        "text": "Quá sợ hãi trước uy áp của rồng, quay đầu bỏ chạy khỏi ngọn núi",
+        "nextNodeId": "ending_bad",
+        "requiredFlag": "",
+        "setFlag": "fled_boss"
+      }
+    ]
+  },
+  "boss_battle": {
+    "text": "Lãnh Chúa Rồng gầm vang trời đất, ngọn lửa địa ngục bao trùm khắp đấu trường!",
+    "type": "BOSS",
+    "enemyId": "dragon_lord",
+    "choices": [
+      {
+        "text": "Hạ gục Boss và hoàn thành sứ mệnh!",
+        "nextNodeId": "ending_good",
+        "requiredFlag": "",
+        "setFlag": "slain_dragon_lord"
+      }
+    ]
+  },
+  "ending_good": {
+    "text": "[GOOD ENDING] Bạn đã đánh bại Lãnh Chúa Rồng vĩ đại, giải phóng vùng đất khỏi bóng tối diệt vong! Tên tuổi của bạn được khắc ghi như một Huyền Thoại trường tồn muôn đời.",
+    "type": "ENDING",
+    "choices": []
+  },
+  "ending_bad": {
+    "text": "[BAD ENDING] Bạn đã chạy trốn khỏi cuộc chiến định mệnh. Vương quốc rơi vào tro tàn và bóng đêm vĩnh hằng.",
+    "type": "ENDING",
+    "choices": []
+  }
+}

@@ -10,6 +10,21 @@ enum class HeroClass {
     RANGER
 };
 
+inline std::string heroClassToString(HeroClass c) {
+    switch (c) {
+        case HeroClass::WARRIOR: return "WARRIOR";
+        case HeroClass::MAGE: return "MAGE";
+        case HeroClass::RANGER: return "RANGER";
+        default: return "WARRIOR";
+    }
+}
+
+inline HeroClass stringToHeroClass(const std::string& str) {
+    if (str == "MAGE") return HeroClass::MAGE;
+    if (str == "RANGER") return HeroClass::RANGER;
+    return HeroClass::WARRIOR;
+}
+
 class Hero {
 protected:
     std::string name;
@@ -22,6 +37,7 @@ protected:
     int maxMp;
     int attack;
     int defense;
+    int gold;
 
 public:
     Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense);
@@ -54,6 +70,7 @@ public:
     int getMaxMp() const;
     int getAttack() const;
     int getDefense() const;
+    int getGold() const;
 
     void setHp(int value);
     void setMp(int value);
@@ -63,6 +80,8 @@ public:
     void setMaxMp(int value);
     void setAttack(int value);
     void setDefense(int value);
+    void setGold(int value);
+    void addGold(int amount);
 
     void increaseMaxHp(int amount);
     void increaseMaxMp(int amount);

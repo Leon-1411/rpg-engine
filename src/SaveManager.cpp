@@ -5,6 +5,7 @@
  */
 
 #include "SaveManager.h"
+#include "Item.h"
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
@@ -29,7 +30,7 @@ std::string SaveManager::getSaveDirectory() const {
     return saveDirectory;
 }
 
-bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
+bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story, const Inventory* inventory) {
     std::error_code ec;
     if (!fs::exists(saveDirectory, ec)) {
         fs::create_directories(saveDirectory, ec);
@@ -49,7 +50,30 @@ bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) 
         j["maxMp"] = hero.getMaxMp();
         j["attack"] = hero.getAttack();
         j["defense"] = hero.getDefense();
+        j["gold"] = hero.getGold();
         j["currentStoryNodeId"] = story.getCurrentNode().id;
+
+        // Inventory serialization
+        if (inventory) {
+            json invArr = json::array();
+            for (const auto& item : inventory->getItems()) {
+                invArr.push_back(item.getId());
+            }
+            j["inventory"] = invArr;
+            j["equippedWeaponIndex"] = inventory->getEquippedWeaponIndex();
+            j["equippedArmorIndex"] = inventory->getEquippedArmorIndex();
+        } else {
+            j["inventory"] = json::array();
+            j["equippedWeaponIndex"] = -1;
+            j["equippedArmorIndex"] = -1;
+        }
+
+        // Story flags serialization
+        json flagsObj = json::object();
+        for (const auto& [flag, val] : story.getFlags()) {
+            flagsObj[flag] = val;
+        }
+        j["storyFlags"] = flagsObj;
 
         std::ofstream outFile(filePath);
         if (!outFile.is_open()) {
@@ -66,7 +90,7 @@ bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) 
     }
 }
 
-bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
+bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story, Inventory* inventory) {
     if (!slotExists(slot)) {
         std::cerr << "[SaveManager] Error: Slot " << slot << " does not exist.\n";
         return false;
@@ -85,16 +109,46 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         inFile >> j;
         inFile.close();
 
-        // Restore hero attributes
+        // Restore max attributes FIRST before current values so clamp does not restrict
+        if (j.contains("maxHp")) hero.setMaxHp(j["maxHp"].get<int>());
+        if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
         if (j.contains("level")) hero.setLevel(j["level"].get<int>());
         if (j.contains("exp")) hero.setExp(j["exp"].get<int>());
         if (j.contains("hp")) hero.setHp(j["hp"].get<int>());
         if (j.contains("mp")) hero.setMp(j["mp"].get<int>());
+        if (j.contains("attack")) hero.setAttack(j["attack"].get<int>());
+        if (j.contains("defense")) hero.setDefense(j["defense"].get<int>());
+        if (j.contains("gold")) hero.setGold(j["gold"].get<int>());
 
         // Restore story progress
         if (j.contains("currentStoryNodeId")) {
             std::string nodeId = j["currentStoryNodeId"].get<std::string>();
             story.moveToNode(nodeId);
+        }
+
+        // Restore story flags
+        if (j.contains("storyFlags") && j["storyFlags"].is_object()) {
+            std::unordered_map<std::string, bool> flags;
+            for (auto& [flag, val] : j["storyFlags"].items()) {
+                flags[flag] = val.get<bool>();
+            }
+            story.setFlags(flags);
+        }
+
+        // Restore inventory items
+        if (inventory && j.contains("inventory") && j["inventory"].is_array()) {
+            inventory->clear();
+            for (const auto& itemIdVal : j["inventory"]) {
+                std::string itemId = itemIdVal.get<std::string>();
+                Item item = ItemFactory::createFromJson(itemId);
+                inventory->addItem(item);
+            }
+            if (j.contains("equippedWeaponIndex")) {
+                inventory->equipWeapon(j["equippedWeaponIndex"].get<int>());
+            }
+            if (j.contains("equippedArmorIndex")) {
+                inventory->equipArmor(j["equippedArmorIndex"].get<int>());
+            }
         }
 
         return true;

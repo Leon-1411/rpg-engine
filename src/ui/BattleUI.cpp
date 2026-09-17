@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iomanip>
 
-static std::string heroClassToString(HeroClass c) {
+static std::string formatHeroClass(HeroClass c) {
     switch (c) {
         case HeroClass::WARRIOR: return "Warrior";
         case HeroClass::MAGE:    return "Mage";
@@ -27,7 +27,7 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     ConsoleUI::printDivider('=', 64, ConsoleUI::Colors::BRIGHT_RED);
 
     // Hero Status (Left side) & Enemy Status (Right side)
-    std::string heroHeader = hero.getName() + " (" + heroClassToString(hero.getHeroClass()) + " Lv." + std::to_string(hero.getLevel()) + ")";
+    std::string heroHeader = hero.getName() + " (" + formatHeroClass(hero.getHeroClass()) + " Lv." + std::to_string(hero.getLevel()) + ")";
     std::string enemyHeader = enemy.getName() + (enemy.getType() == EnemyType::BOSS ? " [BOSS]" : " [Minion]");
 
     std::cout << "  " 
