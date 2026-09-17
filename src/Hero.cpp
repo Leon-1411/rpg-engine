@@ -10,7 +10,7 @@
 #include <cstdlib>
 
 Hero::Hero(const std::string& name, HeroClass heroClass)
-    : name(name), heroClass(heroClass), level(1), exp(0),
+    : name(name), heroClass(heroClass), level(1), exp(0), gold(0),
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
       poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {
     
@@ -59,13 +59,13 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
 }
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense)
-    : Hero(name, heroClass, hp, attack, defense, 10, 0.25f, 0.25f, false) {}
+    : Hero(name, heroClass, hp, 50, attack, defense, 10, 0.25f, 0.25f, false) {}
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
     : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(50), maxMp(50),
       attack(attack), defense(defense), armorPenetration(armorPen),
-      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
+      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor), gold(0),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns({0, 0, 0}),
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
@@ -82,7 +82,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int att
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
     : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(mp), maxMp(mp),
       attack(attack), defense(defense), armorPenetration(armorPen),
-      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
+      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor), gold(0),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns({0, 0, 0}),
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
@@ -429,3 +429,35 @@ void Hero::increaseMaxHp(int amount) { maxHp += amount; }
 void Hero::increaseMaxMp(int amount) { maxMp += amount; }
 void Hero::increaseAttack(int amount) { attack += amount; }
 void Hero::increaseDefense(int amount) { defense += amount; }
+
+void Hero::setName(const std::string& newName) { name = newName; }
+void Hero::setHeroClass(HeroClass newClass) {
+    heroClass = newClass;
+    switch (heroClass) {
+        case HeroClass::WARRIOR: maxCooldowns = {1, 1, 5}; break;
+        case HeroClass::RANGER:  maxCooldowns = {2, 1, 5}; break;
+        case HeroClass::MAGE:    maxCooldowns = {1, 3, 5}; break;
+    }
+}
+void Hero::setArmorPenetration(int value) { armorPenetration = value; }
+void Hero::setCritChance(float value) { critChance = value; }
+void Hero::setCritDamage(float value) { critDamage = value; }
+void Hero::setIgnoreArmor(bool value) { ignoreArmor = value; }
+
+int Hero::getGold() const { return gold; }
+void Hero::setGold(int amount) { gold = std::max(0, amount); }
+void Hero::addGold(int amount) { gold = std::max(0, gold + amount); }
+
+const std::vector<int>& Hero::getSkillCooldowns() const { return skillCooldowns; }
+void Hero::setSkillCooldowns(const std::vector<int>& cds) { skillCooldowns = cds; }
+
+void Hero::removeGold(int amount) {
+    gold = std::max(0, gold - amount);
+}
+
+bool Hero::spendGold(int amount) {
+    if (amount <= 0) return true;
+    if (gold < amount) return false;
+    gold -= amount;
+    return true;
+}

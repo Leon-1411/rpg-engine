@@ -23,6 +23,9 @@ set(SOURCES
     src/CombatEngine.cpp
     src/StoryGraph.cpp
     src/SaveManager.cpp
+    src/DataLoader.cpp
+    src/GameManager.cpp
+    src/Shop.cpp
     src/ui/ConsoleUI.cpp
     src/ui/ASCIIArt.cpp
     src/ui/MainMenu.cpp

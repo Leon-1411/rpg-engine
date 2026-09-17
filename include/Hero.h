@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
 #include "Inventory.h"
 
 enum class HeroClass {
@@ -27,6 +26,7 @@ protected:
     float critChance;
     float critDamage;
     bool ignoreArmor;
+    int gold;
 
     // Combat-specific resources and states
     int readyArrows;                  // Ranger's ready arrows
@@ -136,17 +136,32 @@ public:
     int getEffectiveDefense() const;
 
     void setHp(int value);
+    void setMaxHp(int value);
     void setMp(int value);
+    void setMaxMp(int value);
     void setLevel(int value);
     void setExp(int value);
-    void setMaxHp(int value);
-    void setMaxMp(int value);
     void setAttack(int value);
     void setDefense(int value);
+
+    void setName(const std::string& newName);
+    void setHeroClass(HeroClass newClass);
+    void setArmorPenetration(int value);
+    void setCritChance(float value);
+    void setCritDamage(float value);
+    void setIgnoreArmor(bool value);
+
+    int getGold() const;
+    void setGold(int amount);
+    void addGold(int amount);
+    void removeGold(int amount);
+    bool spendGold(int amount);
+
+    const std::vector<int>& getSkillCooldowns() const;
+    void setSkillCooldowns(const std::vector<int>& cds);
 
     void increaseMaxHp(int amount);
     void increaseMaxMp(int amount);
     void increaseAttack(int amount);
     void increaseDefense(int amount);
 };
-

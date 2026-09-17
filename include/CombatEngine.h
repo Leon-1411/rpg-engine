@@ -3,6 +3,8 @@
 #include "Hero.h"
 #include "Enemy.h"
 #include "Inventory.h"
+#include <iostream>
+#include <string>
 #include <iosfwd>
 
 enum class CombatState {

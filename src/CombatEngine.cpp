@@ -107,6 +107,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " succumbed to deadly poison!\n";
         hero.addExp(enemy.getExpReward());
+        hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -196,6 +197,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
         hero.addExp(enemy.getExpReward());
+        hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -207,6 +209,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
         hero.addExp(enemy.getExpReward());
+        hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -233,6 +236,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
                 return currentState;
             } else if (!enemy.isAlive()) {
                 hero.addExp(enemy.getExpReward());
+                hero.addGold(enemy.getGoldReward());
                 currentState = CombatState::HERO_VICTORY;
                 return currentState;
             } else if (!hero.isAlive()) {
@@ -257,6 +261,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         if (heroPct >= enemyPct) {
             std::cout << hero.getName() << " kiên cường sinh tồn và giành chiến thắng theo % HP!\n";
             hero.addExp(enemy.getExpReward());
+            hero.addGold(enemy.getGoldReward());
             currentState = CombatState::HERO_VICTORY;
         } else {
             std::cout << enemy.getName() << " áp đảo sinh lực. Bạn đã thất bại!\n";

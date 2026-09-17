@@ -200,7 +200,9 @@ std::vector<std::shared_ptr<BossMonster>> BossFactory::loadAllFromJson(const std
     try {
         nlohmann::json data;
         file >> data;
-        for (auto& [key, value] : data.items()) {
+        for (auto it : data.items()) {
+            std::string key = it.key();
+            const auto& value = it.value();
             std::string type = value.value("type", "");
             if (type == "BOSS") {
                 bosses.push_back(createFromJsonObject(key, value));

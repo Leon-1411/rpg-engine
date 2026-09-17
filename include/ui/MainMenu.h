@@ -2,6 +2,8 @@
 
 #include <string>
 #include <vector>
+#include "Hero.h"
+#include "StoryGraph.h"
 
 enum class MainMenuOption {
     NEW_GAME = 1,
@@ -16,6 +18,9 @@ public:
     MainMenu() = default;
     ~MainMenu() = default;
 
+    // Main interactive loop
+    void run();
+
     // Display the title and options, returns user's choice
     MainMenuOption showMenu();
 
@@ -27,4 +32,9 @@ public:
 
     // Show guide & instructions
     void showHelp();
+
+    // Action handlers
+    void handleNewGame();
+    void handleLoadGame();
+    void playStoryLoop(Hero& hero, StoryGraph& story);
 };
