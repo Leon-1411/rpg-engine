@@ -206,6 +206,29 @@
     "description": "Ancient dread sovereign with crushing power and fiery fury, 5x stronger than regular minions.",
     "specialSkill": "Infernal Cataclysm",
     "healAmount": 25,
+    "skills": [
+      {
+        "name": "Flame Breath",
+        "description": "Scorches foes with an expansive cone of fire.",
+        "cooldown": 2,
+        "damageMultiplier": 1.3,
+        "currentCooldown": 2
+      },
+      {
+        "name": "Dragon Roar",
+        "description": "Emits a concussive shockwave that shatters defenses.",
+        "cooldown": 3,
+        "damageMultiplier": 1.6,
+        "currentCooldown": 3
+      },
+      {
+        "name": "Infernal Cataclysm",
+        "description": "Rains molten apocalyptic meteors upon the battlefield.",
+        "cooldown": 5,
+        "damageMultiplier": 2.2,
+        "currentCooldown": 5
+      }
+    ],
     "dropItems": ["GreaterHealthPotion", "wpn_02", "arm_01"],
     "dropChance": 1.0
   }

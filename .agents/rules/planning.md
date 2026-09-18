@@ -19,3 +19,4 @@
   - Running compilation scripts (`build.bat`, `g++`, `cmake`).
   - Running automated unit tests and checking outputs.
 - **Verification & Walkthrough**: After execution, the Agent must verify the build/tests and summarize completed changes in `walkthrough.md`.
+

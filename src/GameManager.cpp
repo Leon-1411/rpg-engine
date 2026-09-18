@@ -154,10 +154,9 @@ void GameManager::loadGame() {
     int slotToLoad = mainMenu.showLoadGameMenu(slots);
     
     if (slotToLoad != -1) {
-        playerHero = std::make_shared<Hero>("Blank", HeroClass::WARRIOR, 1, 1, 1, 1);
         story.loadStoryGraph("data/story.json");
-        if (saveManager.loadGame(slotToLoad, *playerHero, story)) {
-            ConsoleUI::printSuccess("Tải game thành công!");
+        if (saveManager.loadGame(slotToLoad, playerHero, story) && playerHero) {
+            ConsoleUI::printSuccess("Tải game thành công! Chào mừng " + playerHero->getName() + " [" + playerHero->getHeroClassName() + "]");
             ConsoleUI::pause();
             changeState(GameState::STORY_MODE);
         } else {

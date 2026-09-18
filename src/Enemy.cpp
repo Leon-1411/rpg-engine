@@ -1,6 +1,6 @@
 /**
  * @file Enemy.cpp
- * @brief Implement Enemy class methods with class-dependent miss chance and DoT status.
+ * @brief Implement Enemy class methods with class-dependent miss chance, Stun, and DoT status.
  * @author Nhật & Antigravity
  */
 
@@ -13,7 +13,7 @@ Enemy::Enemy(const std::string& name, EnemyType type, int hp, int attack, int de
     : name(name), type(type), hp(hp), maxHp(hp), attack(attack), defense(defense),
       armorPenetration(armorPen), critChance(critChance), critDamage(critDamage),
       expReward(expReward), goldReward(goldReward),
-      poisonTurns(0), poisonDamagePerTurn(0),
+      poisonTurns(0), poisonDamagePerTurn(0), stunTurns(0),
       isPoisonous(false), poisonInflictTurns(0), poisonInflictDmg(0),
       regenTurns(0), regenPerTurn(0),
       dropChance(1.0f) {}
@@ -90,6 +90,26 @@ int Enemy::getPoisonTurns() const {
     return poisonTurns;
 }
 
+void Enemy::applyStun(int turns) {
+    stunTurns = std::max(stunTurns, turns);
+}
+
+bool Enemy::isStunned() const {
+    return stunTurns > 0 && hp > 0;
+}
+
+int Enemy::getStunTurns() const {
+    return stunTurns;
+}
+
+int Enemy::takeStunTurn() {
+    if (stunTurns > 0) {
+        stunTurns--;
+        return 1;
+    }
+    return 0;
+}
+
 void Enemy::displayStats() const {
     std::cout << "--- " << name << " ---\n"
               << "HP: " << hp << "/" << maxHp << " | ATK: " << attack << " | DEF: " << defense << "\n"
@@ -98,6 +118,9 @@ void Enemy::displayStats() const {
               << static_cast<int>(critDamage * 100) << "%)\n";
     if (poisonTurns > 0) {
         std::cout << "[STATUS] Poisoned for " << poisonTurns << " more turn(s) (" << poisonDamagePerTurn << " dmg/turn)\n";
+    }
+    if (stunTurns > 0) {
+        std::cout << "[STATUS] Choáng (Stunned) trong " << stunTurns << " lượt!\n";
     }
 }
 
@@ -114,7 +137,7 @@ int Enemy::getExpReward() const { return expReward; }
 int Enemy::getGoldReward() const { return goldReward; }
 std::string Enemy::getSpecialSkillName() const { return ""; }
 
-void Enemy::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
+void Enemy::setHp(int value) { hp = std::min(maxHp, std::max(0, value)); }
 
 void Enemy::setPoisonous(bool value, int turns, int dmg) {
     isPoisonous = value;
@@ -141,12 +164,11 @@ void Enemy::applyRegen(int turns, int healPerTurn) {
 }
 
 int Enemy::processRegen() {
-    if (regenTurns <= 0 || hp <= 0) return 0;
-    int before = hp;
-    heal(regenPerTurn);
-    int actualHealed = hp - before;
+    if (regenTurns <= 0) return 0;
+    int amount = regenPerTurn;
+    heal(amount);
     regenTurns--;
-    return actualHealed;
+    return amount;
 }
 
 bool Enemy::hasRegen() const {
@@ -155,6 +177,14 @@ bool Enemy::hasRegen() const {
 
 int Enemy::getRegenTurns() const {
     return regenTurns;
+}
+
+void Enemy::clearStatusEffects() {
+    poisonTurns = 0;
+    poisonDamagePerTurn = 0;
+    stunTurns = 0;
+    regenTurns = 0;
+    regenPerTurn = 0;
 }
 
 void Enemy::addDropItem(const std::string& itemId) {
@@ -172,7 +202,7 @@ void Enemy::setDropItemIds(const std::vector<std::string>& itemIds) {
 }
 
 void Enemy::setDropChance(float chance) {
-    dropChance = std::clamp(chance, 0.0f, 1.0f);
+    dropChance = std::min(1.0f, std::max(0.0f, chance));
 }
 
 float Enemy::getDropChance() const {
@@ -189,7 +219,6 @@ std::vector<std::string> Enemy::generateLootDrops() const {
 
     float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     if (roll <= dropChance) {
-        // Drop all items or pick random
         return dropItemIds;
     }
     return drops;

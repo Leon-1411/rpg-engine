@@ -61,7 +61,7 @@ bool Shop::buyItem(int shopIndex, Hero& hero) {
         return false;
     }
 
-    hero.addGold(-gItem.buyPrice);
+    hero.removeGold(gItem.buyPrice);
     hero.getInventory().addItem(gItem.item->clone());
     if (gItem.stock > 0) {
         gItem.stock--;

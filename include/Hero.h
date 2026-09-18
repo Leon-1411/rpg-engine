@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "Inventory.h"
 
 enum class HeroClass {
@@ -27,6 +28,7 @@ protected:
     float critDamage;
     bool ignoreArmor;
     int gold;
+    int statPoints; // Unallocated attribute points (Điểm tiềm năng)
 
     // Combat-specific resources and states
     int readyArrows;                  // Ranger's ready arrows
@@ -47,6 +49,10 @@ protected:
     Inventory inventory;
 
 public:
+    // Factory method to instantiate polymorphic subclasses
+    static std::shared_ptr<Hero> createHero(HeroClass heroClass, const std::string& name,
+                                           int hp = 0, int mp = 0, int attack = 0, int defense = 0);
+
     // Auto-setup based on class design
     Hero(const std::string& name, HeroClass heroClass);
 
@@ -64,6 +70,7 @@ public:
     virtual bool useSkill(int skillIndex, int& outDamage, std::string& outMessage);
     virtual bool useSkill(int skillIndex, int& outDamage);
     virtual void takeDamage(int damage);
+    virtual void takeDirectDamage(int damage);
     virtual void heal(int amount);
     virtual void restoreMp(int amount);
     virtual bool addExp(int amount);
@@ -164,4 +171,12 @@ public:
     void increaseMaxMp(int amount);
     void increaseAttack(int amount);
     void increaseDefense(int amount);
+
+    // Stat points allocation (Phân bổ điểm tiềm năng)
+    int getStatPoints() const;
+    void setStatPoints(int points);
+    void addStatPoints(int points);
+    bool allocateStrength(int points = 1);     // +2 ATK / điểm
+    bool allocateIntelligence(int points = 1); // +10 Max MP, +10 MP / điểm
+    bool allocateVitality(int points = 1);     // +15 Max HP, +15 HP, +1 DEF / điểm
 };
