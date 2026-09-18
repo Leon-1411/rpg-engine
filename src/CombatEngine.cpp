@@ -1,110 +1,104 @@
 /**
  * @file CombatEngine.cpp
- * @brief Implement CombatEngine class methods with new damage formula, Parry/Block/Evade/Defend, Items, and Boss patterns.
- * @author Lợi & Antigravity
+ * @brief Turn-based combat engine with full status effects, defense calculation, and skill execution.
+ * @author Quý & Antigravity
  */
 
 #include "CombatEngine.h"
-#include <algorithm>
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 
 CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory)
-    : hero(hero), enemy(enemy), inventory(inventory), turnCount(0), currentState(CombatState::ONGOING) {}
-
-void CombatEngine::setInventory(Inventory* inv) {
-    inventory = inv;
-}
+    : hero(hero), enemy(enemy), inventory(inventory),
+      currentState(CombatState::ONGOING), turnCount(1) {}
 
 void CombatEngine::startBattle() {
-    turnCount = 1;
     currentState = CombatState::ONGOING;
+    turnCount = 1;
     hero.resetCombatStances();
-    std::cout << "\n=======================================================\n";
-    std::cout << "  BATTLE STARTED: " << hero.getName() << " [" << hero.getHeroClassName()
-              << "] VS " << enemy.getName()
-              << (enemy.getType() == EnemyType::BOSS ? " [BOSS]" : " [MINION]") << "\n";
-    std::cout << "=======================================================\n";
+    enemy.clearStatusEffects();
 }
 
-DamageResult CombatEngine::calculateDamage(int attackerAttack, float critChance, float critDmg,
-                                           int armorPen, int defenderDefense, bool ignoreArmor) const {
-    bool isCrit = false;
-    float baseDmg = static_cast<float>(attackerAttack);
+DamageResult CombatEngine::calculateDamage(int baseAttack, float critChance, float critDamage,
+                                           int armorPen, int targetDefense, bool ignoreArmor) {
+    DamageResult result;
+    result.isCrit = false;
 
+    // 1. Calculate defense mitigation
+    int effectiveDefense = targetDefense;
+    if (ignoreArmor) {
+        effectiveDefense = 0;
+    } else {
+        effectiveDefense = std::max(0, effectiveDefense - armorPen);
+    }
+
+    int rawDamage = std::max(1, baseAttack - effectiveDefense);
+
+    // 2. Check critical strike
     if (critChance > 0.0f) {
-        float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        float roll = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
         if (roll <= critChance) {
-            isCrit = true;
-            baseDmg = attackerAttack * (1.0f + critDmg);
+            result.isCrit = true;
+            rawDamage = static_cast<int>(rawDamage * (1.0f + critDamage));
         }
     }
 
-    int finalDmg = static_cast<int>(baseDmg);
-
-    // If target has defense and attacker does not ignore armor
-    if (!ignoreArmor && defenderDefense > 0) {
-        int effectiveArmor = std::max(0, defenderDefense - armorPen);
-        finalDmg = finalDmg - effectiveArmor;
-    }
-
-    // Damage cannot be less than 1
-    finalDmg = std::max(1, finalDmg);
-
-    return { finalDmg, isCrit };
+    result.damage = std::max(1, rawDamage);
+    return result;
 }
 
-int CombatEngine::calculateDamage(int attackerAttack, int defenderDefense) const {
-    return std::max(1, attackerAttack - defenderDefense);
-}
-
-void CombatEngine::processHeroStatusEffects() {
-    if (hero.hasRegen()) {
-        int healed = hero.processRegen();
-        std::cout << "[STATUS: REGEN] " << hero.getName() << " heals for " << healed
-                  << " HP! (HP: " << hero.getHp() << "/" << hero.getMaxHp()
-                  << " | " << hero.getRegenTurns() << " turn(s) left)\n";
-    }
-
-    if (hero.isPoisoned()) {
-        int poisonDmg = hero.takePoisonDamage();
-        std::cout << "[STATUS: POISON DoT] " << hero.getName() << " suffers " << poisonDmg
-                  << " poison damage! (HP: " << hero.getHp() << "/" << hero.getMaxHp()
-                  << " | " << hero.getPoisonTurns() << " turn(s) left)\n";
-    }
-}
-
-void CombatEngine::processEnemyStatusEffects() {
-    if (enemy.hasRegen()) {
-        int healed = enemy.processRegen();
-        std::cout << "[STATUS: REGEN] " << enemy.getName() << " heals for " << healed
-                  << " HP! (HP: " << enemy.getHp() << "/" << enemy.getMaxHp()
-                  << " | " << enemy.getRegenTurns() << " turn(s) left)\n";
-    }
-
-    if (enemy.isPoisoned()) {
-        int poisonDmg = enemy.takePoisonDamage();
-        std::cout << "[STATUS: POISON DoT] " << enemy.getName() << " suffers " << poisonDmg
-                  << " poison damage! (HP: " << enemy.getHp() << "/" << enemy.getMaxHp()
-                  << " | " << enemy.getPoisonTurns() << " turn(s) left)\n";
-    }
+int CombatEngine::calculateDamage(int attackerAtk, int defenderDef) {
+    DamageResult res = calculateDamage(attackerAtk, 0.0f, 0.0f, 0, defenderDef, false);
+    return res.damage;
 }
 
 void CombatEngine::processStatusEffects() {
-    processHeroStatusEffects();
-    processEnemyStatusEffects();
+    // 1. Hero Poison DoT
+    if (hero.isPoisoned()) {
+        int poisonDmg = hero.takePoisonDamage();
+        std::cout << "[HERO POISON] " << hero.getName() << " suffers "
+                  << poisonDmg << " poison damage! (" << hero.getPoisonTurns()
+                  << " turns remaining, HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+    }
+
+    // 2. Hero Regeneration HoT
+    if (hero.hasRegen()) {
+        int healed = hero.processRegen();
+        std::cout << "[HERO REGEN] " << hero.getName() << " heals "
+                  << healed << " HP from Regeneration! (" << hero.getRegenTurns()
+                  << " turns remaining, HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+    }
+
+    // 3. Enemy Poison DoT
+    if (enemy.isPoisoned()) {
+        int poisonDmg = enemy.takePoisonDamage();
+        std::cout << "[ENEMY POISON] " << enemy.getName() << " takes "
+                  << poisonDmg << " poison damage! (" << enemy.getPoisonTurns()
+                  << " turns remaining, HP: " << enemy.getHp() << "/" << enemy.getMaxHp() << ")\n";
+    }
+
+    // 4. Enemy Regeneration HoT
+    if (enemy.hasRegen()) {
+        int healed = enemy.processRegen();
+        std::cout << "[ENEMY REGEN] " << enemy.getName() << " regenerates "
+                  << healed << " HP! (" << enemy.getRegenTurns()
+                  << " turns remaining, HP: " << enemy.getHp() << "/" << enemy.getMaxHp() << ")\n";
+    }
 }
 
 CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
-    if (currentState != CombatState::ONGOING) return currentState;
+    if (isBattleOver()) {
+        return currentState;
+    }
 
-    std::cout << "\n--- Turn " << turnCount << " ---\n";
+    std::cout << "\n--- Lượt " << turnCount << " ---\n";
 
     // Process Status Effects (Poison DoT & Regeneration HoT) for both Hero and Enemy
     processStatusEffects();
 
     if (!enemy.isAlive()) {
-        std::cout << enemy.getName() << " succumbed to deadly poison!\n";
+        std::cout << enemy.getName() << " đã gục ngã vì độc tố!\n";
         hero.addExp(enemy.getExpReward());
         hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
@@ -112,7 +106,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     }
 
     if (!hero.isAlive()) {
-        std::cout << hero.getName() << " succumbed to deadly poison in battle...\n";
+        std::cout << hero.getName() << " đã kiệt sức trước độc tố trong trận đấu...\n";
         currentState = CombatState::ENEMY_VICTORY;
         return currentState;
     }
@@ -123,9 +117,9 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
                                            hero.getArmorPenetration(), enemy.getDefense(), hero.isIgnoreArmor());
         enemy.takeDamage(res.damage);
         if (res.isCrit) {
-            std::cout << "[CRITICAL HIT!] ";
+            std::cout << "[BẠO KÍCH / CRITICAL HIT!] ";
         }
-        std::cout << hero.getName() << " attacks " << enemy.getName() << " for " << res.damage << " damage! ("
+        std::cout << hero.getName() << " tấn công " << enemy.getName() << " gây " << res.damage << " sát thương! ("
                   << enemy.getName() << " HP: " << enemy.getHp() << "/" << enemy.getMaxHp() << ")\n";
 
     } else if (actionChoice == 2) { // Skill
@@ -134,70 +128,84 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         if (hero.useSkill(skillOrItemIndex, skillDmg, skillMsg)) {
             std::cout << skillMsg << "\n";
 
-            if (skillDmg == -3) { // Mage Skill 3: Poison Flask
-                enemy.applyPoison(5, 8);
-                std::cout << "[POISON APPLIED] " << enemy.getName() << " is poisoned for 5 turns (8 dmg/turn)!\n";
-            } else if (skillDmg > 0) { // Damaging Skill
+            if (skillDmg > 0) { // Damaging Skill
                 DamageResult res = calculateDamage(skillDmg, hero.getCritChance(), hero.getCritDamage(),
                                                    hero.getArmorPenetration(), enemy.getDefense(), hero.isIgnoreArmor());
                 enemy.takeDamage(res.damage);
                 if (res.isCrit) {
-                    std::cout << "[CRITICAL HIT!] ";
+                    std::cout << "[BẠO KÍCH / CRITICAL HIT!] ";
                 }
-                std::cout << "Skill deals " << res.damage << " damage to " << enemy.getName() << "! ("
+                std::cout << "Kỹ năng gây " << res.damage << " sát thương lên " << enemy.getName() << "! ("
                           << enemy.getName() << " HP: " << enemy.getHp() << "/" << enemy.getMaxHp() << ")\n";
+
+                // Warrior Shield Block applies Stun
+                if (hero.getHeroClass() == HeroClass::WARRIOR && skillOrItemIndex == 2) {
+                    enemy.applyStun(1);
+                    std::cout << "[HIỆU ỨNG CHOÁNG] " << enemy.getName() << " bị choáng và sẽ mất lượt kế tiếp!\n";
+                }
+
+                // Ranger Poison Arrow applies Poison DoT (12 dmg/turn for 3 turns)
+                if (hero.getHeroClass() == HeroClass::RANGER && skillOrItemIndex == 2) {
+                    enemy.applyPoison(3, 12);
+                    std::cout << "[HIỆU ỨNG ĐỘC TỐ] " << enemy.getName() << " bị nhiễm độc trong 3 lượt (12 dmg/lượt)!\n";
+                }
+
+                // Ranger Rain of Arrows applies Bleed DoT (8 dmg/turn for 2 turns)
+                if (hero.getHeroClass() == HeroClass::RANGER && skillOrItemIndex == 3) {
+                    enemy.applyPoison(2, 8);
+                    std::cout << "[HIỆU ỨNG CHẢY MÁU] " << enemy.getName() << " bị rách vết thương chảy máu trong 2 lượt (8 dmg/lượt)!\n";
+                }
             }
         } else {
-            std::cout << "[SKILL FAILED] " << skillMsg << "\n";
+            std::cout << "[THẤT BẠI] " << skillMsg << "\n";
             return currentState; // Allow re-action if skill was unavailable
         }
 
-    } else if (actionChoice == 3) { // Item (Potion - Mage Exclusive)
-        if (hero.getHeroClass() != HeroClass::MAGE) {
-            std::cout << "[RESTRICTION] Potions are part of the Mage's exclusive craft and skill set! "
-                      << hero.getName() << " [" << hero.getHeroClassName()
-                      << "] cannot use potions. Use Skills or Defend instead!\n";
+    } else if (actionChoice == 3) { // Item (Potion)
+        Inventory* targetInv = inventory ? inventory : &hero.getInventory();
+        if (!targetInv || targetInv->getItemCount() == 0) {
+            std::cout << "[VẬT PHẨM] Túi đồ trống hoặc không có vật phẩm khả dụng!\n";
             return currentState;
         }
-        if (!inventory || inventory->getItemCount() == 0) {
-            std::cout << "[ITEM FAILED] No inventory or no items available to use!\n";
+        if (skillOrItemIndex < 0 || skillOrItemIndex >= targetInv->getItemCount()) {
+            std::cout << "[VẬT PHẨM] Vị trí vật phẩm không hợp lệ (" << skillOrItemIndex + 1 << ")!\n";
             return currentState;
         }
-        if (skillOrItemIndex < 0 || skillOrItemIndex >= inventory->getItemCount()) {
-            std::cout << "[ITEM FAILED] Invalid item index (" << skillOrItemIndex + 1 << ")!\n";
-            return currentState;
-        }
-        Item item = inventory->getItem(skillOrItemIndex);
+        Item item = targetInv->getItem(skillOrItemIndex);
         if (item.getType() != ItemType::POTION) {
-            std::cout << "[ITEM FAILED] " << item.getName() << " is not a usable Potion in battle!\n";
+            std::cout << "[VẬT PHẨM] " << item.getName() << " không phải là Dược phẩm có thể dùng trong chiến đấu!\n";
             return currentState;
         }
         int beforeHp = hero.getHp();
-        if (inventory->useItem(skillOrItemIndex, hero)) {
-            int healed = hero.getHp() - beforeHp;
-            std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
-                      << healed << " HP! (HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+        int beforeMp = hero.getMp();
+        if (targetInv->useItem(skillOrItemIndex, hero)) {
+            int healedHp = hero.getHp() - beforeHp;
+            int restoredMp = hero.getMp() - beforeMp;
+            std::cout << hero.getName() << " đã sử dụng " << item.getName();
+            if (healedHp > 0) std::cout << ", hồi phục " << healedHp << " HP (Hiện tại: " << hero.getHp() << "/" << hero.getMaxHp() << ")";
+            if (restoredMp > 0) std::cout << ", hồi phục " << restoredMp << " MP (Hiện tại: " << hero.getMp() << "/" << hero.getMaxMp() << ")";
+            std::cout << "!\n";
         } else {
-            std::cout << "[ITEM FAILED] Could not use item!\n";
+            std::cout << "[VẬT PHẨM] Không thể sử dụng vật phẩm lúc này!\n";
             return currentState;
         }
 
     } else if (actionChoice == 4) { // Defend
         hero.setIsDefending(true);
-        std::cout << hero.getName() << " assumes a defensive stance, bracing to reduce next incoming damage by 50%!\n";
+        std::cout << hero.getName() << " vào tư thế phòng thủ vững chắc, giảm 50% sát thương nhận vào trong lượt kế tiếp!\n";
 
     } else if (actionChoice == 5) { // Flee
-        std::cout << hero.getName() << " fled from battle!\n";
+        std::cout << hero.getName() << " đã rút lui an toàn khỏi trận chiến!\n";
         currentState = CombatState::FLED;
         return currentState;
     } else {
-        std::cout << "[INVALID ACTION] Choice must be between 1 and 5.\n";
+        std::cout << "[LỰA CHỌN KHÔNG HỢP LỆ] Vui lòng chọn từ 1 đến 5.\n";
         return currentState;
     }
 
     // Check if enemy defeated after player action
     if (!enemy.isAlive()) {
-        std::cout << enemy.getName() << " was defeated!\n";
+        std::cout << enemy.getName() << " đã bị đánh bại!\n";
         hero.addExp(enemy.getExpReward());
         hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
@@ -209,7 +217,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 
     // Check if hero or enemy defeated
     if (!enemy.isAlive()) {
-        std::cout << enemy.getName() << " was defeated!\n";
+        std::cout << enemy.getName() << " đã bị đánh bại!\n";
         hero.addExp(enemy.getExpReward());
         hero.addGold(enemy.getGoldReward());
         currentState = CombatState::HERO_VICTORY;
@@ -217,7 +225,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     }
 
     if (!hero.isAlive()) {
-        std::cout << hero.getName() << " was defeated in battle...\n";
+        std::cout << hero.getName() << " đã gục ngã trong trận chiến...\n";
         currentState = CombatState::ENEMY_VICTORY;
         return currentState;
     }
@@ -230,43 +238,50 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 }
 
 void CombatEngine::processEnemyTurn() {
-    std::cout << "\n[Enemy Turn - " << enemy.getName() << "]\n";
+    std::cout << "\n[Lượt Kẻ Địch - " << enemy.getName() << "]\n";
     if (!enemy.isAlive()) return;
+
+    if (enemy.isStunned()) {
+        enemy.takeStunTurn();
+        std::cout << "[CHOÁNG / STUN] " << enemy.getName() << " đang bị choáng và mất lượt hành động trong hiệp này!\n";
+        hero.resetCombatStances();
+        return;
+    }
 
     int enemyAction = enemy.chooseAction(hero.getHeroClass(), turnCount);
 
     if (enemyAction == 0) { // Enemy Misses or Hesitates
-        std::cout << enemy.getName() << " hesitates and misses the attack!\n";
+        std::cout << enemy.getName() << " chần chừ và tung đòn trượt!\n";
 
         // Warrior Parry penalty: mistimed parry locks skill for 1 turn
         if (hero.getIsParrying()) {
             hero.lockSkills(1);
-            std::cout << "[MISTIMED PARRY] " << hero.getName()
-                      << " anticipated an attack that never came! Skills are locked for 1 turn.\n";
+            std::cout << "[PHẢN ĐÒN HỤT] " << hero.getName()
+                      << " phán đoán sai lầm đòn đánh! Kỹ năng bị khóa trong 1 lượt.\n";
         }
         hero.resetCombatStances();
 
     } else { // Enemy Attacks (Action 1 = Normal, Action 2 = Heavy, Action 3 = Special)
         if (hero.getIsParrying()) {
             // Warrior Parry Success: counterattack
-            DamageResult counterRes = calculateDamage(static_cast<int>(hero.getAttack() * 1.5f),
+            DamageResult counterRes = calculateDamage(static_cast<int>(hero.getEffectiveAttack() * 1.5f),
                                                      hero.getCritChance(), hero.getCritDamage(),
                                                      hero.getArmorPenetration(), enemy.getDefense(), hero.isIgnoreArmor());
             enemy.takeDamage(counterRes.damage);
-            std::cout << "[PARRY SUCCESS!] " << hero.getName() << " parried the incoming attack and countered for "
-                      << counterRes.damage << " damage!\n";
+            std::cout << "[PHẢN ĐÒN THÀNH CÔNG!] " << hero.getName() << " gạt phăng đòn đánh và phản kích gây "
+                      << counterRes.damage << " sát thương!\n";
 
         } else if (hero.getIsBlocking()) {
             // Warrior Block Success: 0 damage
-            std::cout << "[BLOCK SUCCESS!] " << hero.getName()
-                      << " raised shield into Block stance! 100% damage nullified (0 damage taken).\n";
+            std::cout << "[ĐỠ ĐÒN THÀNH CÔNG!] " << hero.getName()
+                      << " giương khiên kiên cố, chặn đứng 100% sát thương nhận vào (0 damage)!\n";
 
         } else if (hero.getIsEvading()) {
             // Ranger Evade Success: dodge 100% and reload 5 ready arrows
             hero.addReadyArrows(5);
-            std::cout << "[EVADE SUCCESS!] " << hero.getName()
-                      << " swiftly dodged " << enemy.getName()
-                      << "'s strike (0 damage taken) and reloaded +5 Ready Arrows! (Current: "
+            std::cout << "[NÉ TRÁNH HOÀN HẢO!] " << hero.getName()
+                      << " thoăn thoắt né tránh đòn đánh của " << enemy.getName()
+                      << " (0 damage) và nạp thêm +5 Mũi tên! (Hiện có: "
                       << hero.getReadyArrows() << ")\n";
 
         } else {
@@ -276,37 +291,37 @@ void CombatEngine::processEnemyTurn() {
 
             if (enemyAction == 2) {
                 baseAtk = static_cast<int>(baseAtk * 1.5f);
-                std::cout << "[BOSS HEAVY ATTACK!] " << enemy.getName() << " unleashes a devastating smash!\n";
+                std::cout << "[ĐÒN ĐÁNH CỰC MẠNH!] " << enemy.getName() << " tung đòn giáng búa ngàn cân!\n";
             } else if (enemyAction == 3) {
                 baseAtk = static_cast<int>(baseAtk * 1.2f);
                 pen += 10; // Dark surge has increased armor penetration
-                std::cout << "[BOSS SPECIAL SKILL!] " << enemy.getName() << " channels Dark Surge with high penetration!\n";
+                std::cout << "[KỸ NĂNG ĐẶC BIỆT CỦA BOSS!] " << enemy.getName() << " triệu hồi ma thuật hắc ám xuyên giáp!\n";
             }
 
             DamageResult res = calculateDamage(baseAtk, enemy.getCritChance(), enemy.getCritDamage(),
-                                               pen, hero.getDefense(), false);
+                                               pen, hero.getEffectiveDefense(), false);
 
             // Defend stance reduces damage by 50%
             if (hero.getIsDefending()) {
                 int originalDamage = res.damage;
                 res.damage = std::max(1, res.damage / 2);
-                std::cout << "[DEFEND GUARD] " << hero.getName() << " guarded against the strike! Reduced damage from "
-                          << originalDamage << " to " << res.damage << ".\n";
+                std::cout << "[THẾ THỦ GIẢM SÁT THƯƠNG] " << hero.getName() << " phòng ngự vững vàng! Giảm sát thương từ "
+                          << originalDamage << " xuống " << res.damage << ".\n";
             }
 
-            hero.takeDamage(res.damage);
+            hero.takeDirectDamage(res.damage);
             if (res.isCrit) {
-                std::cout << "[CRITICAL HIT!] ";
+                std::cout << "[BẠO KÍCH / CRITICAL HIT!] ";
             }
-            std::cout << enemy.getName() << " hits " << hero.getName() << " for " << res.damage << " damage! ("
+            std::cout << enemy.getName() << " tấn công " << hero.getName() << " gây " << res.damage << " sát thương! ("
                       << hero.getName() << " HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
 
             // Poisonous Enemy trait: applies poison to Hero on successful hit
             if (enemy.getIsPoisonous() && hero.isAlive()) {
                 hero.applyPoison(enemy.getPoisonInflictTurns(), enemy.getPoisonInflictDmg());
-                std::cout << "[VENOM INFLICTED] " << enemy.getName() << " injects venom! "
-                          << hero.getName() << " is poisoned for " << enemy.getPoisonInflictTurns()
-                          << " turns (" << enemy.getPoisonInflictDmg() << " dmg/turn)!\n";
+                std::cout << "[NHIỄM ĐỘC TỐ] " << enemy.getName() << " găm nọc độc vào người! "
+                          << hero.getName() << " bị trúng độc trong " << enemy.getPoisonInflictTurns()
+                          << " lượt (" << enemy.getPoisonInflictDmg() << " dmg/lượt)!\n";
             }
         }
 
@@ -330,59 +345,53 @@ std::string CombatEngine::renderBar(int current, int max, int length) {
     if (max <= 0) max = 1;
     current = std::max(0, std::min(current, max));
     int filled = (current * length) / max;
-    int empty = length - filled;
     std::string bar = "[";
-    bar.append(filled, '=');
-    bar.append(empty, ' ');
-    bar.append("] " + std::to_string(current) + "/" + std::to_string(max));
+    for (int i = 0; i < length; ++i) {
+        if (i < filled) bar += "=";
+        else bar += " ";
+    }
+    bar += "] " + std::to_string(current) + "/" + std::to_string(max);
     return bar;
 }
 
-void CombatEngine::displayBattleStatus(std::ostream& out) const {
+void CombatEngine::displayBattleStatus(std::ostream& out) {
     out << "\n=======================================================\n";
-    out << " TURN " << turnCount << " | BATTLE STATUS\n";
+    out << "  " << hero.getName() << " [" << hero.getHeroClassName() << " Lv." << hero.getLevel() << "]"
+        << "  vs  " << enemy.getName() << "\n";
     out << "-------------------------------------------------------\n";
-    out << " " << hero.getName() << " [" << hero.getHeroClassName() << " Lv." << hero.getLevel() << "]\n";
-    out << "   HP:  " << renderBar(hero.getHp(), hero.getMaxHp(), 20) << "\n";
-    out << "   ATK: " << hero.getAttack() << " | DEF: " << hero.getDefense();
-    if (hero.getHeroClass() == HeroClass::RANGER) {
-        out << " | Arrows: " << hero.getReadyArrows();
-    }
+    out << "  Hero  HP: " << renderBar(hero.getHp(), hero.getMaxHp(), 15)
+        << " | MP: " << renderBar(hero.getMp(), hero.getMaxMp(), 10) << "\n";
+    out << "  Enemy HP: " << renderBar(enemy.getHp(), enemy.getMaxHp(), 15) << "\n";
+
     if (hero.isPoisoned()) {
-        out << " | [POISON: " << hero.getPoisonTurns() << "t, " << hero.getPoisonDamagePerTurn() << " dmg/t]";
+        out << "  * Hero Poison: " << hero.getPoisonTurns() << " turns (" << hero.getPoisonDamagePerTurn() << " dmg/t)\n";
     }
     if (hero.hasRegen()) {
-        out << " | [REGEN: " << hero.getRegenTurns() << "t, +" << hero.getRegenPerTurn() << " HP/t]";
+        out << "  * Hero Regen: " << hero.getRegenTurns() << " turns (+" << hero.getRegenPerTurn() << " HP/t)\n";
     }
-    out << "\n";
-    out << "   CD:  [1] " << hero.getSkillCooldown(1) << "t | [2] "
-        << hero.getSkillCooldown(2) << "t | [3] " << hero.getSkillCooldown(3) << "t\n";
-    out << " VS\n";
-    out << " " << enemy.getName() << (enemy.getType() == EnemyType::BOSS ? " [BOSS]" : " [MINION]") << "\n";
-    out << "   HP:  " << renderBar(enemy.getHp(), enemy.getMaxHp(), 20) << "\n";
-    out << "   ATK: " << enemy.getAttack() << " | DEF: " << enemy.getDefense();
     if (enemy.isPoisoned()) {
-        out << " | [POISON: " << enemy.getPoisonTurns() << "t]";
+        out << "  * Enemy Poison: " << enemy.getPoisonTurns() << " turns (" << enemy.getPoisonDamagePerTurn() << " dmg/t)\n";
     }
     if (enemy.hasRegen()) {
-        out << " | [REGEN: " << enemy.getRegenTurns() << "t]";
+        out << "  * Enemy Regen: " << enemy.getRegenTurns() << " turns (+" << enemy.getRegenPerTurn() << " HP/t)\n";
     }
-    out << "\n=======================================================\n";
+    out << "=======================================================\n";
 }
 
-void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
+void CombatEngine::runBattleLoop(std::istream& in, std::ostream& out) {
     startBattle();
+    out << "\nTrận chiến bắt đầu giữa " << hero.getName() << " và " << enemy.getName() << "!\n";
 
     while (!isBattleOver()) {
         displayBattleStatus(out);
 
-        out << "Actions:\n";
-        out << " 1. Normal Attack\n";
-        out << " 2. Skill\n";
-        out << " 3. Item (Potions - Mage exclusive)\n";
-        out << " 4. Defend (Reduce damage by 50%)\n";
-        out << " 5. Flee\n";
-        out << "Choose action (1-5): ";
+        out << "\nChọn hành động:\n";
+        out << " 1. Đánh thường (Normal Attack)\n";
+        out << " 2. Kỹ năng (Skill)\n";
+        out << " 3. Dược phẩm (Item / Potion)\n";
+        out << " 4. Phòng thủ (Defend - Giảm 50% sát thương)\n";
+        out << " 5. Bỏ chạy (Flee)\n";
+        out << "Lựa chọn của bạn (1-5): ";
 
         int choice = 0;
         if (!(in >> choice)) {
@@ -391,44 +400,30 @@ void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
 
         int subIndex = -1;
         if (choice == 2) {
-            out << "Choose Skill:\n";
-            if (hero.getHeroClass() == HeroClass::WARRIOR) {
-                out << " 1. Sword Slash (Damage x1.8, CD 1) [CD: " << hero.getSkillCooldown(1) << "]\n";
-                out << " 2. Parry (Counter enemy attack, CD 1) [CD: " << hero.getSkillCooldown(2) << "]\n";
-                out << " 3. Shield Block (100% block, CD 5) [CD: " << hero.getSkillCooldown(3) << "]\n";
-            } else if (hero.getHeroClass() == HeroClass::RANGER) {
-                out << " 1. Evade & Reload (Dodge +5 arrows, CD 2) [CD: " << hero.getSkillCooldown(1) << "]\n";
-                out << " 2. Aimed Shot (Cost 1 arrow, CD 1) [CD: " << hero.getSkillCooldown(2) << "]\n";
-                out << " 3. Arrow Barrage (Unleash all arrows, CD 5) [CD: " << hero.getSkillCooldown(3) << "]\n";
-            } else if (hero.getHeroClass() == HeroClass::MAGE) {
-                out << " 1. Energy Ray (Damage x1.2, CD 1) [CD: " << hero.getSkillCooldown(1) << "]\n";
-                out << " 2. Healing Potion (Heal 30 HP, CD 3) [CD: " << hero.getSkillCooldown(2) << "]\n";
-                out << " 3. Poison Flask (Poison 5 turns, CD 5) [CD: " << hero.getSkillCooldown(3) << "]\n";
-            }
-            out << "Select skill (1-3): ";
+            out << "Danh sách kỹ năng của " << hero.getName() << ":\n";
+            hero.displaySkills();
+            out << "Chọn kỹ năng (1-3): ";
             in >> subIndex;
         } else if (choice == 3) {
-            if (hero.getHeroClass() != HeroClass::MAGE) {
-                out << "[RESTRICTION] Potions are part of the Mage's exclusive skillset! "
-                    << hero.getName() << " [" << hero.getHeroClassName()
-                    << "] cannot use potions. Use Skills or Defend instead!\n";
-            } else if (!inventory || inventory->getItemCount() == 0) {
-                out << "Your inventory is empty!\n";
+            Inventory* targetInv = inventory ? inventory : &hero.getInventory();
+            if (!targetInv || targetInv->getItemCount() == 0) {
+                out << "Túi đồ của bạn đang trống!\n";
             } else {
-                out << "Potions in Inventory:\n";
+                out << "Các bình thuốc trong túi đồ:\n";
                 std::vector<int> potionIndices;
-                for (int i = 0; i < inventory->getItemCount(); ++i) {
-                    Item item = inventory->getItem(i);
+                for (int i = 0; i < targetInv->getItemCount(); ++i) {
+                    Item item = targetInv->getItem(i);
                     if (item.getType() == ItemType::POTION) {
                         potionIndices.push_back(i);
                         out << " " << potionIndices.size() << ". " << item.getName()
-                            << " (Heal +" << item.getStatValue() << " HP)\n";
+                            << " (" << (item.getIsManaPotion() ? "Hồi MP +" : "Hồi HP +")
+                            << item.getStatValue() << ")\n";
                     }
                 }
                 if (potionIndices.empty()) {
-                    out << "No potions found in inventory!\n";
+                    out << "Không có bình thuốc nào trong túi đồ!\n";
                 } else {
-                    out << "Select potion (1-" << potionIndices.size() << "): ";
+                    out << "Chọn bình thuốc (1-" << potionIndices.size() << "): ";
                     int pSelect = 0;
                     in >> pSelect;
                     if (pSelect >= 1 && pSelect <= static_cast<int>(potionIndices.size())) {
@@ -443,12 +438,12 @@ void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
 
     out << "\n=======================================================\n";
     if (currentState == CombatState::HERO_VICTORY) {
-        out << "  VICTORY! " << hero.getName() << " defeated " << enemy.getName() << "!\n";
-        out << "  Reward: +" << enemy.getExpReward() << " EXP, +" << enemy.getGoldReward() << " Gold!\n";
+        out << "  CHIẾN THẮNG! " << hero.getName() << " đã đánh bại " << enemy.getName() << "!\n";
+        out << "  Phần thưởng: +" << enemy.getExpReward() << " EXP, +" << enemy.getGoldReward() << " Vàng!\n";
     } else if (currentState == CombatState::ENEMY_VICTORY) {
-        out << "  DEFEAT! " << hero.getName() << " has fallen in battle...\n";
+        out << "  THẤT BẠI! " << hero.getName() << " đã ngã xuống nơi chiến trường...\n";
     } else if (currentState == CombatState::FLED) {
-        out << "  " << hero.getName() << " successfully escaped from battle.\n";
+        out << "  " << hero.getName() << " đã tẩu thoát an toàn khỏi trận đấu.\n";
     }
     out << "=======================================================\n";
 }
