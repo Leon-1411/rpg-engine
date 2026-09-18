@@ -1,12 +1,21 @@
-# Planning & Approval Rule
+# Planning & Execution Rules / Quy Tắc Lập Kế Hoạch & Phê Duyệt
 
-## 1. Quy Định Lập Kế Hoạch (Implementation Plan)
-- Đối với các yêu cầu phát triển tính năng mới, thay đổi thiết kế cốt tryện, hệ thống kinh tế/gameplay, hoặc refactor kiến trúc lớn, Agent BẫT BUỘC phại tạo hoặc cập nhật tài liệu `implementation_plan.md` trước.
-- Kếh hoạch phẨ� mô tả rõ ràng: mục tiêu thay đổi, danh sách file thay đổi/tạo mới, và kế hoạch kiểm thử tự động (Unit Tests/Build).
+## 1. When to Plan (Quy định lập Kế hoạch thực thi)
+- **Mandatory Planning**: For any task involving new feature implementation, story/gameplay logic changes, economy/system updates, significant refactoring, or multi-file code modifications, the Agent **MUST** create or update the `implementation_plan.md` artifact first.
+- **Tài liệu Kế hoạch**: Kế hoạch phải mô tả rõ mục tiêu thay đổi, danh sách các file cần sửa/tạo mới, và phương án kiểm thử tự động (Unit Tests / Build).
+- **Exemptions (Tác vụ nhỏ/Một lần)**: For purely investigatory questions ("explain X", "where is Y"), simple single-line fixes, syntax corrections, or minor follow-up tweaks to an already-approved plan, the Agent MAY execute directly without creating a plan.
 
-## 2. Bắt Buộc Phê Duyệt Thủ Công (Manual Approval Required)
-- Sau khi tạo hoặc cập nhật `implementation_plan.md`, Agent BẫT BUỘC PHẦI DẠNG LẠI (kết thúc lượt tương tác) và chờ người dùng xem zét, phê duyệt (bằng nút "Proceed" hoặc tin nhắn xác nhận).
-- Tuyệt đối KHÔNG ĐƯỢC tự ý bắt đầu sửa đổi mã nguồn hoặc chạy các thao tác chỉnh sủa trước khi nhận được sự đồng ý rõ ràng từ người dùng.
+---
 
-## 3. Cấp Quyền Hành Động Tự Động (Tool Execution Autonomy)
-- Khi kế hoạch Đã ĐƯỢC người dùng phê duyệt, Agent được toàn quyền tự động thực thi các công cụ (chạy command, biển dịch g++, chỉnh sửa file mã nguồn, chạy unit tests) để hoàn thành nhiệm vụ nhanh chóng mà không cần hỏi lại ở từng buớc nhỏ.
+## 2. Mandatory Manual User Approval (Bắt buộc phê duyệt thủ công)
+- **STOP and Block**: After creating or updating `implementation_plan.md`, the Agent **MUST STOP** its turn immediately and wait for explicit user approval (via the "Proceed" button or explicit confirmation message).
+- **DO NOT Pre-execute**: The Agent **MUST NOT** modify any source code, create new project files, or run mutating commands prior to receiving explicit user approval for the plan.
+
+---
+
+## 3. Tool Execution Autonomy (Quyền tự chủ khi thực thi)
+- **Full Autonomy Upon Approval**: Once the user approves the plan, the Agent has full autonomy to execute all necessary tool actions in sequence without asking for permission at every micro-step:
+  - Editing/creating source code files.
+  - Running compilation scripts (`build.bat`, `g++`, `cmake`).
+  - Running automated unit tests and checking outputs.
+- **Verification & Walkthrough**: After execution, the Agent must verify the build/tests and summarize completed changes in `walkthrough.md`.
