@@ -164,7 +164,18 @@ std::shared_ptr<BossMonster> BossFactory::createFromJsonObject(const std::string
     std::string skill = j.value("specialSkill", "Infernal Cataclysm");
     int healAmount = j.value("healAmount", 25);
 
-    return std::make_shared<BossMonster>(id, name, hp, attack, defense, expReward, goldReward, desc, skill, healAmount);
+    auto boss = std::make_shared<BossMonster>(id, name, hp, attack, defense, expReward, goldReward, desc, skill, healAmount);
+    if (j.contains("dropItems") && j["dropItems"].is_array()) {
+        std::vector<std::string> drops;
+        for (const auto& itm : j["dropItems"]) {
+            drops.push_back(itm.get<std::string>());
+        }
+        boss->setDropItemIds(drops);
+    }
+    if (j.contains("dropChance")) {
+        boss->setDropChance(j["dropChance"].get<float>());
+    }
+    return boss;
 }
 
 std::shared_ptr<BossMonster> BossFactory::createFromJson(const std::string& id, const std::string& filepath) {

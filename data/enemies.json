@@ -9,7 +9,9 @@
     "expReward": 40,
     "goldReward": 10,
     "description": "A small, cunning creature that strikes quickly from the shadows.",
-    "specialSkill": "Quick Strike"
+    "specialSkill": "Quick Strike",
+    "dropItems": ["pot_01"],
+    "dropChance": 1.0
   },
   "skeleton": {
     "name": "Skeleton Warrior",
@@ -21,7 +23,9 @@
     "expReward": 65,
     "goldReward": 20,
     "description": "An undead soldier wielding a rusty sword with relentless determination.",
-    "specialSkill": "Bone Pierce"
+    "specialSkill": "Bone Pierce",
+    "dropItems": ["wpn_01", "pot_01"],
+    "dropChance": 1.0
   },
   "orc": {
     "name": "Orc Berserker",
@@ -33,7 +37,9 @@
     "expReward": 100,
     "goldReward": 35,
     "description": "A muscular beast fueled by bloodlust, hitting harder when enraged.",
-    "specialSkill": "Heavy Slam"
+    "specialSkill": "Heavy Slam",
+    "dropItems": ["arm_01", "pot_01"],
+    "dropChance": 1.0
   },
   "dark_knight": {
     "name": "Dark Knight",
@@ -45,7 +51,9 @@
     "expReward": 150,
     "goldReward": 60,
     "description": "A fallen warrior encased in cursed armor, wielding dark magic.",
-    "specialSkill": "Shadow Slash"
+    "specialSkill": "Shadow Slash",
+    "dropItems": ["wpn_01", "arm_01"],
+    "dropChance": 1.0
   },
   "Wild_Mercenary": {
     "name": "Wild Mercenary",
@@ -57,7 +65,9 @@
     "expReward": 75,
     "goldReward": 25,
     "description": "Lính đánh thuê và thợ săn du mục của Bộ Tộc Tự Do, canh giữ ranh giới Rừng Rậm Huyết Nguyệt.",
-    "specialSkill": "Wild Ambush"
+    "specialSkill": "Wild Ambush",
+    "dropItems": ["pot_01", "wpn_03"],
+    "dropChance": 1.0
   },
   "Demon_Scout": {
     "name": "Demon Scout",
@@ -69,7 +79,9 @@
     "expReward": 80,
     "goldReward": 30,
     "description": "Trinh sát quỷ nhanh nhẹn của Ma tộc tuần tra vùng biên giới Trăng Máu.",
-    "specialSkill": "Shadow Dart"
+    "specialSkill": "Shadow Dart",
+    "dropItems": ["pot_01", "pot_02"],
+    "dropChance": 1.0
   },
   "Demon_Berserker": {
     "name": "Demon Berserker",
@@ -81,7 +93,9 @@
     "expReward": 130,
     "goldReward": 50,
     "description": "Chiến binh quỷ cuồng nộ canh giữ lối vào Ma Điện khi người chơi đột kích trực diện.",
-    "specialSkill": "Demonic Frenzy"
+    "specialSkill": "Demonic Frenzy",
+    "dropItems": ["GreaterHealthPotion", "arm_01"],
+    "dropChance": 1.0
   },
   "Demon_King_Malakor": {
     "name": "Demon King Malakor",
@@ -93,7 +107,9 @@
     "goldReward": 200,
     "description": "Thống lĩnh Ma tộc mang sức mạnh hỏa ngục bóng tối căm hờn 500 năm.",
     "specialSkill": "Hellfire Cataclysm",
-    "healAmount": 20
+    "healAmount": 20,
+    "dropItems": ["GreaterHealthPotion", "wpn_02"],
+    "dropChance": 1.0
   },
   "General_Aldric": {
     "name": "General Aldric",
@@ -105,7 +121,9 @@
     "goldReward": 220,
     "description": "Vị tướng huyền thoại của Eldoria với tấm khiên sấm sét kiên cố bảo vệ buồng The Core.",
     "specialSkill": "Thunderous Judgement",
-    "healAmount": 15
+    "healAmount": 15,
+    "dropItems": ["GreaterHealthPotion", "arm_01"],
+    "dropChance": 1.0
   },
   "The_Core_Guardian": {
     "name": "The Core Guardian",
@@ -117,7 +135,9 @@
     "goldReward": 300,
     "description": "Cỗ máy hộ vệ cổ đại khổng lồ được thiết kế để tiêu diệt bất kỳ kẻ xâm nhập nào.",
     "specialSkill": "Arcane Beam Overload",
-    "healAmount": 30
+    "healAmount": 30,
+    "dropItems": ["GreaterHealthPotion", "arm_03"],
+    "dropChance": 1.0
   },
   "Arcane_Council_Enforcers": {
     "name": "Arcane Council Enforcers",
@@ -129,7 +149,9 @@
     "goldReward": 180,
     "description": "Đội cấm vệ pháp sư tinh nhuệ bảo vệ trận địa phong ấn xung quanh đền thờ Core.",
     "specialSkill": "Nullification Wave",
-    "healAmount": 20
+    "healAmount": 20,
+    "dropItems": ["GreaterHealthPotion", "pot_02"],
+    "dropChance": 1.0
   },
   "Archmage_Morvath": {
     "name": "Archmage Morvath",
@@ -141,7 +163,9 @@
     "goldReward": 250,
     "description": "Đại Pháp Sư tối cao mưu mô của Hội đồng Pháp sư, thao túng ma thuật không gian nguyên tố.",
     "specialSkill": "Reality Shatter",
-    "healAmount": 25
+    "healAmount": 25,
+    "dropItems": ["GreaterHealthPotion", "wpn_02"],
+    "dropChance": 1.0
   },
   "Multi-Faction Battle": {
     "name": "Multi-Faction Battle",
@@ -153,7 +177,9 @@
     "goldReward": 300,
     "description": "Trận huyết chiến hỗn loạn giữa tàn quân Hoàng Gia, Ma tộc và Pháp sư trước cổng phong ấn The Core.",
     "specialSkill": "Chaos Tempest",
-    "healAmount": 25
+    "healAmount": 25,
+    "dropItems": ["GreaterHealthPotion", "wpn_01", "arm_01"],
+    "dropChance": 1.0
   },
   "Multi_Faction_Battle": {
     "name": "Multi-Faction Battle",
@@ -165,7 +191,9 @@
     "goldReward": 300,
     "description": "Trận huyết chiến hỗn loạn giữa tàn quân Hoàng Gia, Ma tộc và Pháp sư trước cổng phong ấn The Core.",
     "specialSkill": "Chaos Tempest",
-    "healAmount": 25
+    "healAmount": 25,
+    "dropItems": ["GreaterHealthPotion", "wpn_01", "arm_01"],
+    "dropChance": 1.0
   },
   "dragon_lord": {
     "name": "Dragon Lord",
@@ -177,6 +205,8 @@
     "goldReward": 150,
     "description": "Ancient dread sovereign with crushing power and fiery fury, 5x stronger than regular minions.",
     "specialSkill": "Infernal Cataclysm",
-    "healAmount": 25
+    "healAmount": 25,
+    "dropItems": ["GreaterHealthPotion", "wpn_02", "arm_01"],
+    "dropChance": 1.0
   }
 }

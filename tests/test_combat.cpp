@@ -184,7 +184,31 @@ int main() {
     assert(bossMonster.chooseAction(HeroClass::WARRIOR, 4) == 1); // Loops back
 
     // =========================================================
-    // 8. Interactive Simulation via std::stringstream
+    // 8. Potion Usage in Combat (Action 3)
+    // =========================================================
+    Hero potHero("PotionUser", HeroClass::MAGE, 100, 50, 10, 5);
+    potHero.takeDamage(40); // HP: 60/100
+    potHero.setMp(10);      // MP: 10/50
+    Inventory potInv(5);
+    potInv.addItem(std::make_shared<Potion>("pot_hp", "Health Potion", "Heal HP", 30, false, 2));
+    potInv.addItem(std::make_shared<Potion>("pot_mp", "Mana Potion", "Restore MP", 25, true, 1));
+    Enemy idleDummy("IdleTarget", EnemyType::MINION, 100, 0, 0, 10, 5);
+
+    CombatEngine potEngine(potHero, idleDummy, &potInv);
+    potEngine.startBattle();
+
+    // Use Health Potion (index 0): 60 + 30 = 90 HP, then enemy min attack deals 1 dmg -> 89 HP
+    potEngine.executeTurn(3, 0);
+    assert(potHero.getHp() == 89);
+    assert(potInv.getItemCountById("pot_hp") == 1);
+
+    // Use Mana Potion (index 1): 10 + 25 = 35 MP
+    potEngine.executeTurn(3, 1);
+    assert(potHero.getMp() == 35);
+    assert(!potInv.hasItem("pot_mp")); // consumed single qty
+
+    // =========================================================
+    // 9. Interactive Simulation via std::stringstream
     // =========================================================
     Hero simHero("SimHero", HeroClass::WARRIOR, 100, 50, 10, 0, 0.0f, 0.0f);
     Enemy simEnemy("Goblin", EnemyType::MINION, 30, 5, 0, 20, 10);
@@ -194,6 +218,30 @@ int main() {
     simEngine.runInteractiveBattle(inputSim, outputSim);
     assert(simEngine.getState() == CombatState::HERO_VICTORY);
 
-    std::cout << "[PASS] All Edge Cases, Status Effects, and Combat tests passed successfully!\n";
+    // =========================================================
+    // 10. Loot Drops & Auto-collection in Victory
+    // =========================================================
+    Hero lootHero("LootSeeker", HeroClass::WARRIOR, 100, 50, 50, 10, 0, 0.0f, 0.0f);
+    Enemy lootEnemy("TreasureGoblin", EnemyType::MINION, 20, 5, 0, 75, 50);
+    lootEnemy.setDropItemIds({"pot_01", "wpn_01"});
+    lootEnemy.setDropChance(1.0f); // 100% drop rate for both items
+    assert(lootEnemy.getDropItemIds().size() == 2);
+    assert(lootEnemy.getDropChance() == 1.0f);
+
+    int initialGold = lootHero.getGold();
+    int initialExp = lootHero.getExp();
+
+    CombatEngine lootEngine(lootHero, lootEnemy);
+    lootEngine.startBattle();
+    lootEngine.executeTurn(1); // One-shot kill with 50 ATK vs 20 HP
+
+    assert(lootEngine.getState() == CombatState::HERO_VICTORY);
+    assert(lootHero.getGold() == initialGold + 50);
+    assert(lootHero.getExp() == initialExp + 75);
+    assert(lootEngine.getLastLootDrops().size() == 2);
+    assert(lootHero.getInventory().hasItem("pot_01"));
+    assert(lootHero.getInventory().hasItem("wpn_01"));
+
+    std::cout << "[PASS] All Edge Cases, Status Effects, Combat, and Loot Drop tests passed successfully!\n";
     return 0;
 }

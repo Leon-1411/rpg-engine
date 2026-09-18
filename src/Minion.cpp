@@ -190,18 +190,38 @@ std::shared_ptr<Minion> MinionFactory::createFromJsonObject(const std::string& i
     std::string desc = j.value("description", "");
     std::string skill = j.value("specialSkill", "");
 
+    std::shared_ptr<Minion> minion = nullptr;
     switch (mType) {
         case MinionType::GOBLIN:
-            return std::make_shared<Goblin>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            minion = std::make_shared<Goblin>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
         case MinionType::SKELETON:
-            return std::make_shared<Skeleton>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            minion = std::make_shared<Skeleton>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
         case MinionType::ORC:
-            return std::make_shared<Orc>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            minion = std::make_shared<Orc>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
         case MinionType::DARK_KNIGHT:
-            return std::make_shared<DarkKnight>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            minion = std::make_shared<DarkKnight>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
         default:
-            return std::make_shared<Minion>(id, name, mType, hp, attack, defense, expReward, goldReward, desc, skill);
+            minion = std::make_shared<Minion>(id, name, mType, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
     }
+
+    if (minion) {
+        if (j.contains("dropItems") && j["dropItems"].is_array()) {
+            std::vector<std::string> drops;
+            for (const auto& itm : j["dropItems"]) {
+                drops.push_back(itm.get<std::string>());
+            }
+            minion->setDropItemIds(drops);
+        }
+        if (j.contains("dropChance")) {
+            minion->setDropChance(j["dropChance"].get<float>());
+        }
+    }
+    return minion;
 }
 
 std::shared_ptr<Minion> MinionFactory::createFromJson(const std::string& id, const std::string& filepath) {

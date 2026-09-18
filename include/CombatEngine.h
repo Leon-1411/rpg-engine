@@ -27,10 +27,12 @@ private:
     int turnCount;
     CombatState currentState;
     int consecutiveZeroDamageTurns;
+    std::vector<std::shared_ptr<Item>> lastLootDrops;
 
     void processHeroStatusEffects();
     void processEnemyStatusEffects();
     void processStatusEffects();
+    void processVictoryRewards();
 
 public:
     static constexpr int MAX_BATTLE_TURNS = 100;
@@ -54,9 +56,11 @@ public:
     bool isBattleOver() const;
     CombatState getState() const;
     int getTurnCount() const;
+    const std::vector<std::shared_ptr<Item>>& getLastLootDrops() const;
 
     // UI and Interactive Console Battle Helpers
     static std::string renderBar(int current, int max, int length = 15);
     void displayBattleStatus(std::ostream& out = std::cout) const;
     void runInteractiveBattle(std::istream& in = std::cin, std::ostream& out = std::cout);
 };
+
