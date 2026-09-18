@@ -127,7 +127,7 @@ void testPolymorphismAndActions() {
 
 void testMinionCombat() {
     std::cout << "Testing Minion in CombatEngine...\n";
-    Hero hero("Warrior Hero", HeroClass::WARRIOR, 150, 40, 25, 10);
+    Hero hero("Warrior Hero", HeroClass::WARRIOR, 150, 40, 25, 10, 0, 0.0f, 0.0f);
     auto skeleton = MinionFactory::createFromJson("skeleton", "data/enemies.json");
     assert(skeleton != nullptr);
 

@@ -63,9 +63,9 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
-    : name(name), heroClass(heroClass), level(1), exp(0), gold(0), hp(hp), maxHp(hp), mp(50), maxMp(50),
+    : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(50), maxMp(50),
       attack(attack), defense(defense), armorPenetration(armorPen),
-      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
+      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor), gold(0),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns({0, 0, 0}),
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
@@ -80,9 +80,9 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
-    : name(name), heroClass(heroClass), level(1), exp(0), gold(0), hp(hp), maxHp(hp), mp(mp), maxMp(mp),
+    : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(mp), maxMp(mp),
       attack(attack), defense(defense), armorPenetration(armorPen),
-      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
+      critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor), gold(0),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns({0, 0, 0}),
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
@@ -204,9 +204,7 @@ bool Hero::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
 
 void Hero::takeDamage(int damage) {
     if (damage <= 0) return;
-    // Dùng getEffectiveDefense() để cộng dồn bonus Armor đang trang bị
-    int effectiveDamage = std::max(1, damage - getEffectiveDefense());
-    hp = std::max(0, hp - effectiveDamage);
+    hp = std::max(0, hp - damage);
 }
 
 void Hero::heal(int amount) {
@@ -355,7 +353,7 @@ int Hero::getEffectiveDefense() const {
     return defense + inventory.getEquippedArmorBonus();
 }
 
-void Hero::setHp(int value) { hp = std::max(0, std::min(value, maxHp)); }
+void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setLevel(int value) { level = value; }
 void Hero::setExp(int value) { exp = value; }
 
@@ -421,7 +419,7 @@ void Hero::clearStatusEffects() {
 
 int Hero::getMp() const { return mp; }
 int Hero::getMaxMp() const { return maxMp; }
-void Hero::setMp(int value) { mp = std::max(0, std::min(value, maxMp)); }
+void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
 void Hero::setMaxHp(int value) { maxHp = std::max(1, value); hp = std::min(hp, maxHp); }
 void Hero::setMaxMp(int value) { maxMp = std::max(0, value); mp = std::min(mp, maxMp); }
 void Hero::setAttack(int value) { attack = std::max(0, value); }

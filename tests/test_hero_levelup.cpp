@@ -38,7 +38,7 @@ void testWarriorLevelUp() {
     assert(warrior.getDefense() == 8);
 
     // Gây sát thương để HP và MP giảm trước khi lên cấp
-    warrior.takeDamage(30); // damage nhận: 30 - 8 = 22 -> HP còn 98
+    warrior.takeDamage(22); // HP: 120 - 22 = 98
     int skillDmg = 0;
     bool skillUsed = warrior.useSkill(1, skillDmg); // Power Slash tốn 10 MP -> MP còn 20
     assert(skillUsed);

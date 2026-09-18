@@ -18,10 +18,10 @@ protected:
     int exp;
     int hp;
     int maxHp;
-    int attack;
-    int defense;
     int mp;
     int maxMp;
+    int attack;
+    int defense;
     int armorPenetration;
     float critChance;
     float critDamage;

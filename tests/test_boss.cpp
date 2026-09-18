@@ -51,16 +51,16 @@ void testEnrageMechanic() {
     assert(boss.getDefense() == 50);
 
     // Inflict damage to bring HP to 200 (200 / 500 = 40% > 30% -> not enraged)
-    // 500 - (350 - 50) = 200 HP
-    boss.takeDamage(350);
+    // 500 - 300 = 200 HP
+    boss.takeDamage(300);
     assert(boss.getHp() == 200);
     assert(!boss.isEnraged());
     assert(boss.getAttack() == 100);
     assert(boss.getDefense() == 50);
 
     // Inflict further damage to bring HP to 140 (140 / 500 = 28% < 30% -> enrage triggered!)
-    // 200 - (110 - 50) = 140 HP
-    boss.takeDamage(110);
+    // 200 - 60 = 140 HP
+    boss.takeDamage(60);
     assert(boss.getHp() == 140);
     assert(boss.isEnraged());
 
@@ -71,7 +71,7 @@ void testEnrageMechanic() {
     assert(boss.getDefense() == 75);
 
     // Taking further damage while already enraged should NOT multiply stats again
-    boss.takeDamage(85); // 140 - (85 - 75) = 130 HP
+    boss.takeDamage(10); // 140 - 10 = 130 HP
     assert(boss.getHp() == 130);
     assert(boss.isEnraged());
     assert(boss.getAttack() == 150);

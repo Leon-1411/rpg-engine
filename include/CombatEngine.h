@@ -5,6 +5,7 @@
 #include "Inventory.h"
 #include <iostream>
 #include <string>
+#include <iosfwd>
 
 enum class CombatState {
     ONGOING,
@@ -25,12 +26,14 @@ private:
     Inventory* inventory;
     int turnCount;
     CombatState currentState;
+    int consecutiveZeroDamageTurns;
 
     void processHeroStatusEffects();
     void processEnemyStatusEffects();
     void processStatusEffects();
 
 public:
+    static constexpr int MAX_BATTLE_TURNS = 100;
     CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory = nullptr);
     ~CombatEngine() = default;
 

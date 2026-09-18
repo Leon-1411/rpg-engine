@@ -10,7 +10,7 @@
 #include <cstdlib>
 
 CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory)
-    : hero(hero), enemy(enemy), inventory(inventory), turnCount(0), currentState(CombatState::ONGOING) {}
+    : hero(hero), enemy(enemy), inventory(inventory), turnCount(0), currentState(CombatState::ONGOING), consecutiveZeroDamageTurns(0) {}
 
 void CombatEngine::setInventory(Inventory* inv) {
     inventory = inv;
@@ -18,6 +18,7 @@ void CombatEngine::setInventory(Inventory* inv) {
 
 void CombatEngine::startBattle() {
     turnCount = 1;
+    consecutiveZeroDamageTurns = 0;
     currentState = CombatState::ONGOING;
     hero.resetCombatStances();
     std::cout << "\n=======================================================\n";
@@ -117,6 +118,9 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         return currentState;
     }
 
+    int heroHpBefore = hero.getHp();
+    int enemyHpBefore = enemy.getHp();
+
     // 1. Player action
     if (actionChoice == 1) { // Normal Attack
         DamageResult res = calculateDamage(hero.getEffectiveAttack(), hero.getCritChance(), hero.getCritDamage(),
@@ -152,13 +156,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
             return currentState; // Allow re-action if skill was unavailable
         }
 
-    } else if (actionChoice == 3) { // Item (Potion - Mage Exclusive)
-        if (hero.getHeroClass() != HeroClass::MAGE) {
-            std::cout << "[RESTRICTION] Potions are part of the Mage's exclusive craft and skill set! "
-                      << hero.getName() << " [" << hero.getHeroClassName()
-                      << "] cannot use potions. Use Skills or Defend instead!\n";
-            return currentState;
-        }
+    } else if (actionChoice == 3) { // Item (Potion)
         if (!inventory || inventory->getItemCount() == 0) {
             std::cout << "[ITEM FAILED] No inventory or no items available to use!\n";
             return currentState;
@@ -222,9 +220,55 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         return currentState;
     }
 
+    // Check if both sides dealt 0 damage this round (stalemate / stall check)
+    if (hero.getHp() == heroHpBefore && enemy.getHp() == enemyHpBefore) {
+        consecutiveZeroDamageTurns++;
+        if (consecutiveZeroDamageTurns >= 5) {
+            int fatigueDamage = std::max(5, (consecutiveZeroDamageTurns - 4) * 3);
+            std::cout << "\n[FATIGUE / STALEMATE] Ca hai ben da khong gay sat thuong trong "
+                      << consecutiveZeroDamageTurns << " luot lien tiep! Ap luc chien truong gay "
+                      << fatigueDamage << " sat thuong kiet suc len ca hai ben!\n";
+            hero.takeDamage(fatigueDamage);
+            enemy.takeDamage(fatigueDamage);
+
+            if (!enemy.isAlive() && !hero.isAlive()) {
+                currentState = (hero.getMaxHp() >= enemy.getMaxHp()) ? CombatState::HERO_VICTORY : CombatState::ENEMY_VICTORY;
+                return currentState;
+            } else if (!enemy.isAlive()) {
+                hero.addExp(enemy.getExpReward());
+                hero.addGold(enemy.getGoldReward());
+                currentState = CombatState::HERO_VICTORY;
+                return currentState;
+            } else if (!hero.isAlive()) {
+                currentState = CombatState::ENEMY_VICTORY;
+                return currentState;
+            }
+        }
+    } else {
+        consecutiveZeroDamageTurns = 0;
+    }
+
     // End of full round: reduce skill cooldowns and increment turn
     hero.reduceCooldowns();
     turnCount++;
+
+    // Max turns cap check (Anti-Infinite Loop)
+    if (turnCount > MAX_BATTLE_TURNS) {
+        std::cout << "\n[BATTLE TIMEOUT] Tran chien da vuot qua gioi han " << MAX_BATTLE_TURNS
+                  << " luot! Phan dinh ket qua dua tren ty le % HP con lai.\n";
+        float heroPct = static_cast<float>(hero.getHp()) / hero.getMaxHp();
+        float enemyPct = static_cast<float>(enemy.getHp()) / enemy.getMaxHp();
+        if (heroPct >= enemyPct) {
+            std::cout << hero.getName() << " kiên cường sinh tồn và giành chiến thắng theo % HP!\n";
+            hero.addExp(enemy.getExpReward());
+            hero.addGold(enemy.getGoldReward());
+            currentState = CombatState::HERO_VICTORY;
+        } else {
+            std::cout << enemy.getName() << " áp đảo sinh lực. Bạn đã thất bại!\n";
+            currentState = CombatState::ENEMY_VICTORY;
+        }
+        return currentState;
+    }
 
     return currentState;
 }
@@ -328,7 +372,7 @@ int CombatEngine::getTurnCount() const {
 
 std::string CombatEngine::renderBar(int current, int max, int length) {
     if (max <= 0) max = 1;
-    current = std::max(0, std::min(current, max));
+    current = std::clamp(current, 0, max);
     int filled = (current * length) / max;
     int empty = length - filled;
     std::string bar = "[";
@@ -408,11 +452,7 @@ void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
             out << "Select skill (1-3): ";
             in >> subIndex;
         } else if (choice == 3) {
-            if (hero.getHeroClass() != HeroClass::MAGE) {
-                out << "[RESTRICTION] Potions are part of the Mage's exclusive skillset! "
-                    << hero.getName() << " [" << hero.getHeroClassName()
-                    << "] cannot use potions. Use Skills or Defend instead!\n";
-            } else if (!inventory || inventory->getItemCount() == 0) {
+            if (!inventory || inventory->getItemCount() == 0) {
                 out << "Your inventory is empty!\n";
             } else {
                 out << "Potions in Inventory:\n";
