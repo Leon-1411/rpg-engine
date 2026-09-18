@@ -30,8 +30,8 @@ public:
     // Prints a combat turn log event
     void printCombatLog(const std::string& message);
 
-    // Displays victory banner with EXP/Gold rewards
-    void showVictory(const Enemy& enemy, std::istream& in = std::cin);
+    // Displays victory banner with EXP/Gold rewards and dropped loot items
+    void showVictory(const Enemy& enemy, const std::vector<std::shared_ptr<Item>>& lootDrops = {}, std::istream& in = std::cin);
 
     // Displays defeat / game over screen
     void showDefeat(std::istream& in = std::cin);

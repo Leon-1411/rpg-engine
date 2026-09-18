@@ -15,7 +15,8 @@ Enemy::Enemy(const std::string& name, EnemyType type, int hp, int attack, int de
       expReward(expReward), goldReward(goldReward),
       poisonTurns(0), poisonDamagePerTurn(0),
       isPoisonous(false), poisonInflictTurns(0), poisonInflictDmg(0),
-      regenTurns(0), regenPerTurn(0) {}
+      regenTurns(0), regenPerTurn(0),
+      dropChance(1.0f) {}
 
 int Enemy::chooseAction() {
     return 1;
@@ -155,3 +156,42 @@ bool Enemy::hasRegen() const {
 int Enemy::getRegenTurns() const {
     return regenTurns;
 }
+
+void Enemy::addDropItem(const std::string& itemId) {
+    if (!itemId.empty()) {
+        dropItemIds.push_back(itemId);
+    }
+}
+
+const std::vector<std::string>& Enemy::getDropItemIds() const {
+    return dropItemIds;
+}
+
+void Enemy::setDropItemIds(const std::vector<std::string>& itemIds) {
+    dropItemIds = itemIds;
+}
+
+void Enemy::setDropChance(float chance) {
+    dropChance = std::clamp(chance, 0.0f, 1.0f);
+}
+
+float Enemy::getDropChance() const {
+    return dropChance;
+}
+
+std::vector<std::string> Enemy::generateLootDrops() const {
+    std::vector<std::string> drops;
+    if (dropItemIds.empty()) return drops;
+
+    if (dropChance >= 1.0f) {
+        return dropItemIds;
+    }
+
+    float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    if (roll <= dropChance) {
+        // Drop all items or pick random
+        return dropItemIds;
+    }
+    return drops;
+}
+

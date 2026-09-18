@@ -1,25 +1,21 @@
-/**
- * @file CombatEngine.cpp
- * @brief Implement CombatEngine class methods with new damage formula, Parry/Block/Evade/Defend, Items, and Boss patterns.
- * @author Lợi & Antigravity
- */
-
 #include "CombatEngine.h"
+#include "DataLoader.h"
 #include <algorithm>
 #include <iostream>
 #include <cstdlib>
 
 CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory)
-    : hero(hero), enemy(enemy), inventory(inventory), turnCount(0), currentState(CombatState::ONGOING), consecutiveZeroDamageTurns(0) {}
+    : hero(hero), enemy(enemy), inventory(inventory ? inventory : &hero.getInventory()), turnCount(0), currentState(CombatState::ONGOING), consecutiveZeroDamageTurns(0) {}
 
 void CombatEngine::setInventory(Inventory* inv) {
-    inventory = inv;
+    inventory = inv ? inv : &hero.getInventory();
 }
 
 void CombatEngine::startBattle() {
     turnCount = 1;
     consecutiveZeroDamageTurns = 0;
     currentState = CombatState::ONGOING;
+    lastLootDrops.clear();
     hero.resetCombatStances();
     std::cout << "\n=======================================================\n";
     std::cout << "  BATTLE STARTED: " << hero.getName() << " [" << hero.getHeroClassName()
@@ -96,6 +92,29 @@ void CombatEngine::processStatusEffects() {
     processEnemyStatusEffects();
 }
 
+void CombatEngine::processVictoryRewards() {
+    hero.addExp(enemy.getExpReward());
+    hero.addGold(enemy.getGoldReward());
+    lastLootDrops.clear();
+
+    auto droppedIds = enemy.generateLootDrops();
+    for (const auto& itmId : droppedIds) {
+        auto itm = DataLoader::loadItemById("data/items.json", itmId);
+        if (itm) {
+            lastLootDrops.push_back(itm);
+            if (hero.getInventory().addItem(itm)) {
+                std::cout << "[CHIẾN LỢI PHẨM] " << enemy.getName() << " rơi ra: " << itm->getName() << "!\n";
+            } else {
+                std::cout << "[TÚI ĐỒ ĐẦY] " << enemy.getName() << " rơi ra: " << itm->getName() << " nhưng túi đồ đã đầy!\n";
+            }
+        }
+    }
+}
+
+const std::vector<std::shared_ptr<Item>>& CombatEngine::getLastLootDrops() const {
+    return lastLootDrops;
+}
+
 CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (currentState != CombatState::ONGOING) return currentState;
 
@@ -106,8 +125,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " succumbed to deadly poison!\n";
-        hero.addExp(enemy.getExpReward());
-        hero.addGold(enemy.getGoldReward());
+        processVictoryRewards();
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -171,10 +189,22 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
             return currentState;
         }
         int beforeHp = hero.getHp();
+        int beforeMp = hero.getMp();
         if (inventory->useItem(skillOrItemIndex, hero)) {
             int healed = hero.getHp() - beforeHp;
-            std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
-                      << healed << " HP! (HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+            int mpRestored = hero.getMp() - beforeMp;
+            if (mpRestored > 0 && healed > 0) {
+                std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
+                          << healed << " HP and " << mpRestored << " MP! (HP: "
+                          << hero.getHp() << "/" << hero.getMaxHp() << ", MP: "
+                          << hero.getMp() << "/" << hero.getMaxMp() << ")\n";
+            } else if (mpRestored > 0) {
+                std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
+                          << mpRestored << " MP! (MP: " << hero.getMp() << "/" << hero.getMaxMp() << ")\n";
+            } else {
+                std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
+                          << healed << " HP! (HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+            }
         } else {
             std::cout << "[ITEM FAILED] Could not use item!\n";
             return currentState;
@@ -196,8 +226,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     // Check if enemy defeated after player action
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
-        hero.addExp(enemy.getExpReward());
-        hero.addGold(enemy.getGoldReward());
+        processVictoryRewards();
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -208,8 +237,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     // Check if hero or enemy defeated
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
-        hero.addExp(enemy.getExpReward());
-        hero.addGold(enemy.getGoldReward());
+        processVictoryRewards();
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -232,11 +260,15 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
             enemy.takeDamage(fatigueDamage);
 
             if (!enemy.isAlive() && !hero.isAlive()) {
-                currentState = (hero.getMaxHp() >= enemy.getMaxHp()) ? CombatState::HERO_VICTORY : CombatState::ENEMY_VICTORY;
+                if (hero.getMaxHp() >= enemy.getMaxHp()) {
+                    processVictoryRewards();
+                    currentState = CombatState::HERO_VICTORY;
+                } else {
+                    currentState = CombatState::ENEMY_VICTORY;
+                }
                 return currentState;
             } else if (!enemy.isAlive()) {
-                hero.addExp(enemy.getExpReward());
-                hero.addGold(enemy.getGoldReward());
+                processVictoryRewards();
                 currentState = CombatState::HERO_VICTORY;
                 return currentState;
             } else if (!hero.isAlive()) {
