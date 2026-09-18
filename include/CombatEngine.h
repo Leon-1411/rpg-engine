@@ -5,6 +5,7 @@
 #include "Inventory.h"
 #include <iostream>
 #include <string>
+#include <iosfwd>
 
 enum class CombatState {
     ONGOING,
@@ -25,12 +26,16 @@ private:
     Inventory* inventory;
     int turnCount;
     CombatState currentState;
+    int consecutiveZeroDamageTurns;
+    std::vector<std::shared_ptr<Item>> lastLootDrops;
 
     void processHeroStatusEffects();
     void processEnemyStatusEffects();
     void processStatusEffects();
+    void processVictoryRewards();
 
 public:
+    static constexpr int MAX_BATTLE_TURNS = 100;
     CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory = nullptr);
     ~CombatEngine() = default;
 
@@ -51,9 +56,12 @@ public:
     bool isBattleOver() const;
     CombatState getState() const;
     int getTurnCount() const;
+    const std::vector<std::shared_ptr<Item>>& getLastLootDrops() const;
 
     // UI and Interactive Console Battle Helpers
     static std::string renderBar(int current, int max, int length = 15);
     void displayBattleStatus(std::ostream& out = std::cout) const;
     void runInteractiveBattle(std::istream& in = std::cin, std::ostream& out = std::cout);
+    void runBattleLoop(std::istream& in = std::cin, std::ostream& out = std::cout);
 };
+

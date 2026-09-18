@@ -181,6 +181,10 @@ bool SaveManager::applySnapshot(const SavedGameState& state, Hero& hero, StoryGr
                 inv.addItem(std::make_shared<Armor>(
                     rec.id, rec.name, rec.description, rec.statValue
                 ));
+            } else if (type == ItemType::KEY_ITEM) {
+                inv.addItem(std::make_shared<KeyItem>(
+                    rec.id, rec.name, rec.description
+                ));
             } else {
                 inv.addItem(std::make_shared<Item>(
                     rec.id, rec.name, rec.description, type, rec.statValue

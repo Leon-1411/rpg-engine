@@ -129,8 +129,7 @@ bool Hero::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
 
 void Hero::takeDamage(int damage) {
     if (damage <= 0) return;
-    int effectiveDamage = std::max(1, damage - getEffectiveDefense());
-    hp = std::max(0, hp - effectiveDamage);
+    hp = std::max(0, hp - damage);
 }
 
 void Hero::takeDirectDamage(int damage) {
@@ -266,9 +265,9 @@ std::string Hero::getSkillName(int skillIndex) const {
 }
 
 void Hero::displaySkills() const {
-    std::cout << "[Skills - " << name << " (" << getHeroClassName() << ")]\n";
+    std::cout << "[Skills for " << getHeroClassName() << "]\n";
     for (int i = 1; i <= 3; ++i) {
-        std::cout << "  " << i << ". " << getSkillName(i) << "\n";
+        std::cout << "  " << i << ". " << getSkillName(i) << " (CD: " << maxCooldowns[i-1] << " turns)\n";
     }
 }
 
@@ -336,21 +335,11 @@ Inventory& Hero::getInventory() { return inventory; }
 const Inventory& Hero::getInventory() const { return inventory; }
 
 int Hero::getEffectiveAttack() const {
-    int total = attack;
-    int wpnIdx = inventory.getEquippedWeaponIndex();
-    if (wpnIdx >= 0 && wpnIdx < inventory.getItemCount()) {
-        total += inventory.getItem(wpnIdx).getStatValue();
-    }
-    return total;
+    return attack + inventory.getEquippedWeaponBonus();
 }
 
 int Hero::getEffectiveDefense() const {
-    int total = defense;
-    int armIdx = inventory.getEquippedArmorIndex();
-    if (armIdx >= 0 && armIdx < inventory.getItemCount()) {
-        total += inventory.getItem(armIdx).getStatValue();
-    }
-    return total;
+    return defense + inventory.getEquippedArmorBonus();
 }
 
 void Hero::setHp(int value) { hp = std::min(maxHp, std::max(0, value)); }

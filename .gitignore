@@ -32,6 +32,9 @@ test_story
 test_shop
 test_ui
 test_e2e
+test_combat
+test_inventory
+test_item
 
 # ==========================================
 # Debugging & Symbol files

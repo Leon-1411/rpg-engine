@@ -7,7 +7,8 @@
 enum class ItemType {
     WEAPON,
     ARMOR,
-    POTION
+    POTION,
+    KEY_ITEM
 };
 
 class Hero; // forward declaration
@@ -18,10 +19,10 @@ protected:
     std::string name;
     std::string description;
     ItemType type;
-    int statValue; // Attack bonus for Weapon, Defense for Armor, HP/MP restore for Potion
+    int statValue; // Attack bonus for Weapon, Defense for Armor, HP/MP restore for Potion, 0 for KeyItem
 
 public:
-    Item(const std::string& id, const std::string& name, const std::string& description, ItemType type, int statValue);
+    Item(const std::string& id, const std::string& name, const std::string& description, ItemType type, int statValue = 0);
     virtual ~Item() = default;
 
     std::string getId() const;
@@ -77,6 +78,15 @@ public:
     void addQuantity(int qty);
     bool consumeOne(); // Giảm 1 đơn vị, trả về true nếu vẫn còn > 0, false nếu đã hết
     void apply(Hero& hero) const;
+    void displayInfo() const override;
+    std::shared_ptr<Item> clone() const override;
+};
+
+class KeyItem : public Item {
+public:
+    KeyItem(const std::string& id, const std::string& name, const std::string& description);
+    virtual ~KeyItem() = default;
+
     void displayInfo() const override;
     std::shared_ptr<Item> clone() const override;
 };

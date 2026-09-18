@@ -10,6 +10,7 @@ Ranger::Ranger(const std::string& name, int hp, int mp, int attack, int defense)
     : Hero(name, HeroClass::RANGER, hp, mp, attack, defense, 5, 0.25f, 0.50f, false) {}
 
 bool Ranger::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
+    outDamage = 0;
     int effAtk = getEffectiveAttack();
 
     switch (skillIndex) {

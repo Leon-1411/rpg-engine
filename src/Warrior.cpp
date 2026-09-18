@@ -10,6 +10,7 @@ Warrior::Warrior(const std::string& name, int hp, int mp, int attack, int defens
     : Hero(name, HeroClass::WARRIOR, hp, mp, attack, defense, 10, 0.10f, 0.25f, false) {}
 
 bool Warrior::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
+    outDamage = 0;
     int effAtk = getEffectiveAttack();
     int effDef = getEffectiveDefense();
 

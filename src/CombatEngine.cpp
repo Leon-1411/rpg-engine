@@ -1,32 +1,39 @@
 /**
  * @file CombatEngine.cpp
- * @brief Turn-based combat engine with full status effects, defense calculation, and skill execution.
- * @author Quý & Antigravity
+ * @brief Implement CombatEngine with Turn-based battle loop, status effects, and victory rewards.
+ * @author Leon & Antigravity
  */
 
 #include "CombatEngine.h"
+#include "DataLoader.h"
 #include <iostream>
 #include <algorithm>
 #include <cstdlib>
 
-CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory)
-    : hero(hero), enemy(enemy), inventory(inventory),
-      currentState(CombatState::ONGOING), turnCount(1) {}
+CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inv)
+    : hero(hero), enemy(enemy), inventory(inv), currentState(CombatState::ONGOING),
+      turnCount(1), consecutiveZeroDamageTurns(0) {}
+
+void CombatEngine::setInventory(Inventory* inv) {
+    inventory = inv;
+}
 
 void CombatEngine::startBattle() {
     currentState = CombatState::ONGOING;
     turnCount = 1;
+    consecutiveZeroDamageTurns = 0;
     hero.resetCombatStances();
     enemy.clearStatusEffects();
 }
 
 DamageResult CombatEngine::calculateDamage(int baseAttack, float critChance, float critDamage,
-                                           int armorPen, int targetDefense, bool ignoreArmor) {
+                                           int armorPen, int defenderDefense, bool ignoreArmor) const {
     DamageResult result;
+    result.damage = 0;
     result.isCrit = false;
 
-    // 1. Calculate defense mitigation
-    int effectiveDefense = targetDefense;
+    // 1. Calculate effective defense considering Armor Penetration or Ignore Armor trait
+    int effectiveDefense = std::max(0, defenderDefense);
     if (ignoreArmor) {
         effectiveDefense = 0;
     } else {
@@ -48,7 +55,7 @@ DamageResult CombatEngine::calculateDamage(int baseAttack, float critChance, flo
     return result;
 }
 
-int CombatEngine::calculateDamage(int attackerAtk, int defenderDef) {
+int CombatEngine::calculateDamage(int attackerAtk, int defenderDef) const {
     DamageResult res = calculateDamage(attackerAtk, 0.0f, 0.0f, 0, defenderDef, false);
     return res.damage;
 }
@@ -87,6 +94,30 @@ void CombatEngine::processStatusEffects() {
     }
 }
 
+void CombatEngine::processVictoryRewards() {
+    hero.addExp(enemy.getExpReward());
+    hero.addGold(enemy.getGoldReward());
+    lastLootDrops.clear();
+
+    auto droppedIds = enemy.generateLootDrops();
+    for (const auto& itmId : droppedIds) {
+        auto itm = DataLoader::loadItemById("data/items.json", itmId);
+        if (itm) {
+            lastLootDrops.push_back(itm);
+            Inventory* targetInv = inventory ? inventory : &hero.getInventory();
+            if (targetInv->addItem(itm)) {
+                std::cout << "[CHIẾN LỢI PHẨM] " << enemy.getName() << " rơi ra: " << itm->getName() << "!\n";
+            } else {
+                std::cout << "[TÚI ĐỒ ĐẦY] " << enemy.getName() << " rơi ra: " << itm->getName() << " nhưng túi đồ đã đầy!\n";
+            }
+        }
+    }
+}
+
+const std::vector<std::shared_ptr<Item>>& CombatEngine::getLastLootDrops() const {
+    return lastLootDrops;
+}
+
 CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (isBattleOver()) {
         return currentState;
@@ -99,8 +130,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " đã gục ngã vì độc tố!\n";
-        hero.addExp(enemy.getExpReward());
-        hero.addGold(enemy.getGoldReward());
+        processVictoryRewards();
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -110,6 +140,9 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         currentState = CombatState::ENEMY_VICTORY;
         return currentState;
     }
+
+    int heroHpBefore = hero.getHp();
+    int enemyHpBefore = enemy.getHp();
 
     // 1. Player action
     if (actionChoice == 1) { // Normal Attack
@@ -206,8 +239,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     // Check if enemy defeated after player action
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " đã bị đánh bại!\n";
-        hero.addExp(enemy.getExpReward());
-        hero.addGold(enemy.getGoldReward());
+        processVictoryRewards();
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -218,8 +250,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     // Check if hero or enemy defeated
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " đã bị đánh bại!\n";
-        hero.addExp(enemy.getExpReward());
-        hero.addGold(enemy.getGoldReward());
+        processVictoryRewards();
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -230,9 +261,58 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         return currentState;
     }
 
+    // Check if both sides dealt 0 damage this round (stalemate / stall check)
+    if (hero.getHp() == heroHpBefore && enemy.getHp() == enemyHpBefore) {
+        consecutiveZeroDamageTurns++;
+        if (consecutiveZeroDamageTurns >= 5) {
+            int fatigueDamage = std::max(5, (consecutiveZeroDamageTurns - 4) * 3);
+            std::cout << "\n[FATIGUE / STALEMATE] Cả hai bên đã không gây sát thương trong "
+                      << consecutiveZeroDamageTurns << " lượt liên tiếp! Áp lực chiến trường gây "
+                      << fatigueDamage << " sát thương kiệt sức lên cả hai bên!\n";
+            hero.takeDamage(fatigueDamage);
+            enemy.takeDamage(fatigueDamage);
+
+            if (!enemy.isAlive() && !hero.isAlive()) {
+                if (hero.getMaxHp() >= enemy.getMaxHp()) {
+                    processVictoryRewards();
+                    currentState = CombatState::HERO_VICTORY;
+                } else {
+                    currentState = CombatState::ENEMY_VICTORY;
+                }
+                return currentState;
+            } else if (!enemy.isAlive()) {
+                processVictoryRewards();
+                currentState = CombatState::HERO_VICTORY;
+                return currentState;
+            } else if (!hero.isAlive()) {
+                currentState = CombatState::ENEMY_VICTORY;
+                return currentState;
+            }
+        }
+    } else {
+        consecutiveZeroDamageTurns = 0;
+    }
+
     // End of full round: reduce skill cooldowns and increment turn
     hero.reduceCooldowns();
     turnCount++;
+
+    // Max turns cap check (Anti-Infinite Loop)
+    if (turnCount > MAX_BATTLE_TURNS) {
+        std::cout << "\n[BATTLE TIMEOUT] Trận chiến đã vượt quá giới hạn " << MAX_BATTLE_TURNS
+                  << " lượt! Phân định kết quả dựa trên tỷ lệ % HP còn lại.\n";
+        float heroPct = static_cast<float>(hero.getHp()) / hero.getMaxHp();
+        float enemyPct = static_cast<float>(enemy.getHp()) / enemy.getMaxHp();
+        if (heroPct >= enemyPct) {
+            std::cout << hero.getName() << " kiên cường sinh tồn và giành chiến thắng theo % HP!\n";
+            processVictoryRewards();
+            currentState = CombatState::HERO_VICTORY;
+        } else {
+            std::cout << enemy.getName() << " áp đảo sinh lực. Bạn đã thất bại!\n";
+            currentState = CombatState::ENEMY_VICTORY;
+        }
+        return currentState;
+    }
 
     return currentState;
 }
@@ -343,7 +423,7 @@ int CombatEngine::getTurnCount() const {
 
 std::string CombatEngine::renderBar(int current, int max, int length) {
     if (max <= 0) max = 1;
-    current = std::max(0, std::min(current, max));
+    current = std::min(max, std::max(0, current));
     int filled = (current * length) / max;
     std::string bar = "[";
     for (int i = 0; i < length; ++i) {
@@ -354,7 +434,7 @@ std::string CombatEngine::renderBar(int current, int max, int length) {
     return bar;
 }
 
-void CombatEngine::displayBattleStatus(std::ostream& out) {
+void CombatEngine::displayBattleStatus(std::ostream& out) const {
     out << "\n=======================================================\n";
     out << "  " << hero.getName() << " [" << hero.getHeroClassName() << " Lv." << hero.getLevel() << "]"
         << "  vs  " << enemy.getName() << "\n";
@@ -376,6 +456,10 @@ void CombatEngine::displayBattleStatus(std::ostream& out) {
         out << "  * Enemy Regen: " << enemy.getRegenTurns() << " turns (+" << enemy.getRegenPerTurn() << " HP/t)\n";
     }
     out << "=======================================================\n";
+}
+
+void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
+    runBattleLoop(in, out);
 }
 
 void CombatEngine::runBattleLoop(std::istream& in, std::ostream& out) {
@@ -412,12 +496,14 @@ void CombatEngine::runBattleLoop(std::istream& in, std::ostream& out) {
                 out << "Các bình thuốc trong túi đồ:\n";
                 std::vector<int> potionIndices;
                 for (int i = 0; i < targetInv->getItemCount(); ++i) {
-                    Item item = targetInv->getItem(i);
-                    if (item.getType() == ItemType::POTION) {
+                    auto itemPtr = targetInv->getItemPtr(i);
+                    if (itemPtr && itemPtr->getType() == ItemType::POTION) {
                         potionIndices.push_back(i);
-                        out << " " << potionIndices.size() << ". " << item.getName()
-                            << " (" << (item.getIsManaPotion() ? "Hồi MP +" : "Hồi HP +")
-                            << item.getStatValue() << ")\n";
+                        auto potPtr = std::dynamic_pointer_cast<Potion>(itemPtr);
+                        bool isMana = potPtr ? potPtr->isMana() : false;
+                        out << " " << potionIndices.size() << ". " << itemPtr->getName()
+                            << " (" << (isMana ? "Hồi MP +" : "Hồi HP +")
+                            << itemPtr->getStatValue() << ")\n";
                     }
                 }
                 if (potionIndices.empty()) {

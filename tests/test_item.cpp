@@ -3,6 +3,7 @@
 #include "Armor.h"
 #include "Potion.h"
 #include "Hero.h"
+#include "DataLoader.h"
 #include <cassert>
 #include <iostream>
 
@@ -72,13 +73,55 @@ void testPolymorphism() {
     assert(item2->getStatValue() == 12);
 }
 
+void testKeyItem() {
+    KeyItem amulet("FreeForestAmulet", "Free Forest Amulet", "Amulet from Free Forest Tribe");
+    assert(amulet.getId() == "FreeForestAmulet");
+    assert(amulet.getName() == "Free Forest Amulet");
+    assert(amulet.getType() == ItemType::KEY_ITEM);
+    assert(amulet.getStatValue() == 0);
+
+    auto cloned = amulet.clone();
+    assert(cloned != nullptr);
+    assert(cloned->getId() == "FreeForestAmulet");
+    assert(cloned->getType() == ItemType::KEY_ITEM);
+}
+
+void testDataLoaderItemLoading() {
+    auto items = DataLoader::loadItemPointers("data/items.json");
+    assert(!items.empty());
+
+    bool foundWeapon = false;
+    bool foundArmor = false;
+    bool foundPotion = false;
+    bool foundKeyItem = false;
+
+    for (const auto& itm : items) {
+        if (itm->getType() == ItemType::WEAPON) foundWeapon = true;
+        if (itm->getType() == ItemType::ARMOR) foundArmor = true;
+        if (itm->getType() == ItemType::POTION) foundPotion = true;
+        if (itm->getType() == ItemType::KEY_ITEM) foundKeyItem = true;
+    }
+
+    assert(foundWeapon);
+    assert(foundArmor);
+    assert(foundPotion);
+    assert(foundKeyItem);
+
+    auto royal = DataLoader::loadItemById("data/items.json", "RoyalInsignia");
+    assert(royal != nullptr);
+    assert(royal->getType() == ItemType::KEY_ITEM);
+}
+
 int main() {
     testLegacyItem();
     testWeaponSubclass();
     testArmorSubclass();
     testPotionSubclass();
+    testKeyItem();
     testPolymorphism();
+    testDataLoaderItemLoading();
 
     std::cout << "[PASS] All Item unit tests successful!\n";
     return 0;
 }
+

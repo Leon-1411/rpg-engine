@@ -23,15 +23,15 @@ goto found_compiler
 echo [RPG Engine] Compiler not found in Windows PATH, using Docker environment...
 set DOCKER_CORE=src/Hero.cpp src/Warrior.cpp src/Mage.cpp src/Ranger.cpp src/LevelSystem.cpp src/Enemy.cpp src/Minion.cpp src/BossMonster.cpp src/Item.cpp src/Inventory.cpp src/Shop.cpp src/CombatEngine.cpp src/StoryGraph.cpp src/SaveManager.cpp src/DataLoader.cpp src/GameManager.cpp src/ui/ConsoleUI.cpp src/ui/ASCIIArt.cpp src/ui/MainMenu.cpp src/ui/BattleUI.cpp src/ui/InventoryUI.cpp
 if "%1"=="test" (
-    docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "g++ -std=c++14 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_save.cpp -o test_save && ./test_save && g++ -std=c++14 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_story.cpp -o test_story && ./test_story && g++ -std=c++14 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_shop.cpp -o test_shop && ./test_shop"
+    docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_item.cpp -o test_item && ./test_item && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_inventory.cpp -o test_inventory && ./test_inventory && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_combat.cpp -o test_combat && ./test_combat && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_save.cpp -o test_save && ./test_save && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_story.cpp -o test_story && ./test_story && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_shop.cpp -o test_shop && ./test_shop"
     goto end
 )
 if "%1"=="clean" (
-    del /q *.exe *.o test_save test_story test_shop 2>nul
+    del /q *.exe *.o test_save test_story test_shop test_item test_inventory test_combat 2>nul
     echo [RPG Engine] Cleaned build artifacts.
     goto end
 )
-docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "g++ -std=c++14 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% src/main.cpp -o rpg_engine"
+docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% src/main.cpp -o rpg_engine"
 if %ERRORLEVEL% equ 0 (
     echo [RPG Engine] Build SUCCESS! Output: rpg_engine
 ) else (
@@ -59,12 +59,22 @@ goto end
 
 :test
 echo [RPG Engine] Running Tests...
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_item.cpp -o test_item.exe
+.\test_item.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_inventory.cpp -o test_inventory.exe
+.\test_inventory.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_combat.cpp -o test_combat.exe
+.\test_combat.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_save.cpp -o test_save.exe
 .\test_save.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_story.cpp -o test_story.exe
 .\test_story.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_ui.cpp -o test_ui.exe
 .\test_ui.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_hero.cpp -o test_hero.exe
+.\test_hero.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_boss.cpp -o test_boss.exe
+.\test_boss.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_shop.cpp -o test_shop.exe
 .\test_shop.exe
 goto end

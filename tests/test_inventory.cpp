@@ -16,7 +16,7 @@ void testLegacyUsage() {
     assert(inv.getItemCount() == 2);
 
     Hero hero("Tester", HeroClass::WARRIOR, 100, 20, 10, 5);
-    hero.takeDamage(40); // 100 - (40 - 5) = 65
+    hero.takeDamage(35); // 100 - 35 = 65
     assert(hero.getHp() == 65);
 
     // Use potion at index 0
@@ -43,7 +43,7 @@ void testPotionStacking() {
     assert(potion->getQuantity() == 2);
 
     Hero hero("StackTester", HeroClass::WARRIOR, 100, 20, 10, 5);
-    hero.takeDamage(50); // HP = 55
+    hero.takeDamage(45); // HP = 55
 
     // Dùng lần 1: Còn 1 lọ trong túi
     assert(inv.useItem(0, hero) == true);
@@ -232,7 +232,7 @@ void testUseItemById() {
     inv.addItem(pot);
 
     Hero hero("Tester", HeroClass::WARRIOR, 100, 20, 10, 5);
-    hero.takeDamage(60); // HP = 45
+    hero.takeDamage(55); // HP = 45
 
     // Dùng bằng ID: qty 2→1
     assert(inv.useItemById("p_hp", hero) == true);
@@ -247,6 +247,22 @@ void testUseItemById() {
     assert(inv.useItemById("p_hp", hero) == false);
 }
 
+// ==========================================
+// Test KeyItem: cannot equip as weapon or armor
+// ==========================================
+void testKeyItemInventoryBehavior() {
+    Inventory inv(5);
+    auto keyItem = std::make_shared<KeyItem>("RoyalInsignia", "Royal Insignia", "Badge from King");
+    inv.addItem(keyItem);
+
+    assert(inv.getItemCount() == 1);
+    assert(inv.hasItem("RoyalInsignia") == true);
+    assert(inv.equipWeapon(0) == false); // Cannot equip as weapon
+    assert(inv.equipArmor(0) == false);  // Cannot equip as armor
+    assert(inv.getEquippedWeaponBonus() == 0);
+    assert(inv.getEquippedArmorBonus() == 0);
+}
+
 int main() {
     testLegacyUsage();
     testPotionStacking();
@@ -258,6 +274,7 @@ int main() {
     testRemovePotionById();
     testQueryHelpers();
     testUseItemById();
+    testKeyItemInventoryBehavior();
 
     std::cout << "[PASS] All Inventory unit tests successful!\n";
     return 0;

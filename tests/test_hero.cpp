@@ -77,15 +77,15 @@ int main() {
     assert(dmg == 58);
     assert(mage->getMp() == 85);
 
-    // Skill 2: Ice Blast (20 MP, ATK*2 + 20 = 68 dmg)
+    // Skill 2: Ice Blast (20 MP, ATK*2 + 20 = 68 dmg, +10 MP restore)
     assert(mage->useSkill(2, dmg, msg) == true);
     assert(dmg == 68);
-    assert(mage->getMp() == 65);
+    assert(mage->getMp() == 75); // 85 - 20 + 10 = 75
 
     // Skill 3: Meteor (35 MP, ATK*3 + 40 = 112 dmg)
     assert(mage->useSkill(3, dmg, msg) == true);
     assert(dmg == 112);
-    assert(mage->getMp() == 30);
+    assert(mage->getMp() == 40); // 75 - 35 = 40
 
     std::cout << "  [PASS] Mage base stats and magic skills verified.\n";
 
@@ -129,8 +129,8 @@ int main() {
 
     warrior->getInventory().addItem(ironSword);
     warrior->getInventory().addItem(ironArmor);
-    warrior->getInventory().equipItem(0); // Equip weapon (+12 ATK)
-    warrior->getInventory().equipItem(1); // Equip armor (+8 DEF)
+    warrior->getInventory().equipWeapon(0); // Equip weapon (+12 ATK)
+    warrior->getInventory().equipArmor(1); // Equip armor (+8 DEF)
 
     assert(warrior->getEffectiveAttack() == 18 + 12); // 30
     assert(warrior->getEffectiveDefense() == 8 + 8);   // 16

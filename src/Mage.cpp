@@ -10,6 +10,7 @@ Mage::Mage(const std::string& name, int hp, int mp, int attack, int defense)
     : Hero(name, HeroClass::MAGE, hp, mp, attack, defense, 0, 0.0f, 0.0f, true) {}
 
 bool Mage::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
+    outDamage = 0;
     int effAtk = getEffectiveAttack();
 
     switch (skillIndex) {
