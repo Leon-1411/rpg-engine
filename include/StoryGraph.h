@@ -131,6 +131,9 @@ public:
     bool selectChoice(int choiceIndex);
     bool moveToNode(const std::string& nodeId);
     
+    bool canSelectChoice(int choiceIndex) const;
+    bool canSelectDialogueChoice(int choiceIndex) const;
+
     // Quan ly hoi thoai re nhanh
     bool isInDialogue() const;
     DialogueNode getCurrentDialogueNode() const;
@@ -144,5 +147,9 @@ public:
     void clearStoryFlags();
     
     bool isEnding() const;
+    bool isGameOverNode() const;
     size_t getNodeCount() const;
+
+    // Kiem tra tinh toan ven do thi va phat hien cut duong (Dead-end / Broken links)
+    bool validateGraph(std::vector<std::string>& errors) const;
 };
