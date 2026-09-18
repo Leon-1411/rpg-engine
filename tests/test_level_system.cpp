@@ -36,6 +36,7 @@ void testAddExpAndSingleLevelUp() {
     assert(warrior.getLevel() == 2);
     assert(warrior.getExp() == 0);
     assert(warrior.getExpToNextLevel() == 300);
+    assert(warrior.getStatPoints() == 3); // 3 điểm tiềm năng khi lên 1 cấp
 
     // Kiểm tra tăng trưởng chỉ số theo WARRIOR (HP +25, MP +3, ATK +3, DEF +3)
     assert(warrior.getMaxHp() == 125);

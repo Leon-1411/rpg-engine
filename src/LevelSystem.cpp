@@ -1,6 +1,6 @@
 /**
  * @file LevelSystem.cpp
- * @brief Hiện thực logic cho LevelSystem: tính toán EXP, thăng cấp và tăng chỉ số.
+ * @brief Hiện thực logic cho LevelSystem: tính toán EXP, thăng cấp, tăng chỉ số và phân bổ điểm tiềm năng.
  */
 
 #include "LevelSystem.h"
@@ -82,6 +82,47 @@ void LevelSystem::levelUp(Hero& hero) {
     // Hồi phục 100% máu và mana khi lên cấp
     hero.setHp(hero.getMaxHp());
     hero.setMp(hero.getMaxMp());
+
+    // Thưởng 3 Điểm Tiềm Năng để người chơi tự do cộng điểm
+    hero.addStatPoints(3);
+}
+
+void LevelSystem::promptStatAllocation(Hero& hero, std::istream& in, std::ostream& out) {
+    while (hero.getStatPoints() > 0) {
+        out << "\n==================================================\n"
+            << "          PHÂN BỔ ĐIỂM THUỘC TÍNH (LEVEL UP)      \n"
+            << "==================================================\n"
+            << " Anh hùng: " << hero.getName() << " [" << hero.getHeroClassName() << " Lv." << hero.getLevel() << "]\n"
+            << " Điểm tiềm năng khả dụng: [ " << hero.getStatPoints() << " ] điểm\n"
+            << "--------------------------------------------------\n"
+            << " 1. Sức Mạnh (Strength)       : +2 Tấn công (ATK) / điểm\n"
+            << " 2. Phép Thuật (Intelligence) : +10 Năng lượng (MP) / điểm\n"
+            << " 3. Thể Lực / Giáp (Vitality) : +15 Máu (HP) & +1 Giáp (DEF) / điểm\n"
+            << " 4. Để dành điểm (Lưu lại phân bổ sau)\n"
+            << "--------------------------------------------------\n"
+            << "Chọn thuộc tính muốn tăng [1-4]: ";
+
+        int choice = 0;
+        if (!(in >> choice)) {
+            break;
+        }
+
+        if (choice == 1) {
+            hero.allocateStrength(1);
+            out << "-> Đã tăng +2 Tấn công! (ATK hiện tại: " << hero.getAttack() << ")\n";
+        } else if (choice == 2) {
+            hero.allocateIntelligence(1);
+            out << "-> Đã tăng +10 Năng lượng! (MP hiện tại: " << hero.getMaxMp() << ")\n";
+        } else if (choice == 3) {
+            hero.allocateVitality(1);
+            out << "-> Đã tăng +15 Máu & +1 Giáp! (HP: " << hero.getMaxHp() << ", DEF: " << hero.getDefense() << ")\n";
+        } else if (choice == 4) {
+            out << "-> Đã lưu lại " << hero.getStatPoints() << " điểm tiềm năng.\n";
+            break;
+        } else {
+            out << "[LỖI] Vui lòng nhập từ 1 đến 4!\n";
+        }
+    }
 }
 
 int LevelSystem::calculateMonsterExpReward(int monsterLevel, int heroLevel, int baseExp) {

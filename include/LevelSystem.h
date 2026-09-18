@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Hero.h"
+#include <iostream>
 
 /**
  * @struct StatGrowth
@@ -15,7 +16,7 @@ struct StatGrowth {
 
 /**
  * @class LevelSystem
- * @brief Hệ thống quản lý công thức EXP, thăng cấp và tăng trưởng chỉ số.
+ * @brief Hệ thống quản lý công thức EXP, thăng cấp, tăng trưởng chỉ số và phân bổ điểm tiềm năng.
  */
 class LevelSystem {
 public:
@@ -62,9 +63,18 @@ public:
      * - Tăng level lên 1.
      * - Tăng chỉ số (maxHp, maxMp, attack, defense) dựa theo hệ Hero.
      * - Hồi phục 100% HP và MP.
+     * - Thưởng 3 Điểm Tiềm Năng (Stat Points) để người chơi tự do cộng điểm.
      * @param hero Tham chiếu Hero được thăng cấp.
      */
     static void levelUp(Hero& hero);
+
+    /**
+     * @brief Giao diện Console UI tương tác cho phép người chơi phân bổ điểm thuộc tính.
+     * @param hero Tham chiếu Hero cần phân bổ điểm.
+     * @param in Luồng nhập.
+     * @param out Luồng xuất.
+     */
+    static void promptStatAllocation(Hero& hero, std::istream& in = std::cin, std::ostream& out = std::cout);
 
     /**
      * @brief Tính toán lượng EXP nhận được khi tiêu diệt quái vật.

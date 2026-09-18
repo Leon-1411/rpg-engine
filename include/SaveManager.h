@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 struct SavedItemRecord {
     std::string id;
@@ -36,6 +37,7 @@ struct SavedGameState {
     bool ignoreArmor = false;
     int readyArrows = 0;
     int gold = 0;
+    int statPoints = 0;
 
     // Status effects
     int poisonTurns = 0;
@@ -79,6 +81,7 @@ public:
     // Core Save/Load API (Compatible with GameManager, MainMenu, tests)
     bool saveGame(int slot, const Hero& hero, const StoryGraph& story);
     bool loadGame(int slot, Hero& hero, StoryGraph& story);
+    bool loadGame(int slot, std::shared_ptr<Hero>& outHero, StoryGraph& story);
 
     // Slot Management
     bool slotExists(int slot) const;

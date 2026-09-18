@@ -41,7 +41,7 @@ goto end
 
 :found_compiler
 set INCLUDES=-Iinclude -Iinclude/ui -Iinclude/nlohmann
-set CXXFLAGS=-std=c++17 %INCLUDES%
+set CXXFLAGS=-std=c++14 %INCLUDES%
 set CORE_SOURCES=src/Hero.cpp src/Warrior.cpp src/Mage.cpp src/Ranger.cpp src/LevelSystem.cpp src/Enemy.cpp src/Minion.cpp src/BossMonster.cpp src/Item.cpp src/Inventory.cpp src/Shop.cpp src/CombatEngine.cpp src/StoryGraph.cpp src/SaveManager.cpp src/DataLoader.cpp src/GameManager.cpp src/ui/ConsoleUI.cpp src/ui/ASCIIArt.cpp src/ui/MainMenu.cpp src/ui/BattleUI.cpp src/ui/InventoryUI.cpp
 
 if "%1"=="clean" goto clean
@@ -71,6 +71,10 @@ echo [RPG Engine] Running Tests...
 .\test_story.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_ui.cpp -o test_ui.exe
 .\test_ui.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_hero.cpp -o test_hero.exe
+.\test_hero.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_boss.cpp -o test_boss.exe
+.\test_boss.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_shop.cpp -o test_shop.exe
 .\test_shop.exe
 goto end

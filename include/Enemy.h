@@ -27,6 +27,9 @@ protected:
     int poisonTurns;
     int poisonDamagePerTurn;
 
+    // Stun status (Choáng mất lượt)
+    int stunTurns;
+
     // Poisonous monster traits (inflicts poison on hit)
     bool isPoisonous;
     int poisonInflictTurns;
@@ -68,6 +71,13 @@ public:
     int takePoisonDamage();
     bool isPoisoned() const;
     int getPoisonTurns() const;
+    int getPoisonDamagePerTurn() const { return poisonDamagePerTurn; }
+
+    // Stun mechanisms (Choáng)
+    void applyStun(int turns = 1);
+    bool isStunned() const;
+    int getStunTurns() const;
+    int takeStunTurn();
 
     // Poisonous monster traits (Inflicting poison on target)
     void setPoisonous(bool value, int turns = 3, int dmg = 5);
@@ -80,6 +90,9 @@ public:
     int processRegen();
     bool hasRegen() const;
     int getRegenTurns() const;
+    int getRegenPerTurn() const { return regenPerTurn; }
+
+    void clearStatusEffects();
 
     // Getters & Setters
     std::string getName() const;

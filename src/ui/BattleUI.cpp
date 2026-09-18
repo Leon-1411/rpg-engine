@@ -111,6 +111,11 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
         int actionCode = static_cast<int>(action);
         int itemOrSkillIndex = -1;
 
+        if (action == BattleAction::RUN && enemy.getType() == EnemyType::BOSS) {
+            lastMessage = "Không thể bỏ chạy khỏi trận chiến Boss Tối Cao!";
+            continue;
+        }
+
         if (action == BattleAction::SKILL) {
             itemOrSkillIndex = 1;
         } else if (action == BattleAction::ITEM) {

@@ -1,51 +1,75 @@
 /**
  * @file Mage.cpp
- * @brief Hiện thực lớp Mage kế thừa Hero.
+ * @brief Hiện thực lớp Mage (Morrigan) kế thừa Hero với sát thương phép cộng từ vũ khí & hồi phục Mana.
  */
 
 #include "Mage.h"
 #include <iostream>
 
 Mage::Mage(const std::string& name, int hp, int mp, int attack, int defense)
-    : Hero(name, HeroClass::MAGE, hp, mp, attack, defense) {}
+    : Hero(name, HeroClass::MAGE, hp, mp, attack, defense, 0, 0.0f, 0.0f, true) {}
 
-bool Mage::useSkill(int skillIndex, int& outDamage) {
+bool Mage::useSkill(int skillIndex, int& outDamage, std::string& outMessage) {
+    outDamage = 0;
+    int effAtk = getEffectiveAttack();
+
     switch (skillIndex) {
         case 1: { // Fireball
             const int cost = 15;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 2 + 10;
-                std::cout << "[Mage] " << name << " niệm chú phóng [Fireball] rực lửa!\n";
+                outDamage = effAtk * 2 + 10;
+                outMessage = "[Mage] " + name + " niệm chú phóng [Fireball] rực lửa gây " +
+                             std::to_string(outDamage) + " sát thương phép xuyên giáp!";
                 return true;
+            } else {
+                outMessage = "Không đủ MP để dùng Fireball! (Cần 15 MP, hiện có: " + std::to_string(mp) + ")";
+                return false;
             }
-            break;
         }
-        case 2: { // Ice Blast
+        case 2: { // Ice Blast (Sát thương & Hồi phục 10 Mana)
             const int cost = 20;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 2 + 20;
-                std::cout << "[Mage] " << name << " triệu hồi băng giá [Ice Blast] đóng băng kẻ thù!\n";
+                outDamage = effAtk * 2 + 20;
+                restoreMp(10);
+                outMessage = "[Mage] " + name + " triệu hồi hàn băng [Ice Blast] gây " +
+                             std::to_string(outDamage) + " sát thương phép và hấp thụ hồi phục +10 MP! (MP: " +
+                             std::to_string(mp) + "/" + std::to_string(maxMp) + ")";
                 return true;
+            } else {
+                outMessage = "Không đủ MP để dùng Ice Blast! (Cần 20 MP, hiện có: " + std::to_string(mp) + ")";
+                return false;
             }
-            break;
         }
         case 3: { // Meteor
             const int cost = 35;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 3 + 40;
-                std::cout << "[Mage] " << name << " gọi mưa thiên thạch hủy diệt [Meteor]!\n";
+                outDamage = effAtk * 3 + 40;
+                outMessage = "[Mage] " + name + " gọi mưa thiên thạch hủy diệt [Meteor] giáng xuống gây " +
+                             std::to_string(outDamage) + " sát thương ma thuật cực đại!";
                 return true;
+            } else {
+                outMessage = "Không đủ MP để dùng Meteor! (Cần 35 MP, hiện có: " + std::to_string(mp) + ")";
+                return false;
             }
-            break;
         }
         default:
+            outMessage = "Kỹ năng không hợp lệ (chỉ chọn từ 1 đến 3)!";
             break;
     }
     outDamage = 0;
     return false;
+}
+
+bool Mage::useSkill(int skillIndex, int& outDamage) {
+    std::string msg;
+    bool result = useSkill(skillIndex, outDamage, msg);
+    if (result) {
+        std::cout << msg << "\n";
+    }
+    return result;
 }
 
 void Mage::levelUp() {
@@ -63,8 +87,9 @@ std::string Mage::getSkillName(int skillIndex) const {
 }
 
 void Mage::displaySkills() const {
+    int effAtk = getEffectiveAttack();
     std::cout << "[Mage Skills - " << name << "]\n"
-              << "  1. Fireball   (MP: 15) - Cầu lửa gây (ATK*2 + 10) damage\n"
-              << "  2. Ice Blast  (MP: 20) - Băng tiễn gây (ATK*2 + 20) damage\n"
-              << "  3. Meteor     (MP: 35) - Thiên thạch hủy diệt gây (ATK*3 + 40) damage\n";
+              << "  1. Fireball   (MP: 15) - Cầu lửa gây (" << effAtk * 2 + 10 << " dmg) phép xuyên giáp\n"
+              << "  2. Ice Blast  (MP: 20) - Băng tiễn gây (" << effAtk * 2 + 20 << " dmg) phép & Hồi phục +10 MP\n"
+              << "  3. Meteor     (MP: 35) - Thiên thạch hủy diệt gây (" << effAtk * 3 + 40 << " dmg) phép cực đại\n";
 }
