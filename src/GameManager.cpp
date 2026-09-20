@@ -9,6 +9,7 @@
 #include "Mage.h"
 #include "Ranger.h"
 #include "DataLoader.h"
+#include "LevelSystem.h"
 #include "Shop.h"
 #include <iostream>
 
@@ -254,8 +255,12 @@ void GameManager::handleStoryMode() {
                 giveItemById(itmId);
             }
             if (current.rewardExp > 0 && playerHero) {
-                playerHero->setExp(playerHero->getExp() + current.rewardExp);
+                bool leveled = playerHero->addExp(current.rewardExp);
                 std::cout << "  + " << current.rewardExp << " EXP\n";
+                if (leveled && playerHero->getStatPoints() > 0) {
+                    std::cout << "\n" << ConsoleUI::colorize("★ CHÚC MỪNG BẠN ĐÃ THĂNG CẤP! CÓ " + std::to_string(playerHero->getStatPoints()) + " ĐIỂM TIỀM NĂNG ★", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+                    LevelSystem::promptStatAllocation(*playerHero);
+                }
             }
             if (current.rewardGold > 0 && playerHero) {
                 playerHero->addGold(current.rewardGold);
@@ -356,11 +361,13 @@ void GameManager::handleStoryMode() {
     }
 
     // Utility options
-    int optInv = numChoices + 1;
-    int optSave = numChoices + 2;
-    int optMenu = numChoices + 3;
+    int optHero = numChoices + 1;
+    int optInv = numChoices + 2;
+    int optSave = numChoices + 3;
+    int optMenu = numChoices + 4;
 
     std::cout << "\n--- Tiện ích ---\n";
+    std::cout << "  " << optHero << ". Thông tin Anh Hùng & Phân bổ điểm (Hero Stats)\n";
     std::cout << "  " << optInv << ". Mở túi đồ (Inventory)\n";
     std::cout << "  " << optSave << ". Lưu game (Save Game Slot 1)\n";
     std::cout << "  " << optMenu << ". Quay về Menu chính\n";
@@ -369,6 +376,15 @@ void GameManager::handleStoryMode() {
 
     if (choice >= 1 && choice <= numChoices) {
         story.selectChoice(choice - 1);
+    } else if (choice == optHero) {
+        if (playerHero) {
+            playerHero->displayStats();
+            if (playerHero->getStatPoints() > 0) {
+                LevelSystem::promptStatAllocation(*playerHero);
+            } else {
+                ConsoleUI::pause();
+            }
+        }
     } else if (choice == optInv) {
         changeState(GameState::INVENTORY_MODE);
     } else if (choice == optSave) {
@@ -414,7 +430,14 @@ void GameManager::handleBattleMode() {
         int itemOrSkillIndex = -1;
 
         if (action == BattleAction::SKILL) {
-            itemOrSkillIndex = 1;
+            std::cout << "\n" << ConsoleUI::colorize("✦ DANH SÁCH KỸ NĂNG - " + playerHero->getName() + " [MP: " + std::to_string(playerHero->getMp()) + "/" + std::to_string(playerHero->getMaxMp()) + "]:", ConsoleUI::Colors::BRIGHT_CYAN) << "\n";
+            playerHero->displaySkills();
+            std::cout << "  0. Quay lại\n";
+            int sChoice = ConsoleUI::getIntInput(0, 3, "Chọn kỹ năng muốn dùng [1-3, hoặc 0 để hủy]: ");
+            if (sChoice == 0) {
+                continue;
+            }
+            itemOrSkillIndex = sChoice;
         } else if (action == BattleAction::ITEM) {
             auto& inv = playerHero->getInventory();
             std::vector<int> potionIndices;
@@ -456,6 +479,10 @@ void GameManager::handleBattleMode() {
 
     if (combat.getState() == CombatState::HERO_VICTORY) {
         battleUI.showVictory(*enemy, combat.getLastLootDrops());
+        if (playerHero && playerHero->getStatPoints() > 0) {
+            std::cout << "\n" << ConsoleUI::colorize("★ BẠN CÓ ĐIỂM TIỀM NĂNG CHƯA PHÂN BỔ (" + std::to_string(playerHero->getStatPoints()) + " ĐIỂM)! ★", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+            LevelSystem::promptStatAllocation(*playerHero);
+        }
         if (!currentWinNodeId.empty()) {
             story.moveToNode(currentWinNodeId);
         }
