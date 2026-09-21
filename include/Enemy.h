@@ -27,6 +27,9 @@ protected:
     int poisonTurns;
     int poisonDamagePerTurn;
 
+    // Stun status (Choáng mất lượt)
+    int stunTurns;
+
     // Poisonous monster traits (inflicts poison on hit)
     bool isPoisonous;
     int poisonInflictTurns;
@@ -35,6 +38,10 @@ protected:
     // Regeneration status
     int regenTurns;
     int regenPerTurn;
+
+    // Loot drops (Weapon, Armor, Potion, etc.)
+    std::vector<std::string> dropItemIds;
+    float dropChance;
 
 public:
     Enemy(const std::string& name, EnemyType type, int hp, int attack, int defense,
@@ -51,11 +58,26 @@ public:
     virtual void displayStats() const;
     virtual std::string getSpecialSkillName() const;
 
+    // Loot drop methods
+    void addDropItem(const std::string& itemId);
+    const std::vector<std::string>& getDropItemIds() const;
+    void setDropItemIds(const std::vector<std::string>& itemIds);
+    void setDropChance(float chance);
+    float getDropChance() const;
+    std::vector<std::string> generateLootDrops() const;
+
     // Poison mechanisms (Suffering poison)
     void applyPoison(int turns, int damagePerTurn);
     int takePoisonDamage();
     bool isPoisoned() const;
     int getPoisonTurns() const;
+    int getPoisonDamagePerTurn() const { return poisonDamagePerTurn; }
+
+    // Stun mechanisms (Choáng)
+    void applyStun(int turns = 1);
+    bool isStunned() const;
+    int getStunTurns() const;
+    int takeStunTurn();
 
     // Poisonous monster traits (Inflicting poison on target)
     void setPoisonous(bool value, int turns = 3, int dmg = 5);
@@ -68,6 +90,9 @@ public:
     int processRegen();
     bool hasRegen() const;
     int getRegenTurns() const;
+    int getRegenPerTurn() const { return regenPerTurn; }
+
+    void clearStatusEffects();
 
     // Getters & Setters
     std::string getName() const;

@@ -69,6 +69,7 @@ SavedGameState SaveManager::createSnapshot(const Hero& hero, const StoryGraph& s
     state.ignoreArmor = hero.isIgnoreArmor();
     state.readyArrows = hero.getReadyArrows();
     state.gold = hero.getGold();
+    state.statPoints = hero.getStatPoints();
 
     // Status effects
     state.poisonTurns = hero.getPoisonTurns();
@@ -139,6 +140,7 @@ bool SaveManager::applySnapshot(const SavedGameState& state, Hero& hero, StoryGr
         hero.setIgnoreArmor(state.ignoreArmor);
         hero.setReadyArrows(state.readyArrows);
         hero.setGold(state.gold);
+        hero.setStatPoints(state.statPoints);
 
         // Status effects
         hero.clearStatusEffects();
@@ -178,6 +180,10 @@ bool SaveManager::applySnapshot(const SavedGameState& state, Hero& hero, StoryGr
             } else if (type == ItemType::ARMOR) {
                 inv.addItem(std::make_shared<Armor>(
                     rec.id, rec.name, rec.description, rec.statValue
+                ));
+            } else if (type == ItemType::KEY_ITEM) {
+                inv.addItem(std::make_shared<KeyItem>(
+                    rec.id, rec.name, rec.description
                 ));
             } else {
                 inv.addItem(std::make_shared<Item>(
@@ -266,6 +272,7 @@ bool SaveManager::saveGameState(int slot, const SavedGameState& state) const {
         heroJ["ignoreArmor"] = state.ignoreArmor;
         heroJ["readyArrows"] = state.readyArrows;
         heroJ["gold"] = state.gold;
+        heroJ["statPoints"] = state.statPoints;
 
         json statusJ;
         statusJ["poisonTurns"] = state.poisonTurns;
@@ -359,6 +366,7 @@ bool SaveManager::loadGameState(int slot, SavedGameState& outState) const {
         outState.ignoreArmor = heroPtr->value("ignoreArmor", j.value("ignoreArmor", false));
         outState.readyArrows = heroPtr->value("readyArrows", j.value("readyArrows", 0));
         outState.gold = heroPtr->value("gold", j.value("gold", 0));
+        outState.statPoints = heroPtr->value("statPoints", j.value("statPoints", 0));
 
         // Read status effects
         if (heroPtr->contains("statusEffects") && (*heroPtr)["statusEffects"].is_object()) {
@@ -453,6 +461,21 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
     }
 
     return applySnapshot(state, hero, story);
+}
+
+bool SaveManager::loadGame(int slot, std::shared_ptr<Hero>& outHero, StoryGraph& story) {
+    if (!slotExists(slot)) {
+        std::cerr << "[SaveManager] Error: Slot " << slot << " does not exist.\n";
+        return false;
+    }
+
+    SavedGameState state;
+    if (!loadGameState(slot, state)) {
+        return false;
+    }
+
+    outHero = Hero::createHero(state.heroClass, state.heroName, state.hp, state.mp, state.attack, state.defense);
+    return applySnapshot(state, *outHero, story);
 }
 
 bool SaveManager::slotExists(int slot) const {

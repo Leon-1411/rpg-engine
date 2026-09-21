@@ -141,16 +141,18 @@ void MainMenu::handleNewGame() {
 
     int classChoice = ConsoleUI::getIntInput(1, 3, "  Chọn lớp [1-3]: ");
 
-    Hero player(heroName, HeroClass::WARRIOR, 120, 30, 18, 8);
+    HeroClass chosenClass = HeroClass::WARRIOR;
     if (classChoice == 1) {
-        player = Hero(heroName, HeroClass::WARRIOR, 120, 30, 18, 8);
+        chosenClass = HeroClass::WARRIOR;
     } else if (classChoice == 2) {
-        player = Hero(heroName, HeroClass::MAGE, 80, 100, 24, 3);
+        chosenClass = HeroClass::MAGE;
     } else {
-        player = Hero(heroName, HeroClass::RANGER, 95, 50, 20, 5);
+        chosenClass = HeroClass::RANGER;
     }
 
-    ConsoleUI::printSuccess("Khởi tạo nhân vật " + player.getName() + " thành công!");
+    std::shared_ptr<Hero> player = Hero::createHero(chosenClass, heroName);
+
+    ConsoleUI::printSuccess("Khởi tạo nhân vật " + player->getName() + " [" + player->getHeroClassName() + "] thành công!");
     ConsoleUI::pause();
 
     // Load story from JSON
@@ -161,7 +163,7 @@ void MainMenu::handleNewGame() {
         ConsoleUI::printWarning("Không tìm thấy data/story.json, sử dụng cốt truyện mặc định.");
     }
 
-    playStoryLoop(player, story);
+    playStoryLoop(*player, story);
 }
 
 void MainMenu::handleLoadGame() {
@@ -170,7 +172,7 @@ void MainMenu::handleLoadGame() {
     int slot = showLoadGameMenu(slots);
     if (slot <= 0) return;
 
-    Hero player("TempHero", HeroClass::WARRIOR, 100, 20, 10, 5);
+    std::shared_ptr<Hero> player;
     StoryGraph story;
     std::string storyPath = "data/story.json";
     if (!std::ifstream(storyPath).good()) storyPath = "../data/story.json";
@@ -178,10 +180,10 @@ void MainMenu::handleLoadGame() {
         // Use default story graph
     }
 
-    if (saveMgr.loadGame(slot, player, story)) {
-        ConsoleUI::printSuccess("Tải bản lưu Slot " + std::to_string(slot) + " thành công!");
+    if (saveMgr.loadGame(slot, player, story) && player) {
+        ConsoleUI::printSuccess("Tải bản lưu Slot " + std::to_string(slot) + " thành công! Chào mừng " + player->getName() + " [" + player->getHeroClassName() + "]");
         ConsoleUI::pause();
-        playStoryLoop(player, story);
+        playStoryLoop(*player, story);
     } else {
         ConsoleUI::printError("Không thể tải bản lưu Slot " + std::to_string(slot) + "!");
         ConsoleUI::pause();

@@ -247,6 +247,22 @@ void testUseItemById() {
     assert(inv.useItemById("p_hp", hero) == false);
 }
 
+// ==========================================
+// Test KeyItem: cannot equip as weapon or armor
+// ==========================================
+void testKeyItemInventoryBehavior() {
+    Inventory inv(5);
+    auto keyItem = std::make_shared<KeyItem>("RoyalInsignia", "Royal Insignia", "Badge from King");
+    inv.addItem(keyItem);
+
+    assert(inv.getItemCount() == 1);
+    assert(inv.hasItem("RoyalInsignia") == true);
+    assert(inv.equipWeapon(0) == false); // Cannot equip as weapon
+    assert(inv.equipArmor(0) == false);  // Cannot equip as armor
+    assert(inv.getEquippedWeaponBonus() == 0);
+    assert(inv.getEquippedArmorBonus() == 0);
+}
+
 int main() {
     testLegacyUsage();
     testPotionStacking();
@@ -258,6 +274,7 @@ int main() {
     testRemovePotionById();
     testQueryHelpers();
     testUseItemById();
+    testKeyItemInventoryBehavior();
 
     std::cout << "[PASS] All Inventory unit tests successful!\n";
     return 0;

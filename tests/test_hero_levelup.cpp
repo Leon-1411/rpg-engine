@@ -118,13 +118,13 @@ void testMageLevelUp() {
     bool ok = mage.useSkill(1, skillDmg);
     assert(ok && skillDmg == 48 && mage.getMp() == 85);
 
-    // Skill 2: Ice Blast (MP: 20, Dmg: ATK*2 + 20 = 19*2 + 20 = 58)
+    // Skill 2: Ice Blast (MP: 20, Dmg: ATK*2 + 20 = 19*2 + 20 = 58, +10 MP restore)
     ok = mage.useSkill(2, skillDmg);
-    assert(ok && skillDmg == 58 && mage.getMp() == 65);
+    assert(ok && skillDmg == 58 && mage.getMp() == 75); // 85 - 20 + 10 = 75
 
     // Skill 3: Meteor (MP: 35, Dmg: ATK*3 + 40 = 19*3 + 40 = 97)
     ok = mage.useSkill(3, skillDmg);
-    assert(ok && skillDmg == 97 && mage.getMp() == 30);
+    assert(ok && skillDmg == 97 && mage.getMp() == 40); // 75 - 35 = 40
 
     std::cout << "-> [PASS] Mage level up & skills verified.\n";
 }

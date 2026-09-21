@@ -361,6 +361,38 @@ void testSnapshotDirectAPI() {
     std::cout << " -> PASSED\n";
 }
 
+void testPolymorphicSharedPtrLoad() {
+    std::cout << "[Test 9] Polymorphic SharedPtr LoadGame (Warrior / Mage / Ranger)...n";
+    SaveManager manager("saves_test/");
+    
+    // Save a Mage
+    std::shared_ptr<Hero> mage = Hero::createHero(HeroClass::MAGE, "Morrigan");
+    mage->setGold(250);
+    StoryGraph story;
+    assert(manager.saveGame(12, *mage, story) == true);
+
+    // Load into shared_ptr
+    std::shared_ptr<Hero> loadedMage;
+    StoryGraph loadedStory;
+    assert(manager.loadGame(12, loadedMage, loadedStory) == true);
+    assert(loadedMage != nullptr);
+    assert(loadedMage->getName() == "Morrigan");
+    assert(loadedMage->getHeroClass() == HeroClass::MAGE);
+    assert(loadedMage->getHeroClassName() == "Mage");
+    assert(loadedMage->getGold() == 250);
+    assert(loadedMage->getSkillName(1) == "Fireball");
+    assert(loadedMage->getSkillName(2) == "Ice Blast");
+    assert(loadedMage->getSkillName(3) == "Meteor");
+
+    int dmg = 0;
+    std::string msg;
+    assert(loadedMage->useSkill(1, dmg, msg) == true);
+    assert(dmg > 0);
+
+    assert(manager.deleteSlot(12) == true);
+    std::cout << " -> PASSED\n";
+}
+
 int main() {
     std::cout << "========================================\n";
     std::cout << " RUNNING SAVEMANAGER COMPREHENSIVE TESTS\n";
@@ -374,6 +406,7 @@ int main() {
     testCorruptedFileAndErrorHandling();
     testBackwardCompatibilityWithLegacySave();
     testSnapshotDirectAPI();
+    testPolymorphicSharedPtrLoad();
 
     std::cout << "========================================\n";
     std::cout << " [ALL PASS] SaveManager unit tests successful!\n";

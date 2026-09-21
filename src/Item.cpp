@@ -120,3 +120,19 @@ void Potion::displayInfo() const {
 std::shared_ptr<Item> Potion::clone() const {
     return std::make_shared<Potion>(*this);
 }
+
+// ==========================================
+// KeyItem Implementation
+// ==========================================
+
+KeyItem::KeyItem(const std::string& id, const std::string& name, const std::string& description)
+    : Item(id, name, description, ItemType::KEY_ITEM, 0) {}
+
+void KeyItem::displayInfo() const {
+    std::cout << "[" << id << "] " << name << " (Key Item): " << description << " [Nhiệm Vụ]\n";
+}
+
+std::shared_ptr<Item> KeyItem::clone() const {
+    return std::make_shared<KeyItem>(*this);
+}
+

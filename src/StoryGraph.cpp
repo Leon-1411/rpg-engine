@@ -341,16 +341,28 @@ void StoryGraph::setCurrentNodeId(const std::string& nodeId) {
     resetDialogue();
 }
 
-bool StoryGraph::selectChoice(int choiceIndex) {
+bool StoryGraph::canSelectChoice(int choiceIndex) const {
     auto node = getCurrentNode();
-    if (choiceIndex >= 0 && choiceIndex < static_cast<int>(node.choices.size())) {
-        const Choice& choice = node.choices[choiceIndex];
-        if (!choice.setFlag.empty()) {
-            setFlag(choice.setFlag, true);
-        }
-        return moveToNode(choice.nextNodeId);
+    if (choiceIndex < 0 || choiceIndex >= static_cast<int>(node.choices.size())) {
+        return false;
     }
-    return false;
+    const Choice& choice = node.choices[choiceIndex];
+    if (!choice.requiredFlag.empty() && !getFlag(choice.requiredFlag)) {
+        return false;
+    }
+    return true;
+}
+
+bool StoryGraph::selectChoice(int choiceIndex) {
+    if (!canSelectChoice(choiceIndex)) {
+        return false;
+    }
+    auto node = getCurrentNode();
+    const Choice& choice = node.choices[choiceIndex];
+    if (!choice.setFlag.empty()) {
+        setFlag(choice.setFlag, true);
+    }
+    return moveToNode(choice.nextNodeId);
 }
 
 bool StoryGraph::moveToNode(const std::string& nodeId) {
@@ -391,13 +403,22 @@ DialogueNode StoryGraph::getCurrentDialogueNode() const {
     return {};
 }
 
-bool StoryGraph::selectDialogueChoice(int choiceIndex) {
+bool StoryGraph::canSelectDialogueChoice(int choiceIndex) const {
     if (!isInDialogue()) return false;
     DialogueNode dNode = getCurrentDialogueNode();
     if (choiceIndex < 0 || choiceIndex >= static_cast<int>(dNode.choices.size())) {
         return false;
     }
+    const DialogueChoice& choice = dNode.choices[choiceIndex];
+    if (!choice.requiredFlag.empty() && !getFlag(choice.requiredFlag)) {
+        return false;
+    }
+    return true;
+}
 
+bool StoryGraph::selectDialogueChoice(int choiceIndex) {
+    if (!canSelectDialogueChoice(choiceIndex)) return false;
+    DialogueNode dNode = getCurrentDialogueNode();
     const DialogueChoice& choice = dNode.choices[choiceIndex];
     if (!choice.setFlag.empty()) {
         setFlag(choice.setFlag, true);
@@ -445,9 +466,108 @@ void StoryGraph::clearStoryFlags() {
 }
 
 bool StoryGraph::isEnding() const {
-    return getCurrentNode().type == EventType::ENDING;
+    auto node = getCurrentNode();
+    return node.type == EventType::ENDING || node.rawType == "ENDING" || node.id == "GameOver";
+}
+
+bool StoryGraph::isGameOverNode() const {
+    auto node = getCurrentNode();
+    return node.id == "GameOver" || node.rawType == "GAME_OVER";
 }
 
 size_t StoryGraph::getNodeCount() const {
     return nodes.size();
+}
+
+bool StoryGraph::validateGraph(std::vector<std::string>& errors) const {
+    errors.clear();
+    if (nodes.empty()) {
+        errors.push_back("Graph is empty, no nodes loaded.");
+        return false;
+    }
+
+    if (nodes.find(currentNodeId) == nodes.end()) {
+        errors.push_back("Start node '" + currentNodeId + "' not found in graph.");
+    }
+
+    for (const auto& pair : nodes) {
+        const std::string& id = pair.first;
+        const StoryNode& node = pair.second;
+
+        // 1. Kiem tra cac choices thong thuong
+        for (size_t cIdx = 0; cIdx < node.choices.size(); ++cIdx) {
+            const auto& ch = node.choices[cIdx];
+            if (ch.nextNodeId.empty()) {
+                errors.push_back("Node '" + id + "' choice #" + std::to_string(cIdx + 1) + " ('" + ch.text + "') has empty nextNodeId.");
+            } else if (nodes.find(ch.nextNodeId) == nodes.end()) {
+                errors.push_back("Node '" + id + "' choice #" + std::to_string(cIdx + 1) + " ('" + ch.text + "') links to non-existent nextNodeId: '" + ch.nextNodeId + "'.");
+            }
+        }
+
+        // 2. Kiem tra Dialogue Tree
+        if (!node.dialogueTree.empty()) {
+            if (!node.dialogueTree.startDialogueId.empty() && 
+                node.dialogueTree.nodes.find(node.dialogueTree.startDialogueId) == node.dialogueTree.nodes.end()) {
+                errors.push_back("Node '" + id + "' has invalid start_dialogue_id: '" + node.dialogueTree.startDialogueId + "'.");
+            }
+
+            for (const auto& dPair : node.dialogueTree.nodes) {
+                const std::string& dId = dPair.first;
+                const DialogueNode& dn = dPair.second;
+                for (size_t dcIdx = 0; dcIdx < dn.choices.size(); ++dcIdx) {
+                    const auto& dChoice = dn.choices[dcIdx];
+                    if (!dChoice.nextDialogueId.empty() && node.dialogueTree.nodes.find(dChoice.nextDialogueId) == node.dialogueTree.nodes.end()) {
+                        errors.push_back("Node '" + id + "' dialogue '" + dId + "' choice #" + std::to_string(dcIdx + 1) + " links to non-existent nextDialogueId: '" + dChoice.nextDialogueId + "'.");
+                    }
+                    if (!dChoice.nextNodeId.empty() && nodes.find(dChoice.nextNodeId) == nodes.end()) {
+                        errors.push_back("Node '" + id + "' dialogue '" + dId + "' choice #" + std::to_string(dcIdx + 1) + " links to non-existent nextNodeId: '" + dChoice.nextNodeId + "'.");
+                    }
+                }
+            }
+        }
+
+        // 3. Kiem tra cac lien ket dac biet
+        if (!node.onWinNodeId.empty() && nodes.find(node.onWinNodeId) == nodes.end()) {
+            errors.push_back("Node '" + id + "' onWinNodeId links to non-existent node: '" + node.onWinNodeId + "'.");
+        }
+        if (!node.onLoseNodeId.empty() && nodes.find(node.onLoseNodeId) == nodes.end()) {
+            errors.push_back("Node '" + id + "' onLoseNodeId links to non-existent node: '" + node.onLoseNodeId + "'.");
+        }
+        if (!node.onPassNodeId.empty() && nodes.find(node.onPassNodeId) == nodes.end()) {
+            errors.push_back("Node '" + id + "' onPassNodeId links to non-existent node: '" + node.onPassNodeId + "'.");
+        }
+        if (!node.onFailNodeId.empty() && nodes.find(node.onFailNodeId) == nodes.end()) {
+            errors.push_back("Node '" + id + "' onFailNodeId links to non-existent node: '" + node.onFailNodeId + "'.");
+        }
+        if (!node.nextNodeId.empty() && nodes.find(node.nextNodeId) == nodes.end()) {
+            errors.push_back("Node '" + id + "' nextNodeId links to non-existent node: '" + node.nextNodeId + "'.");
+        }
+
+        // 4. Kiem tra Dead-end (Cut duong)
+        bool isEndingNode = (node.type == EventType::ENDING || node.rawType == "ENDING" || id == "GameOver");
+        if (!isEndingNode) {
+            bool hasOutgoing = !node.choices.empty() ||
+                               !node.nextNodeId.empty() ||
+                               !node.onPassNodeId.empty() ||
+                               !node.onWinNodeId.empty();
+
+            if (!hasOutgoing && !node.dialogueTree.empty()) {
+                for (const auto& dPair : node.dialogueTree.nodes) {
+                    for (const auto& dChoice : dPair.second.choices) {
+                        if (!dChoice.nextNodeId.empty()) {
+                            hasOutgoing = true;
+                            break;
+                        }
+                    }
+                    if (hasOutgoing) break;
+                }
+            }
+
+            if (!hasOutgoing) {
+                errors.push_back("Dead-end detected: Node '" + id + "' is not an ENDING node but has no outgoing transitions!");
+            }
+        }
+    }
+
+    return errors.empty();
 }

@@ -78,18 +78,16 @@ void GameManager::handleMainMenu() {
 }
 
 void GameManager::giveItemById(const std::string& itemId) {
-    auto items = DataLoader::loadItems("data/items.json");
-    for (const auto& itm : items) {
-        if (itm.getId() == itemId) {
-            if (playerHero) {
-                playerHero->getInventory().addItem(itm);
-                std::cout << "  + [Vật phẩm] " << itm.getName() << " (" << itm.getDescription() << ")\n";
-            }
-            return;
+    auto itemPtr = DataLoader::loadItemById("data/items.json", itemId);
+    if (itemPtr) {
+        if (playerHero) {
+            playerHero->getInventory().addItem(itemPtr);
+            std::cout << "  + [Vật phẩm] " << itemPtr->getName() << " (" << itemPtr->getDescription() << ")\n";
         }
+        return;
     }
     // Fallback if not in items.json
-    Item fallback(itemId, itemId, "Special Quest Item", ItemType::ARMOR, 0);
+    auto fallback = std::make_shared<KeyItem>(itemId, itemId, "Special Quest Item");
     if (playerHero) {
         playerHero->getInventory().addItem(fallback);
         std::cout << "  + [Vật phẩm đặc biệt] " << itemId << "\n";
@@ -137,6 +135,12 @@ void GameManager::startNewGame() {
         giveItemById("pot_01");
     }
 
+    // Auto-equip starting weapon and armor
+    if (playerHero && playerHero->getInventory().getItemCount() >= 2) {
+        playerHero->getInventory().equipWeapon(0);
+        playerHero->getInventory().equipArmor(1);
+    }
+
     story.loadStoryGraph("data/story.json");
     
     ConsoleUI::printSuccess("Khởi tạo nhân vật " + playerHero->getName() + " [" + playerHero->getHeroClassName() + "] thành công!");
@@ -150,10 +154,9 @@ void GameManager::loadGame() {
     int slotToLoad = mainMenu.showLoadGameMenu(slots);
     
     if (slotToLoad != -1) {
-        playerHero = std::make_shared<Hero>("Blank", HeroClass::WARRIOR, 1, 1, 1, 1);
         story.loadStoryGraph("data/story.json");
-        if (saveManager.loadGame(slotToLoad, *playerHero, story)) {
-            ConsoleUI::printSuccess("Tải game thành công!");
+        if (saveManager.loadGame(slotToLoad, playerHero, story) && playerHero) {
+            ConsoleUI::printSuccess("Tải game thành công! Chào mừng " + playerHero->getName() + " [" + playerHero->getHeroClassName() + "]");
             ConsoleUI::pause();
             changeState(GameState::STORY_MODE);
         } else {
@@ -398,38 +401,56 @@ void GameManager::handleBattleMode() {
     CombatEngine combat(*playerHero, *enemy, &playerHero->getInventory());
     combat.startBattle();
 
+    std::string lastTurnMsg = "Một kẻ địch đã xuất hiện: " + enemy->getName() + "!";
+    if (enemy->getType() == EnemyType::BOSS) {
+        lastTurnMsg = "CẢNH BÁO NGUY HIỂM: TRẬN CHIẾN BOSS TỐI CAO - " + enemy->getName() + " BẮT ĐẦU!";
+    }
+
     while (!combat.isBattleOver()) {
-        battleUI.renderBattleScreen(*playerHero, *enemy, "Tới lượt của bạn!");
+        battleUI.renderBattleScreen(*playerHero, *enemy, lastTurnMsg);
         BattleAction action = battleUI.getPlayerAction();
         
         int actionCode = static_cast<int>(action);
-        int subIndex = -1;
+        int itemOrSkillIndex = -1;
 
         if (action == BattleAction::SKILL) {
             std::cout << "\n--- Danh Sách Kỹ Năng (" << playerHero->getHeroClassName() << ") ---\n";
             std::cout << "  1. " << playerHero->getSkillName(1) << " [Hồi chiêu: " << playerHero->getSkillCooldown(1) << " lượt]\n";
             std::cout << "  2. " << playerHero->getSkillName(2) << " [Hồi chiêu: " << playerHero->getSkillCooldown(2) << " lượt]\n";
             std::cout << "  3. " << playerHero->getSkillName(3) << " [Hồi chiêu: " << playerHero->getSkillCooldown(3) << " lượt]\n";
-            subIndex = ConsoleUI::getIntInput(1, 3, "Chọn kỹ năng (1-3): ");
+            itemOrSkillIndex = ConsoleUI::getIntInput(1, 3, "Chọn kỹ năng (1-3): ");
         } else if (action == BattleAction::ITEM) {
             auto& inv = playerHero->getInventory();
             std::vector<int> potionIndices;
-            std::cout << "\n--- Danh Sách Dược Phẩm Trong Túi ---\n";
             for (int i = 0; i < inv.getItemCount(); ++i) {
-                Item itm = inv.getItem(i);
-                if (itm.getType() == ItemType::POTION) {
+                auto itm = inv.getItemPtr(i);
+                if (itm && itm->getType() == ItemType::POTION) {
                     potionIndices.push_back(i);
-                    std::cout << "  " << potionIndices.size() << ". " << itm.getName()
-                              << " (" << itm.getDescription() << ")\n";
                 }
             }
+
             if (potionIndices.empty()) {
-                ConsoleUI::printWarning("Bạn không có bình dược phẩm nào trong túi đồ!");
-                ConsoleUI::pause();
+                lastTurnMsg = "Túi đồ không còn bình thuốc (Potion) nào để sử dụng!";
                 continue;
+            }
+
+            if (potionIndices.size() == 1) {
+                itemOrSkillIndex = potionIndices[0];
             } else {
-                int pSel = ConsoleUI::getIntInput(1, static_cast<int>(potionIndices.size()), "Chọn dược phẩm muốn dùng: ");
-                subIndex = potionIndices[pSel - 1];
+                std::cout << "\n" << ConsoleUI::colorize("Danh sách thuốc trong túi:", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+                for (size_t p = 0; p < potionIndices.size(); ++p) {
+                    auto itm = inv.getItemPtr(potionIndices[p]);
+                    auto pot = std::dynamic_pointer_cast<Potion>(itm);
+                    std::string qtyStr = pot ? (" (x" + std::to_string(pot->getQuantity()) + ")") : "";
+                    std::string statDesc = (pot && pot->isMana()) ? ("Hồi " + std::to_string(itm->getStatValue()) + " MP") : ("Hồi " + std::to_string(itm->getStatValue()) + " HP");
+                    std::cout << "  " << (p + 1) << ". " << itm->getName() << qtyStr << " [" << statDesc << "]\n";
+                }
+                std::cout << "  0. Quay lại\n";
+                int pChoice = ConsoleUI::getIntInput(0, static_cast<int>(potionIndices.size()), "Chọn bình thuốc muốn dùng: ");
+                if (pChoice == 0) {
+                    continue;
+                }
+                itemOrSkillIndex = potionIndices[pChoice - 1];
             }
         } else if (action == BattleAction::RUN) {
             if (enemy->getType() == EnemyType::BOSS) {
@@ -439,12 +460,12 @@ void GameManager::handleBattleMode() {
             }
         }
 
-        combat.executeTurn(actionCode, subIndex);
-        ConsoleUI::pause("Nhấn Enter để tiếp tục lượt tiếp theo...");
+        combat.executeTurn(actionCode, itemOrSkillIndex);
+        lastTurnMsg = "Lượt đấu vừa diễn ra!";
     }
 
     if (combat.getState() == CombatState::HERO_VICTORY) {
-        battleUI.showVictory(*enemy);
+        battleUI.showVictory(*enemy, combat.getLastLootDrops());
         if (!currentWinNodeId.empty()) {
             story.moveToNode(currentWinNodeId);
         }
@@ -454,6 +475,7 @@ void GameManager::handleBattleMode() {
             story.moveToNode(currentLoseNodeId);
             changeState(GameState::STORY_MODE);
         } else {
+            battleUI.showDefeat();
             changeState(GameState::GAME_OVER);
         }
     } else {
@@ -474,16 +496,48 @@ void GameManager::handleInventoryMode() {
             std::shared_ptr<Item> item = playerHero->getInventory().getItemPtr(itemIdx);
             if (item) {
                 int action = invUI.selectItemAction(*item);
-                if (action == 1 && item->getType() == ItemType::POTION) {
-                    playerHero->getInventory().useItem(itemIdx, *playerHero);
-                } else if (action == 2) {
-                    if (item->getType() == ItemType::WEAPON) {
-                        playerHero->getInventory().equipWeapon(itemIdx);
+                if (action == 1) {
+                    if (item->getType() == ItemType::POTION) {
+                        int beforeHp = playerHero->getHp();
+                        int beforeMp = playerHero->getMp();
+                        playerHero->getInventory().useItem(itemIdx, *playerHero);
+                        int hpDiff = playerHero->getHp() - beforeHp;
+                        int mpDiff = playerHero->getMp() - beforeMp;
+                        if (hpDiff > 0) ConsoleUI::printSuccess("Đã hồi phục " + std::to_string(hpDiff) + " HP!");
+                        if (mpDiff > 0) ConsoleUI::printSuccess("Đã hồi phục " + std::to_string(mpDiff) + " MP!");
+                        ConsoleUI::pause();
+                    } else if (item->getType() == ItemType::WEAPON) {
+                        if (playerHero->getInventory().getEquippedWeaponIndex() == itemIdx) {
+                            playerHero->getInventory().unequipWeapon();
+                            ConsoleUI::printSuccess("Đã tháo vũ khí!");
+                        } else {
+                            playerHero->getInventory().equipWeapon(itemIdx);
+                            ConsoleUI::printSuccess("Đã trang bị " + item->getName() + " [+" + std::to_string(item->getStatValue()) + " ATK]!");
+                        }
+                        ConsoleUI::pause();
                     } else if (item->getType() == ItemType::ARMOR) {
-                        playerHero->getInventory().equipArmor(itemIdx);
+                        if (playerHero->getInventory().getEquippedArmorIndex() == itemIdx) {
+                            playerHero->getInventory().unequipArmor();
+                            ConsoleUI::printSuccess("Đã tháo giáp!");
+                        } else {
+                            playerHero->getInventory().equipArmor(itemIdx);
+                            ConsoleUI::printSuccess("Đã trang bị " + item->getName() + " [+" + std::to_string(item->getStatValue()) + " DEF]!");
+                        }
+                        ConsoleUI::pause();
+                    } else if (item->getType() == ItemType::KEY_ITEM) {
+                        std::cout << "\n[" << item->getName() << "]: " << item->getDescription() << "\n";
+                        ConsoleUI::pause();
                     }
-                } else if (action == 3) {
-                    playerHero->getInventory().removeItem(itemIdx);
+                } else if (action == 2) {
+                    if (item->getType() == ItemType::KEY_ITEM) {
+                        ConsoleUI::printWarning("Đây là vật phẩm cốt truyện quan trọng, không thể vứt bỏ!");
+                        ConsoleUI::pause();
+                    } else {
+                        std::string itemName = item->getName();
+                        playerHero->getInventory().removeItem(itemIdx);
+                        ConsoleUI::printWarning("Đã vứt bỏ: " + itemName);
+                        ConsoleUI::pause();
+                    }
                 }
             }
         }

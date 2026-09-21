@@ -51,7 +51,6 @@ void testEnrageMechanic() {
     assert(boss.getDefense() == 50);
 
     // Inflict damage to bring HP to 200 (200 / 500 = 40% > 30% -> not enraged)
-    // 500 - 300 = 200 HP
     boss.takeDamage(300);
     assert(boss.getHp() == 200);
     assert(!boss.isEnraged());
@@ -59,7 +58,6 @@ void testEnrageMechanic() {
     assert(boss.getDefense() == 50);
 
     // Inflict further damage to bring HP to 140 (140 / 500 = 28% < 30% -> enrage triggered!)
-    // 200 - 60 = 140 HP
     boss.takeDamage(60);
     assert(boss.getHp() == 140);
     assert(boss.isEnraged());
@@ -169,8 +167,120 @@ void testBossJsonLoading() {
     assert(jsonOutput["type"] == "BOSS");
     assert(jsonOutput["hp"] == 525);
     assert(jsonOutput["attack"] == 105);
+    assert(jsonOutput.contains("skills"));
+    assert(jsonOutput["skills"].size() == 3);
 
     std::cout << "[PASS] Boss JSON loading test passed!\n";
+}
+
+void testBossSkillCooldowns() {
+    std::cout << "Testing Boss 3-skill cooldown system...\n";
+
+    BossMonster boss("test_boss", "Test Dragon", 500, 100, 50, 400, 100, "A fearsome beast", "Infernal Cataclysm", 20);
+
+    // 1. Verify 3 skills were initialized
+    const auto& skills = boss.getSkills();
+    assert(skills.size() == 3);
+    assert(skills[0].name == "Flame Breath");
+    assert(skills[0].cooldown == 2);
+    assert(skills[0].damageMultiplier == 1.3);
+
+    assert(skills[1].name == "Dragon Roar");
+    assert(skills[1].cooldown == 3);
+    assert(skills[1].damageMultiplier == 1.6);
+
+    assert(skills[2].name == "Infernal Cataclysm");
+    assert(skills[2].cooldown == 5);
+    assert(skills[2].damageMultiplier == 2.2);
+
+    // Initial cooldowns check (all on initial cooldown for battle pacing)
+    assert(boss.getSkillRemainingCooldown(0) == 2);
+    assert(boss.getSkillRemainingCooldown(1) == 3);
+    assert(boss.getSkillRemainingCooldown(2) == 5);
+    assert(!boss.isSkillReady(0));
+    assert(!boss.isSkillReady(1));
+    assert(!boss.isSkillReady(2));
+
+    // 2. Turn 1: All on cooldown -> Boss performs Normal Attack (Action 1)
+    int action1 = boss.chooseAction();
+    assert(action1 == 1); // Normal attack
+    assert(boss.getSkillRemainingCooldown(0) == 1);
+    assert(boss.getSkillRemainingCooldown(1) == 2);
+    assert(boss.getSkillRemainingCooldown(2) == 4);
+
+    // 3. Turn 2: Skill 0 cooldown ticks from 1 to 0 -> becomes READY!
+    // Boss uses Skill 0 (Flame Breath, return 2).
+    int action2 = boss.chooseAction();
+    assert(action2 == 2); // Skill used
+    assert(boss.getSpecialSkillName() == "Flame Breath");
+    assert(boss.getActiveSkillIndex() == 0);
+    assert(boss.getActiveSkillMultiplier() == 1.3);
+    assert(boss.getSkillRemainingCooldown(0) == 2); // Triggered: put on 2-turn CD
+    assert(boss.getSkillRemainingCooldown(1) == 1);
+    assert(boss.getSkillRemainingCooldown(2) == 3);
+
+    // 4. Turn 3: Skill 1 ticks from 1 to 0 -> becomes READY!
+    // Boss uses Skill 1 (Dragon Roar, return 2).
+    int action3 = boss.chooseAction();
+    assert(action3 == 2);
+    assert(boss.getSpecialSkillName() == "Dragon Roar");
+    assert(boss.getActiveSkillIndex() == 1);
+    assert(boss.getActiveSkillMultiplier() == 1.6);
+    assert(boss.getSkillRemainingCooldown(1) == 3); // Triggered: put on 3-turn CD
+    assert(boss.getSkillRemainingCooldown(0) == 1);
+    assert(boss.getSkillRemainingCooldown(2) == 2);
+
+    // 5. Test Manual Skill Triggering & Reset
+    boss.resetCooldowns();
+    assert(boss.isSkillReady(0));
+    assert(boss.isSkillReady(1));
+    assert(boss.isSkillReady(2));
+
+    // Direct use of Skill 0
+    bool used = boss.useSkill(0);
+    assert(used == true);
+    assert(boss.getSkillRemainingCooldown(0) == 2);
+    assert(!boss.isSkillReady(0));
+
+    // Cannot use Skill 0 again while on cooldown
+    bool usedAgain = boss.useSkill(0);
+    assert(usedAgain == false);
+
+    // 6. Test Enrage resetting Ultimate skill cooldown
+    BossMonster rageBoss("rage_boss", "Rage Dragon", 500, 100, 50, 400, 100, "Fury", "Infernal Cataclysm", 20);
+    // Put ultimate on cooldown
+    rageBoss.setSkillCooldown(2, 5);
+    assert(!rageBoss.isSkillReady(2));
+    assert(rageBoss.getSkillRemainingCooldown(2) == 5);
+
+    // Trigger enrage directly via HP drop below 30%
+    rageBoss.setHp(120);
+    rageBoss.checkEnrage();
+    assert(rageBoss.isEnraged());
+    // Ultimate cooldown must be reset by Enrage!
+    assert(rageBoss.isSkillReady(2));
+    assert(rageBoss.getSkillRemainingCooldown(2) == 0);
+
+    // 7. Verify JSON parsing of 3 skills
+    auto jsonBoss = BossFactory::createFromJson("dragon_lord", "data/enemies.json");
+    assert(jsonBoss != nullptr);
+    assert(jsonBoss->getSkills().size() == 3);
+    assert(jsonBoss->getSkills()[0].name == "Flame Breath");
+    assert(jsonBoss->getSkills()[0].cooldown == 2);
+    assert(jsonBoss->getSkills()[1].name == "Dragon Roar");
+    assert(jsonBoss->getSkills()[1].cooldown == 3);
+    assert(jsonBoss->getSkills()[2].name == "Infernal Cataclysm");
+    assert(jsonBoss->getSkills()[2].cooldown == 5);
+
+    auto exportedJson = BossFactory::bossToJson(*jsonBoss);
+    assert(exportedJson.contains("skills"));
+    assert(exportedJson["skills"].size() == 3);
+    assert(exportedJson["skills"][0]["name"] == "Flame Breath");
+    assert(exportedJson["skills"][0]["cooldown"] == 2);
+    assert(exportedJson["skills"][2]["name"] == "Infernal Cataclysm");
+    assert(exportedJson["skills"][2]["cooldown"] == 5);
+
+    std::cout << "[PASS] Boss 3-skill cooldown tests passed!\n";
 }
 
 int main() {
@@ -183,6 +293,7 @@ int main() {
     testHealingAbility();
     testCombatWithBoss();
     testBossJsonLoading();
+    testBossSkillCooldowns();
 
     std::cout << "\n========================================\n";
     std::cout << "   [ALL PASS] All Boss tests passed!    \n";
