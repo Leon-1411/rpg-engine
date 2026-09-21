@@ -54,11 +54,14 @@ public:
     bool loadStoryGraph(const std::string& filePath);
     
     StoryNode getCurrentNode() const;
+    bool isChoiceAvailable(int choiceIndex) const;
     bool selectChoice(int choiceIndex);
     bool moveToNode(const std::string& nodeId);
     
     void setFlag(const std::string& flag, bool value = true);
     bool getFlag(const std::string& flag) const;
+    const std::unordered_map<std::string, bool>& getStoryFlags() const;
+    void setStoryFlags(const std::unordered_map<std::string, bool>& flags);
     
     bool isEnding() const;
     size_t getNodeCount() const;

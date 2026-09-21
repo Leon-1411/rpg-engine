@@ -28,6 +28,7 @@ set(SOURCES
     src/ui/MainMenu.cpp
     src/ui/BattleUI.cpp
     src/ui/InventoryUI.cpp
+    src/Game.cpp
 )
 
 # Core engine static library

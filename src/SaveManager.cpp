@@ -30,7 +30,6 @@ std::string SaveManager::getSaveDirectory() const {
 }
 
 bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
-bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) {
     std::error_code ec;
     if (!fs::exists(saveDirectory, ec)) {
         fs::create_directories(saveDirectory, ec);
@@ -68,11 +67,19 @@ bool SaveManager::saveGame(int slot, const Hero& hero, const StoryGraph& story) 
             itemJ["statValue"] = items[i]->getStatValue();
             auto potion = std::dynamic_pointer_cast<Potion>(items[i]);
             itemJ["quantity"] = potion ? potion->getQuantity() : 1;
+            itemJ["isMana"] = potion ? potion->isMana() : false;
             itemJ["isEquippedWeapon"] = (static_cast<int>(i) == inv.getEquippedWeaponIndex());
             itemJ["isEquippedArmor"] = (static_cast<int>(i) == inv.getEquippedArmorIndex());
             itemsJson.push_back(itemJ);
         }
         j["inventory"] = itemsJson;
+
+        // Save story flags
+        json flagsJson = json::object();
+        for (const auto& [flag, value] : story.getStoryFlags()) {
+            flagsJson[flag] = value;
+        }
+        j["storyFlags"] = flagsJson;
 
         std::ofstream outFile(filePath);
         if (!outFile.is_open()) {
@@ -108,7 +115,14 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         inFile >> j;
         inFile.close();
 
-        // Restore hero attributes
+        // Restore hero name
+        if (j.contains("heroName")) hero.setName(j["heroName"].get<std::string>());
+
+        // Restore full stats BEFORE hp/mp to ensure clamp works correctly
+        if (j.contains("maxHp")) hero.setMaxHp(j["maxHp"].get<int>());
+        if (j.contains("maxMp")) hero.setMaxMp(j["maxMp"].get<int>());
+        if (j.contains("attack")) hero.setAttack(j["attack"].get<int>());
+        if (j.contains("defense")) hero.setDefense(j["defense"].get<int>());
         if (j.contains("level")) hero.setLevel(j["level"].get<int>());
         if (j.contains("exp")) hero.setExp(j["exp"].get<int>());
         if (j.contains("hp")) hero.setHp(j["hp"].get<int>());
@@ -120,7 +134,16 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
             story.moveToNode(nodeId);
         }
 
-        // Restore inventory items
+        // Restore story flags
+        if (j.contains("storyFlags") && j["storyFlags"].is_object()) {
+            std::unordered_map<std::string, bool> flags;
+            for (auto& [key, val] : j["storyFlags"].items()) {
+                if (val.is_boolean()) flags[key] = val.get<bool>();
+            }
+            story.setStoryFlags(flags);
+        }
+
+        // Restore inventory items using correct subclasses
         if (j.contains("inventory") && j["inventory"].is_array()) {
             Inventory& inv = hero.getInventory();
             inv.clear();
@@ -131,13 +154,17 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
                 ItemType type = static_cast<ItemType>(itemJ.value("type", 0));
                 int statVal = itemJ.value("statValue", 0);
                 int qty = itemJ.value("quantity", 1);
+                bool isMana = itemJ.value("isMana", false);
 
                 if (type == ItemType::POTION) {
-                    Item potion(id, name, desc, type, statVal, qty);
+                    auto potion = std::make_shared<Potion>(id, name, desc, statVal, isMana, qty);
                     inv.addItem(potion);
+                } else if (type == ItemType::WEAPON) {
+                    auto weapon = std::make_shared<Weapon>(id, name, desc, statVal);
+                    inv.addItem(weapon);
                 } else {
-                    Item equip(id, name, desc, type, statVal);
-                    inv.addItem(equip);
+                    auto armor = std::make_shared<Armor>(id, name, desc, statVal);
+                    inv.addItem(armor);
                 }
             }
             if (j.contains("equippedWeaponIndex")) {
@@ -155,7 +182,6 @@ bool SaveManager::loadGame(int slot, Hero& hero, StoryGraph& story) {
         std::cerr << "[SaveManager] Exception during load: " << e.what() << "\n";
         return false;
     }
-}
 }
 
 bool SaveManager::slotExists(int slot) const {

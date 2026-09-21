@@ -64,6 +64,9 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
             std::cout << "Item usage failed (No potion available or invalid item)!\n";
             return currentState; // Không tốn lượt nếu dùng thất bại
         }
+    } else if (actionChoice == 4) { // Defend
+        isDefending = true;
+        std::cout << hero.getName() << " raises defense stance! Incoming damage will be halved this turn.\n";
     } else if (actionChoice == 5) { // Flee
         std::cout << hero.getName() << " fled from battle!\n";
         currentState = CombatState::FLED;
@@ -94,6 +97,9 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     // Enemy Turn
     processEnemyTurn();
 
+    // Reset defense stance after enemy turn
+    isDefending = false;
+
     if (!hero.isAlive()) {
         std::cout << hero.getName() << " was defeated in battle...\n";
         currentState = CombatState::ENEMY_VICTORY;
@@ -110,22 +116,34 @@ int CombatEngine::calculateDamage(int attackerAttack, int defenderDefense) const
 
 void CombatEngine::processEnemyTurn() {
     int enemyAction = enemy.chooseAction();
+    int heroDef = hero.getEffectiveDefense();
+    if (isDefending) {
+        // Tăng gấp đôi defense hiệu quả khi đang trong trạng thái phòng thủ (Defend)
+        heroDef *= 2;
+    }
+
     if (enemyAction == 2) {
         std::string skillName = enemy.getSpecialSkillName();
         if (skillName.empty()) skillName = "Special Skill";
         int skillDmg = static_cast<int>(enemy.getAttack() * 1.4);
-        int displayDmg = calculateDamage(skillDmg, hero.getEffectiveDefense());
-        hero.takeDamage(skillDmg);
+        int effectiveDmg = calculateDamage(skillDmg, heroDef);
+        if (isDefending) {
+            effectiveDmg = std::max(1, effectiveDmg / 2);
+        }
+        hero.setHp(hero.getHp() - effectiveDmg);
         std::cout << enemy.getName() << " unleashes [" << skillName << "] on "
-                  << hero.getName() << " for " << displayDmg << " damage!\n";
+                  << hero.getName() << " for " << effectiveDmg << " damage!"
+                  << (isDefending ? " (Guarded!)" : "") << "\n";
     } else {
-        // Truyền raw attack; Hero::takeDamage tự áp getEffectiveDefense() bên trong
-        int rawAtk     = enemy.getAttack();
-        int displayDmg = calculateDamage(rawAtk, hero.getEffectiveDefense()); // chỉ để log
-        hero.takeDamage(rawAtk);
+        int rawAtk = enemy.getAttack();
+        int effectiveDmg = calculateDamage(rawAtk, heroDef);
+        if (isDefending) {
+            effectiveDmg = std::max(1, effectiveDmg / 2);
+        }
+        hero.setHp(hero.getHp() - effectiveDmg);
         std::cout << enemy.getName() << " attacks " << hero.getName()
-                  << " for " << displayDmg << " damage!\n";
-    }
+                  << " for " << effectiveDmg << " damage!"
+                  << (isDefending ? " (Guarded!)" : "") << "\n";
     }
 }
 

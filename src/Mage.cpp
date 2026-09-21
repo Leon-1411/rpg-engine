@@ -10,12 +10,13 @@ Mage::Mage(const std::string& name, int hp, int mp, int attack, int defense)
     : Hero(name, HeroClass::MAGE, hp, mp, attack, defense) {}
 
 bool Mage::useSkill(int skillIndex, int& outDamage) {
+    int effAtk = getEffectiveAttack();
     switch (skillIndex) {
         case 1: { // Fireball
             const int cost = 15;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 2 + 10;
+                outDamage = effAtk * 2 + 10;
                 std::cout << "[Mage] " << name << " niệm chú phóng [Fireball] rực lửa!\n";
                 return true;
             }
@@ -25,7 +26,7 @@ bool Mage::useSkill(int skillIndex, int& outDamage) {
             const int cost = 20;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 2 + 20;
+                outDamage = effAtk * 2 + 20;
                 std::cout << "[Mage] " << name << " triệu hồi băng giá [Ice Blast] đóng băng kẻ thù!\n";
                 return true;
             }
@@ -35,7 +36,7 @@ bool Mage::useSkill(int skillIndex, int& outDamage) {
             const int cost = 35;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 3 + 40;
+                outDamage = effAtk * 3 + 40;
                 std::cout << "[Mage] " << name << " gọi mưa thiên thạch hủy diệt [Meteor]!\n";
                 return true;
             }

@@ -10,12 +10,14 @@ Warrior::Warrior(const std::string& name, int hp, int mp, int attack, int defens
     : Hero(name, HeroClass::WARRIOR, hp, mp, attack, defense) {}
 
 bool Warrior::useSkill(int skillIndex, int& outDamage) {
+    int effAtk = getEffectiveAttack();
+    int effDef = getEffectiveDefense();
     switch (skillIndex) {
         case 1: { // Power Slash
             const int cost = 10;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 2;
+                outDamage = effAtk * 2;
                 std::cout << "[Warrior] " << name << " tung chiêu [Power Slash] chém mạnh mẽ!\n";
                 return true;
             }
@@ -25,7 +27,7 @@ bool Warrior::useSkill(int skillIndex, int& outDamage) {
             const int cost = 12;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack + defense * 2;
+                outDamage = effAtk + effDef * 2;
                 std::cout << "[Warrior] " << name << " dựng khiên chắn và phản đòn [Shield Block]!\n";
                 return true;
             }
@@ -35,7 +37,7 @@ bool Warrior::useSkill(int skillIndex, int& outDamage) {
             const int cost = 15;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 3;
+                outDamage = effAtk * 3;
                 std::cout << "[Warrior] " << name << " bước vào trạng thái cuồng bạo [Berserk]!\n";
                 return true;
             }

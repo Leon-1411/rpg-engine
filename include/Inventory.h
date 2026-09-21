@@ -25,6 +25,7 @@ public:
     bool removeItem(const std::string& itemId);        // Xóa theo ID (ưu tiên potion giảm qty)
     bool useItem(int index, Hero& hero);
     bool useItemById(const std::string& itemId, Hero& hero); // Dùng item theo ID
+    void clear();                                            // Xóa sạch túi đồ và hủy trang bị
 
     // Equipment Management
     bool equipWeapon(int index);

@@ -65,6 +65,23 @@
       "statValue": 25,
       "healAmount": 25,
       "isMana": true
+    },
+    {
+      "id": "IceKey",
+      "name": "Chìa Khóa Băng Bất Hoại",
+      "description": "Cổ vật chạm khắc hoa tuyết, dùng mở phong ấn bí mật trong Đền Băng.",
+      "type": "ARMOR",
+      "statValue": 5,
+      "defenseBonus": 5
+    },
+    {
+      "id": "GreaterHealthPotion",
+      "name": "Bình Thuốc Máu Lớn",
+      "description": "Dược thảo thượng hạng hồi phục tức thì 75 HP.",
+      "type": "POTION",
+      "statValue": 75,
+      "healAmount": 75,
+      "isMana": false
     }
   ]
 }

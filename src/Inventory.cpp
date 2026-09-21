@@ -289,3 +289,9 @@ std::shared_ptr<Item> Inventory::getItemById(const std::string& itemId) const {
     if (idx == -1) return nullptr;
     return items[idx];
 }
+
+void Inventory::clear() {
+    items.clear();
+    equippedWeaponIndex = -1;
+    equippedArmorIndex = -1;
+}

@@ -139,10 +139,26 @@ StoryNode StoryGraph::getCurrentNode() const {
     return {};
 }
 
+bool StoryGraph::isChoiceAvailable(int choiceIndex) const {
+    auto node = getCurrentNode();
+    if (choiceIndex >= 0 && choiceIndex < static_cast<int>(node.choices.size())) {
+        const Choice& choice = node.choices[choiceIndex];
+        if (!choice.requiredFlag.empty()) {
+            return getFlag(choice.requiredFlag);
+        }
+        return true;
+    }
+    return false;
+}
+
 bool StoryGraph::selectChoice(int choiceIndex) {
     auto node = getCurrentNode();
     if (choiceIndex >= 0 && choiceIndex < static_cast<int>(node.choices.size())) {
         const Choice& choice = node.choices[choiceIndex];
+        if (!choice.requiredFlag.empty() && !getFlag(choice.requiredFlag)) {
+            std::cout << "[Story] Lựa chọn này yêu cầu cờ điều kiện: '" << choice.requiredFlag << "' chưa hoàn thành!\n";
+            return false;
+        }
         if (!choice.setFlag.empty()) {
             setFlag(choice.setFlag, true);
         }
@@ -167,6 +183,14 @@ bool StoryGraph::getFlag(const std::string& flag) const {
     auto it = storyFlags.find(flag);
     if (it != storyFlags.end()) return it->second;
     return false;
+}
+
+const std::unordered_map<std::string, bool>& StoryGraph::getStoryFlags() const {
+    return storyFlags;
+}
+
+void StoryGraph::setStoryFlags(const std::unordered_map<std::string, bool>& flags) {
+    storyFlags = flags;
 }
 
 bool StoryGraph::isEnding() const {

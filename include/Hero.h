@@ -63,6 +63,7 @@ public:
     int getEffectiveAttack() const;
     int getEffectiveDefense() const;
 
+    void setName(const std::string& newName);
     void setHp(int value);
     void setMp(int value);
     void setLevel(int value);

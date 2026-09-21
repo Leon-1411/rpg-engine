@@ -12,7 +12,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int att
     : name(name), heroClass(heroClass), level(1), exp(0), hp(hp), maxHp(hp), mp(mp), maxMp(mp), attack(attack), defense(defense) {}
 
 int Hero::normalAttack() {
-    return attack;
+    return getEffectiveAttack();
 }
 
 bool Hero::useSkill(int skillIndex, int& outDamage) {
@@ -96,6 +96,7 @@ int Hero::getEffectiveDefense() const {
     return defense + inventory.getEquippedArmorBonus();
 }
 
+void Hero::setName(const std::string& newName) { name = newName; }
 void Hero::setHp(int value) { hp = std::clamp(value, 0, maxHp); }
 void Hero::setMp(int value) { mp = std::clamp(value, 0, maxMp); }
 void Hero::setLevel(int value) { level = value; }

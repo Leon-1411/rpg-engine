@@ -16,6 +16,7 @@ private:
     Enemy& enemy;
     int turnCount;
     CombatState currentState;
+    bool isDefending = false;
     std::vector<std::shared_ptr<Item>> lastDroppedItems;
 
 public:

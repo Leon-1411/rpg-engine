@@ -58,5 +58,41 @@
     "description": "Ancient dread sovereign with crushing power and fiery fury, 5x stronger than regular minions.",
     "specialSkill": "Infernal Cataclysm",
     "healAmount": 25
+  },
+  "minion_soul_eater": {
+    "name": "Quỷ Bắt Hồn (Soul Eater)",
+    "type": "MINION",
+    "minionType": "GOBLIN",
+    "hp": 70,
+    "attack": 16,
+    "defense": 6,
+    "expReward": 50,
+    "goldReward": 25,
+    "description": "Một con quỷ hung hãn phục kích từ tán rừng ma sương mù.",
+    "specialSkill": "Quick Strike"
+  },
+  "boss_frost_lord": {
+    "name": "Chúa Tể Băng Frost Lord",
+    "type": "BOSS",
+    "hp": 300,
+    "attack": 45,
+    "defense": 20,
+    "expReward": 350,
+    "goldReward": 100,
+    "description": "Kẻ thống trị đền băng với quyền năng bão tuyết đóng băng mọi sinh linh.",
+    "specialSkill": "Bão Tuyết Đóng Băng",
+    "healAmount": 20
+  },
+  "boss_ice_dragon": {
+    "name": "Rồng Băng Cổ Đại (Ancient Ice Dragon)",
+    "type": "BOSS",
+    "hp": 550,
+    "attack": 70,
+    "defense": 30,
+    "expReward": 600,
+    "goldReward": 300,
+    "description": "Thần thú cổ đại bị phong ấn ngàn năm, cội nguồn của mọi tai ương băng giá.",
+    "specialSkill": "Hơi Thở Băng Hà Diệt Tuyệt",
+    "healAmount": 35
   }
 }

@@ -10,12 +10,13 @@ Ranger::Ranger(const std::string& name, int hp, int mp, int attack, int defense)
     : Hero(name, HeroClass::RANGER, hp, mp, attack, defense) {}
 
 bool Ranger::useSkill(int skillIndex, int& outDamage) {
+    int effAtk = getEffectiveAttack();
     switch (skillIndex) {
         case 1: { // Double Shot
             const int cost = 12;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = static_cast<int>(attack * 1.8);
+                outDamage = static_cast<int>(effAtk * 1.8);
                 std::cout << "[Ranger] " << name << " giương cung bắn liên hoàn [Double Shot]!\n";
                 return true;
             }
@@ -25,7 +26,7 @@ bool Ranger::useSkill(int skillIndex, int& outDamage) {
             const int cost = 18;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 2 + 10;
+                outDamage = effAtk * 2 + 10;
                 std::cout << "[Ranger] " << name << " bắn mũi tên tẩm kịch độc [Poison Arrow]!\n";
                 return true;
             }
@@ -35,7 +36,7 @@ bool Ranger::useSkill(int skillIndex, int& outDamage) {
             const int cost = 25;
             if (mp >= cost) {
                 mp -= cost;
-                outDamage = attack * 3;
+                outDamage = effAtk * 3;
                 std::cout << "[Ranger] " << name << " bắn bão tên diện rộng [Rain of Arrows]!\n";
                 return true;
             }
