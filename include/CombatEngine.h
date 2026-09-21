@@ -16,6 +16,7 @@ private:
     Enemy& enemy;
     int turnCount;
     CombatState currentState;
+    std::vector<std::shared_ptr<Item>> lastDroppedItems;
 
 public:
     CombatEngine(Hero& hero, Enemy& enemy);
@@ -30,4 +31,5 @@ public:
     bool isBattleOver() const;
     CombatState getState() const;
     int getTurnCount() const;
+    const std::vector<std::shared_ptr<Item>>& getLastDroppedItems() const;
 };

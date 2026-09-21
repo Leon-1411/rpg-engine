@@ -2,10 +2,18 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+#include <memory>
+#include "Item.h"
 
 enum class EnemyType {
     MINION,
     BOSS
+};
+
+struct DropEntry {
+    std::shared_ptr<Item> item;
+    double dropChance; // 0.0 - 1.0 (1.0 = 100%)
 };
 
 class Enemy {
@@ -18,6 +26,7 @@ protected:
     int defense;
     int expReward;
     int goldReward;
+    std::vector<DropEntry> dropTable;
 
 public:
     Enemy(const std::string& name, EnemyType type, int hp, int attack, int defense, int expReward, int goldReward);
@@ -29,6 +38,11 @@ public:
     bool isAlive() const;
     virtual void displayStats() const;
     virtual std::string getSpecialSkillName() const;
+
+    // Drop table management
+    void addDropItem(std::shared_ptr<Item> item, double dropChance = 1.0);
+    std::vector<std::shared_ptr<Item>> rollDrops() const;
+    const std::vector<DropEntry>& getDropTable() const;
 
     // Getters & Setters
     std::string getName() const;
@@ -42,3 +56,4 @@ public:
 
     void setHp(int value);
 };
+

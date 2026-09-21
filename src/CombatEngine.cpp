@@ -40,6 +40,30 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         } else {
             std::cout << "Skill execution failed (Not enough MP or invalid skill)!\n";
         }
+    } else if (actionChoice == 3) { // Use Potion / Item
+        bool used = false;
+        if (skillOrItemIndex >= 0) {
+            // Dùng item theo chỉ mục cụ thể
+            used = hero.getInventory().useItem(skillOrItemIndex, hero);
+        } else {
+            // Tự động tìm lọ Potion đầu tiên trong túi đồ
+            const auto& items = hero.getInventory().getItems();
+            for (int i = 0; i < static_cast<int>(items.size()); ++i) {
+                if (items[i] && items[i]->getType() == ItemType::POTION) {
+                    used = hero.getInventory().useItem(i, hero);
+                    break;
+                }
+            }
+        }
+
+        if (used) {
+            std::cout << hero.getName() << " used a potion! HP: " 
+                      << hero.getHp() << "/" << hero.getMaxHp() 
+                      << " | MP: " << hero.getMp() << "/" << hero.getMaxMp() << "\n";
+        } else {
+            std::cout << "Item usage failed (No potion available or invalid item)!\n";
+            return currentState; // Không tốn lượt nếu dùng thất bại
+        }
     } else if (actionChoice == 5) { // Flee
         std::cout << hero.getName() << " fled from battle!\n";
         currentState = CombatState::FLED;
@@ -49,6 +73,20 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
     if (!enemy.isAlive()) {
         std::cout << enemy.getName() << " was defeated!\n";
         hero.addExp(enemy.getExpReward());
+
+        // Xử lý rớt vật phẩm (Weapon, Armor, Health Potion, ...)
+        lastDroppedItems = enemy.rollDrops();
+        for (const auto& item : lastDroppedItems) {
+            if (item) {
+                std::cout << "[Item Drop] " << enemy.getName() << " dropped: " << item->getName() << "!\n";
+                if (hero.getInventory().addItem(item)) {
+                    std::cout << "Added '" << item->getName() << "' to " << hero.getName() << "'s inventory.\n";
+                } else {
+                    std::cout << "[Inventory Full] Could not take '" << item->getName() << "'!\n";
+                }
+            }
+        }
+
         currentState = CombatState::HERO_VICTORY;
         return currentState;
     }
@@ -102,3 +140,8 @@ CombatState CombatEngine::getState() const {
 int CombatEngine::getTurnCount() const {
     return turnCount;
 }
+
+const std::vector<std::shared_ptr<Item>>& CombatEngine::getLastDroppedItems() const {
+    return lastDroppedItems;
+}
+

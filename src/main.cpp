@@ -85,6 +85,15 @@ int main() {
     if (!minion) {
         minion = std::make_shared<Goblin>();
     }
+    // Cài đặt drop table cho quái vật (rớt Health Potion và Giáp da)
+    auto dropPotion = std::make_shared<Potion>("pot_01", "Health Potion", "Restores 35 HP", 35, false, 1);
+    auto dropArmor = std::make_shared<Armor>("arm_03", "Leather Armor", "Light armor", 6);
+    minion->addDropItem(dropPotion, 1.0);
+    minion->addDropItem(dropArmor, 1.0);
+
+    // Thêm 1 lọ potion vào túi đồ của player để sử dụng trong chiến đấu
+    player.getInventory().addItem(potion);
+
     std::cout << "\nEncountered an enemy:\n";
     minion->displayStats();
 
@@ -96,6 +105,12 @@ int main() {
     
     battleUI.printCombatLog("Arthur vung kiếm tấn công Goblin Scout!");
     combat.executeTurn(1);
+
+    if (!combat.isBattleOver()) {
+        battleUI.printCombatLog("Arthur dùng bình máu hồi phục sức lực!");
+        combat.executeTurn(3); // Use Potion
+    }
+
     if (!combat.isBattleOver()) {
         battleUI.printCombatLog("Arthur tiếp tục dồn đòn kết liễu!");
         combat.executeTurn(1);
