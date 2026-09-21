@@ -114,6 +114,8 @@ private:
     std::string currentNodeId;
     std::string currentDialogueId;
     std::unordered_map<std::string, bool> storyFlags;
+    // Quan ly tien do cot truyen & Mo khoa Endings (Story Progress Codex)
+    std::vector<std::string> visitedNodes;
 
 public:
     StoryGraph();
@@ -152,4 +154,15 @@ public:
 
     // Kiem tra tinh toan ven do thi va phat hien cut duong (Dead-end / Broken links)
     bool validateGraph(std::vector<std::string>& errors) const;
+
+    // Tien do choi, Endings va Node chua mo khoa (Progress Tracking & Codex)
+    void markNodeVisited(const std::string& nodeId);
+    bool isNodeVisited(const std::string& nodeId) const;
+    const std::vector<std::string>& getVisitedNodes() const;
+    void setVisitedNodes(const std::vector<std::string>& visited);
+    std::vector<std::string> getLockedNodes() const;
+    std::vector<std::string> getAllEndings() const;
+    std::vector<std::string> getDiscoveredEndings() const;
+    float getExplorationPercentage() const;
+    void printStoryProgress() const;
 };

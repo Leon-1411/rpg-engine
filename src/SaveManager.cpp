@@ -87,6 +87,7 @@ SavedGameState SaveManager::createSnapshot(const Hero& hero, const StoryGraph& s
     }
     state.currentStoryNodeId = currentNode;
     state.storyFlags = story.getStoryFlags();
+    state.visitedNodes = story.getVisitedNodes();
 
     // 3. Inventory state
     const Inventory& inv = hero.getInventory();
@@ -162,6 +163,9 @@ bool SaveManager::applySnapshot(const SavedGameState& state, Hero& hero, StoryGr
             story.moveToNode(state.currentStoryNodeId);
         }
         story.setStoryFlags(state.storyFlags);
+        if (!state.visitedNodes.empty()) {
+            story.setVisitedNodes(state.visitedNodes);
+        }
 
         // 3. Restore inventory
         Inventory& inv = hero.getInventory();
@@ -291,8 +295,10 @@ bool SaveManager::saveGameState(int slot, const SavedGameState& state) const {
             flagsJ[pair.first] = pair.second;
         }
         storyJ["flags"] = flagsJ;
+        storyJ["visitedNodes"] = state.visitedNodes;
         j["story"] = storyJ;
         j["storyFlags"] = flagsJ; // Root fallback
+        j["visitedNodes"] = state.visitedNodes;
 
         // Inventory
         json invJ;
@@ -390,6 +396,9 @@ bool SaveManager::loadGameState(int slot, SavedGameState& outState) const {
                     outState.storyFlags[item.key()] = item.value().get<bool>();
                 }
             }
+            if (j["story"].contains("visitedNodes") && j["story"]["visitedNodes"].is_array()) {
+                outState.visitedNodes = j["story"]["visitedNodes"].get<std::vector<std::string>>();
+            }
         } else {
             outState.currentStoryNodeId = j.value("currentStoryNodeId", "");
         }
@@ -398,6 +407,9 @@ bool SaveManager::loadGameState(int slot, SavedGameState& outState) const {
             for (auto& item : j["storyFlags"].items()) {
                 outState.storyFlags[item.key()] = item.value().get<bool>();
             }
+        }
+        if (outState.visitedNodes.empty() && j.contains("visitedNodes") && j["visitedNodes"].is_array()) {
+            outState.visitedNodes = j["visitedNodes"].get<std::vector<std::string>>();
         }
 
         // 3. Read Inventory state

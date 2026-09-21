@@ -47,7 +47,9 @@
         }
       },
       "rewards": {
-        "items": ["RoyalInsignia"],
+        "items": [
+          "RoyalInsignia"
+        ],
         "exp": 50,
         "gold": 50
       },
@@ -196,7 +198,10 @@
         }
       },
       "rewards": {
-        "items": ["FreeForestAmulet", "GreaterHealthPotion"],
+        "items": [
+          "FreeForestAmulet",
+          "GreaterHealthPotion"
+        ],
         "exp": 100,
         "gold": 100
       },
@@ -214,7 +219,9 @@
       "type": "REWARD",
       "description": "Bằng sự thông thái ma pháp, bạn đã giải mã thành công Cổ Thư The Core (AncientCodex), ghi chép cơ chế vận hành gốc của năng lượng ma thuật 500 năm trước!",
       "rewards": {
-        "items": ["AncientCodex"],
+        "items": [
+          "AncientCodex"
+        ],
         "exp": 120,
         "gold": 120
       },
@@ -232,7 +239,9 @@
       "type": "REWARD",
       "description": "Từ tàn tích tiền đồn, bạn tìm thấy Cổ Phù Thấu Cảm Ma Tộc (DemonEmpathyRune), cho phép thấu hiểu và giao tiếp với loài Quỷ.",
       "rewards": {
-        "items": ["DemonEmpathyRune"],
+        "items": [
+          "DemonEmpathyRune"
+        ],
         "exp": 100,
         "gold": 100
       },
@@ -261,7 +270,9 @@
       "title": "Kiểm Tra Cổ Phù Thấu Cảm",
       "type": "REQUIREMENT_CHECK",
       "description": "Kiểm tra xem bạn có mang theo DemonEmpathyRune để đàm phán hòa bình hay không...",
-      "required_items": ["DemonEmpathyRune"],
+      "required_items": [
+        "DemonEmpathyRune"
+      ],
       "on_pass_node_id": "Node11",
       "on_fail_node_id": "Node12"
     },
@@ -321,7 +332,9 @@
         }
       },
       "rewards": {
-        "items": ["ElenaDiary"],
+        "items": [
+          "ElenaDiary"
+        ],
         "exp": 150,
         "gold": 150
       },
@@ -429,7 +442,10 @@
       "title": "Kiểm Tra Điều Kiện True Ending",
       "type": "REQUIREMENT_CHECK",
       "description": "Kiểm tra xem bạn có sở hữu cả AncientCodex và ElenaDiary hay không...",
-      "required_items": ["AncientCodex", "ElenaDiary"],
+      "required_items": [
+        "AncientCodex",
+        "ElenaDiary"
+      ],
       "on_pass_node_id": "End5",
       "on_fail_node_id": "End2"
     },
@@ -477,7 +493,9 @@
       "title": "Kiểm Tra Bùa Hộ Mệnh Rừng Sâu",
       "type": "REQUIREMENT_CHECK",
       "description": "Kiểm tra xem bạn có sở hữu FreeForestAmulet để triệu tập liên minh Bộ Tộc Tự Do hay không...",
-      "required_items": ["FreeForestAmulet"],
+      "required_items": [
+        "FreeForestAmulet"
+      ],
       "on_pass_node_id": "Node22",
       "on_fail_node_id": "Node21_Fail"
     },

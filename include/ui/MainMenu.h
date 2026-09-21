@@ -10,7 +10,9 @@ enum class MainMenuOption {
     LOAD_GAME = 2,
     HERO_SHOWCASE = 3,
     HELP = 4,
-    EXIT = 5
+    STORY_CODEX = 5,
+    UNDER_DEV_FEATURES = 6,
+    EXIT = 7
 };
 
 class MainMenu {
@@ -32,6 +34,12 @@ public:
 
     // Show guide & instructions
     void showHelp();
+
+    // Show Story Progress & Endings Codex
+    void showStoryCodex(const StoryGraph& story);
+
+    // Show warning for features currently in development
+    void showUnderDevelopmentWarning();
 
     // Action handlers
     void handleNewGame();

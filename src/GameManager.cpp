@@ -71,6 +71,12 @@ void GameManager::handleMainMenu() {
         case MainMenuOption::HELP:
             mainMenu.showHelp();
             break;
+        case MainMenuOption::STORY_CODEX:
+            story.printStoryProgress();
+            break;
+        case MainMenuOption::UNDER_DEV_FEATURES:
+            mainMenu.showUnderDevelopmentWarning();
+            break;
         case MainMenuOption::EXIT:
             changeState(GameState::EXIT);
             break;
@@ -357,11 +363,13 @@ void GameManager::handleStoryMode() {
 
     // Utility options
     int optInv = numChoices + 1;
-    int optSave = numChoices + 2;
-    int optMenu = numChoices + 3;
+    int optCodex = numChoices + 2;
+    int optSave = numChoices + 3;
+    int optMenu = numChoices + 4;
 
     std::cout << "\n--- Tiện ích ---\n";
     std::cout << "  " << optInv << ". Mở túi đồ (Inventory)\n";
+    std::cout << "  " << optCodex << ". Xem tiến độ cốt truyện & Endings (Story Codex)\n";
     std::cout << "  " << optSave << ". Lưu game (Save Game Slot 1)\n";
     std::cout << "  " << optMenu << ". Quay về Menu chính\n";
 
@@ -371,6 +379,8 @@ void GameManager::handleStoryMode() {
         story.selectChoice(choice - 1);
     } else if (choice == optInv) {
         changeState(GameState::INVENTORY_MODE);
+    } else if (choice == optCodex) {
+        story.printStoryProgress();
     } else if (choice == optSave) {
         if (playerHero) {
             saveManager.saveGame(1, *playerHero, story);

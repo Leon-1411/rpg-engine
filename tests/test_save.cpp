@@ -168,6 +168,9 @@ void testStoryGraphProgressAndFlags() {
     story.setFlag("has_temple_key", true);
     story.setFlag("talked_to_guardian", true);
     story.setFlag("boss_defeated", false);
+    story.markNodeVisited("node_intro");
+    story.markNodeVisited("node_forest");
+    story.markNodeVisited("temple_altar_02");
 
     assert(manager.saveGame(2, hero, story) == true);
 
@@ -180,6 +183,9 @@ void testStoryGraphProgressAndFlags() {
     assert(loadedStory.getFlag("talked_to_guardian") == true);
     assert(loadedStory.getFlag("boss_defeated") == false);
     assert(loadedStory.getFlag("non_existent_flag") == false);
+    assert(loadedStory.isNodeVisited("node_intro") == true);
+    assert(loadedStory.isNodeVisited("node_forest") == true);
+    assert(loadedStory.isNodeVisited("temple_altar_02") == true);
 
     assert(manager.deleteSlot(2) == true);
     std::cout << " -> PASSED\n";

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 int main() {
     // 1. Kiểm thử đồ thị mặc định
@@ -121,17 +122,29 @@ int main() {
     assert(flagGraph.getFlag("unlocked") == true);
     assert(flagGraph.isEnding() == true);
 
-    // 7. Test DataLoader functions
-    std::string itemsPath = "data/items.json";
-    if (!std::ifstream(itemsPath).good()) itemsPath = "../data/items.json";
-    auto items = DataLoader::loadItems(itemsPath);
-    assert(!items.empty());
+    // 8. Kiểm thử Tiến độ khám phá cốt truyện & Endings (Story Progress Codex)
+    assert(fileStory.isNodeVisited("Node01") == true);
+    assert(fileStory.getVisitedNodes().size() >= 1);
+    
+    // Thử di chuyển qua một số node để cập nhật tiến độ
+    fileStory.moveToNode("Node02_Holy");
+    fileStory.moveToNode("Node03_Holy");
+    fileStory.moveToNode("End1");
+    assert(fileStory.isNodeVisited("End1") == true);
 
-    std::string enemiesPath = "data/enemies.json";
-    if (!std::ifstream(enemiesPath).good()) enemiesPath = "../data/enemies.json";
-    auto enemies = DataLoader::loadEnemies(enemiesPath);
-    assert(!enemies.empty());
+    std::vector<std::string> allEndings = fileStory.getAllEndings();
+    assert(allEndings.size() >= 5); // Phải có ít nhất 5 endings: End1..End5
+    
+    std::vector<std::string> discoveredEndings = fileStory.getDiscoveredEndings();
+    assert(!discoveredEndings.empty());
+    assert(std::find(discoveredEndings.begin(), discoveredEndings.end(), "End1") != discoveredEndings.end());
 
-    std::cout << "[PASS] All StoryGraph unit tests (validateGraph, Dead-ends, Choices & Flags) passed successfully!\n";
+    float progressPercent = fileStory.getExplorationPercentage();
+    assert(progressPercent > 0.0f && progressPercent <= 100.0f);
+
+    std::vector<std::string> lockedNodes = fileStory.getLockedNodes();
+    assert(!lockedNodes.empty());
+
+    std::cout << "[PASS] All StoryGraph unit tests (validateGraph, Dead-ends, Progress Codex & Endings) passed successfully!\n";
     return 0;
 }

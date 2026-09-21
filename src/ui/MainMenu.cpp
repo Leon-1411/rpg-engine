@@ -10,6 +10,11 @@
 #include <vector>
 
 void MainMenu::run() {
+    StoryGraph defaultStory;
+    std::string storyPath = "data/story.json";
+    if (!std::ifstream(storyPath).good()) storyPath = "../data/story.json";
+    DataLoader::loadStory(storyPath, defaultStory);
+
     while (true) {
         MainMenuOption option = showMenu();
         switch (option) {
@@ -25,6 +30,12 @@ void MainMenu::run() {
             case MainMenuOption::HELP:
                 showHelp();
                 break;
+            case MainMenuOption::STORY_CODEX:
+                showStoryCodex(defaultStory);
+                break;
+            case MainMenuOption::UNDER_DEV_FEATURES:
+                showUnderDevelopmentWarning();
+                break;
             case MainMenuOption::EXIT:
                 ConsoleUI::clearScreen();
                 std::cout << "\n" << ConsoleUI::colorize("Cảm ơn bạn đã chơi! Hẹn gặp lại trong thế giới Fantasy RPG!", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n\n";
@@ -37,7 +48,7 @@ MainMenuOption MainMenu::showMenu() {
     ConsoleUI::clearScreen();
     ASCIIArt::printTitleLogo();
 
-    ConsoleUI::printHeader("MAIN MENU", 50, ConsoleUI::Colors::BRIGHT_YELLOW);
+    ConsoleUI::printHeader("MAIN MENU", 60, ConsoleUI::Colors::BRIGHT_YELLOW);
     std::cout << "\n";
     std::cout << "  " << ConsoleUI::colorize("1.", ConsoleUI::Colors::BRIGHT_CYAN) 
               << " Tạo trò chơi mới (New Game)\n";
@@ -47,11 +58,15 @@ MainMenuOption MainMenu::showMenu() {
               << " Xem thông tin các lớp Hero (Showcase)\n";
     std::cout << "  " << ConsoleUI::colorize("4.", ConsoleUI::Colors::BRIGHT_CYAN) 
               << " Hướng dẫn chơi (Help)\n";
-    std::cout << "  " << ConsoleUI::colorize("5.", ConsoleUI::Colors::BRIGHT_RED) 
+    std::cout << "  " << ConsoleUI::colorize("5.", ConsoleUI::Colors::BRIGHT_MAGENTA) 
+              << " Thư viện Cốt truyện & Kết cục (Story Codex & Endings)\n";
+    std::cout << "  " << ConsoleUI::colorize("6.", ConsoleUI::Colors::BRIGHT_YELLOW) 
+              << " Chế độ Đồ họa 2D Raylib (Đang phát triển)\n";
+    std::cout << "  " << ConsoleUI::colorize("7.", ConsoleUI::Colors::BRIGHT_RED) 
               << " Thoát (Exit)\n\n";
-    ConsoleUI::printDivider('-', 50, ConsoleUI::Colors::DIM);
+    ConsoleUI::printDivider('-', 60, ConsoleUI::Colors::DIM);
 
-    int choice = ConsoleUI::getIntInput(1, 5, "Nhập lựa chọn của bạn [1-5]: ");
+    int choice = ConsoleUI::getIntInput(1, 7, "Nhập lựa chọn của bạn [1-7]: ");
     return static_cast<MainMenuOption>(choice);
 }
 
@@ -121,6 +136,28 @@ void MainMenu::showHelp() {
     };
     ConsoleUI::printBox(lines, 60, ConsoleUI::Colors::BRIGHT_BLUE);
     
+    ConsoleUI::pause();
+}
+
+void MainMenu::showStoryCodex(const StoryGraph& story) {
+    story.printStoryProgress();
+}
+
+void MainMenu::showUnderDevelopmentWarning() {
+    ConsoleUI::clearScreen();
+    ConsoleUI::printHeader("TÍNH NĂNG ĐANG ĐƯỢC PHÁT TRIỂN", 65, ConsoleUI::Colors::BRIGHT_YELLOW);
+    std::vector<std::string> warnBox = {
+        "THÔNG BÁO TỪ HỆ THỐNG RPG ENGINE:",
+        "",
+        "★ Chế độ đồ họa 2D Pixel Raylib (rpg_engine_2d.exe)",
+        "★ Hệ thống âm thanh đa kênh BGM & Hiệu ứng SFX",
+        "★ Đồng bộ lưu trữ đám mây (Cloud Save Sync)",
+        "",
+        "-> Trạng thái: Tính năng đang được phát triển!",
+        "-> Vui lòng trải nghiệm phiên bản Text RPG & Storytelling Engine chính thức.",
+        "-> Dự kiến hoàn tất và tích hợp trong bản cập nhật kế tiếp."
+    };
+    ConsoleUI::printBox(warnBox, 65, ConsoleUI::Colors::BRIGHT_RED);
     ConsoleUI::pause();
 }
 
@@ -252,8 +289,11 @@ void MainMenu::playStoryLoop(Hero& hero, StoryGraph& story) {
             std::cout << "  " << ConsoleUI::colorize(std::to_string(i + 1) + ".", ConsoleUI::Colors::BRIGHT_GREEN)
                       << " " << node.choices[i].text << "\n";
         }
-        int saveOpt = choiceCount + 1;
-        int exitOpt = choiceCount + 2;
+        int codexOpt = choiceCount + 1;
+        int saveOpt = choiceCount + 2;
+        int exitOpt = choiceCount + 3;
+        std::cout << "  " << ConsoleUI::colorize(std::to_string(codexOpt) + ".", ConsoleUI::Colors::BRIGHT_MAGENTA)
+                  << " Xem tiến độ cốt truyện & Endings (Story Codex)\n";
         std::cout << "  " << ConsoleUI::colorize(std::to_string(saveOpt) + ".", ConsoleUI::Colors::BRIGHT_YELLOW)
                   << " Lưu trò chơi (Save Game vào slot JSON)\n";
         std::cout << "  " << ConsoleUI::colorize(std::to_string(exitOpt) + ".", ConsoleUI::Colors::BRIGHT_RED)
@@ -263,6 +303,8 @@ void MainMenu::playStoryLoop(Hero& hero, StoryGraph& story) {
 
         if (playerChoice == exitOpt) {
             return;
+        } else if (playerChoice == codexOpt) {
+            story.printStoryProgress();
         } else if (playerChoice == saveOpt) {
             int slot = ConsoleUI::getIntInput(1, 9, "Chọn số slot lưu [1-9]: ");
             if (saveMgr.saveGame(slot, hero, story)) {

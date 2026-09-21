@@ -5,9 +5,12 @@
  */
 
 #include "StoryGraph.h"
+#include "ui/ConsoleUI.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <iomanip>
 #include <nlohmann/json.hpp>
 
 static EventType stringToEventType(const std::string& str) {
@@ -27,6 +30,7 @@ StoryGraph::StoryGraph() : currentNodeId("start") {
     startNode.choices.push_back({"Walk into the dark forest", "forest_path", "", ""});
     startNode.choices.push_back({"Follow the river trail", "river_trail", "", ""});
     nodes["start"] = startNode;
+    markNodeVisited("start");
 }
 
 void StoryGraph::addNode(const StoryNode& node) {
@@ -38,6 +42,7 @@ void StoryGraph::clear() {
     currentNodeId.clear();
     currentDialogueId.clear();
     storyFlags.clear();
+    visitedNodes.clear();
 }
 
 const std::unordered_map<std::string, StoryNode>& StoryGraph::getAllNodes() const {
@@ -299,6 +304,7 @@ bool StoryGraph::loadFromJsonString(const std::string& jsonContent) {
             currentNodeId = nodes.begin()->first;
         }
 
+        markNodeVisited(currentNodeId);
         resetDialogue();
         return true;
     } catch (const std::exception& e) {
@@ -338,6 +344,7 @@ std::string StoryGraph::getCurrentNodeId() const {
 
 void StoryGraph::setCurrentNodeId(const std::string& nodeId) {
     currentNodeId = nodeId;
+    markNodeVisited(nodeId);
     resetDialogue();
 }
 
@@ -368,6 +375,7 @@ bool StoryGraph::selectChoice(int choiceIndex) {
 bool StoryGraph::moveToNode(const std::string& nodeId) {
     if (nodes.find(nodeId) != nodes.end()) {
         currentNodeId = nodeId;
+        markNodeVisited(nodeId);
         resetDialogue();
         return true;
     }
@@ -570,4 +578,137 @@ bool StoryGraph::validateGraph(std::vector<std::string>& errors) const {
     }
 
     return errors.empty();
+}
+
+void StoryGraph::markNodeVisited(const std::string& nodeId) {
+    if (nodeId.empty()) return;
+    if (std::find(visitedNodes.begin(), visitedNodes.end(), nodeId) == visitedNodes.end()) {
+        visitedNodes.push_back(nodeId);
+    }
+}
+
+bool StoryGraph::isNodeVisited(const std::string& nodeId) const {
+    return std::find(visitedNodes.begin(), visitedNodes.end(), nodeId) != visitedNodes.end();
+}
+
+const std::vector<std::string>& StoryGraph::getVisitedNodes() const {
+    return visitedNodes;
+}
+
+void StoryGraph::setVisitedNodes(const std::vector<std::string>& visited) {
+    visitedNodes = visited;
+}
+
+std::vector<std::string> StoryGraph::getLockedNodes() const {
+    std::vector<std::string> locked;
+    for (const auto& pair : nodes) {
+        if (!isNodeVisited(pair.first)) {
+            locked.push_back(pair.first);
+        }
+    }
+    std::sort(locked.begin(), locked.end());
+    return locked;
+}
+
+std::vector<std::string> StoryGraph::getAllEndings() const {
+    std::vector<std::string> endings;
+    for (const auto& pair : nodes) {
+        const auto& n = pair.second;
+        if (n.type == EventType::ENDING || n.rawType == "ENDING" || n.id.rfind("End", 0) == 0) {
+            endings.push_back(pair.first);
+        }
+    }
+    std::sort(endings.begin(), endings.end());
+    return endings;
+}
+
+std::vector<std::string> StoryGraph::getDiscoveredEndings() const {
+    std::vector<std::string> discovered;
+    for (const auto& endId : getAllEndings()) {
+        if (isNodeVisited(endId)) {
+            discovered.push_back(endId);
+        }
+    }
+    return discovered;
+}
+
+float StoryGraph::getExplorationPercentage() const {
+    if (nodes.empty()) return 0.0f;
+    return (static_cast<float>(visitedNodes.size()) / static_cast<float>(nodes.size())) * 100.0f;
+}
+
+void StoryGraph::printStoryProgress() const {
+    ConsoleUI::clearScreen();
+    ConsoleUI::printHeader("TIẾN ĐỘ KHÁM PHÁ CỐT TRUYỆN (FRACTURED CROWN CODEX)", 70, ConsoleUI::Colors::BRIGHT_YELLOW);
+
+    size_t totalNodes = nodes.size();
+    size_t visitedCount = visitedNodes.size();
+    float percent = getExplorationPercentage();
+
+    std::cout << "\n";
+    std::cout << "  • Tổng số địa điểm / nút cốt truyện: " 
+              << ConsoleUI::colorize(std::to_string(totalNodes), ConsoleUI::Colors::BRIGHT_WHITE) << "\n";
+    std::cout << "  • Số địa điểm đã khám phá: " 
+              << ConsoleUI::colorize(std::to_string(visitedCount), ConsoleUI::Colors::BRIGHT_GREEN) << "\n";
+    std::cout << "  • Số địa điểm chưa mở khóa: " 
+              << ConsoleUI::colorize(std::to_string(totalNodes >= visitedCount ? totalNodes - visitedCount : 0), ConsoleUI::Colors::BRIGHT_RED) << "\n";
+
+    std::cout << "\n";
+    ConsoleUI::printProgressBar("  Tỷ lệ hoàn thành cốt truyện", static_cast<int>(visitedCount), static_cast<int>(totalNodes), 30, ConsoleUI::Colors::BRIGHT_CYAN);
+    std::cout << "  (Khám phá được: " << std::fixed << std::setprecision(1) << percent << "%)\n\n";
+
+    ConsoleUI::printDivider('=', 70, ConsoleUI::Colors::CYAN);
+    std::cout << ConsoleUI::colorize("  DANH SÁCH CÁC KẾT CỤC (FRACTURED CROWN ENDINGS):", ConsoleUI::Colors::BRIGHT_MAGENTA) << "\n";
+    ConsoleUI::printDivider('-', 70, ConsoleUI::Colors::DIM);
+
+    std::vector<std::string> allEndings = getAllEndings();
+    std::unordered_map<std::string, std::string> endingTitles = {
+        {"End1", "End 1: Ánh Sáng Thánh Hoàng (Holy Crown Order)"},
+        {"End2", "End 2: Đế Chế Thiết Giáp (Iron Legion Dominion)"},
+        {"End3", "End 3: Bóng Đêm Tội Phạm (Shadow Syndicate)"},
+        {"End4", "End 4: Người Bảo Hộ Thiên Nhiên (Nature Wardens)"},
+        {"End5", "End 5: [TRUE ENDING] Khôi Phục Vương Miện Vỡ (Fractured Crown Restored)"},
+        {"GameOver", "Game Over: Hy Sinh Giữa Chiến Trường"}
+    };
+
+    if (allEndings.empty()) {
+        std::cout << "    (Chưa có dữ liệu Endings)\n";
+    } else {
+        for (const auto& endId : allEndings) {
+            bool unlocked = isNodeVisited(endId);
+            std::string title = endId;
+            if (endingTitles.find(endId) != endingTitles.end()) {
+                title = endingTitles[endId];
+            } else if (nodes.find(endId) != nodes.end() && !nodes.at(endId).title.empty()) {
+                title = nodes.at(endId).title;
+            }
+
+            if (unlocked) {
+                std::cout << "  [ " << ConsoleUI::colorize("★ ĐÃ MỞ KHÓA", ConsoleUI::Colors::BRIGHT_GREEN) << " ] " 
+                          << ConsoleUI::colorize(title, ConsoleUI::Colors::BRIGHT_WHITE) << "\n";
+            } else {
+                std::cout << "  [ " << ConsoleUI::colorize("🔒 CHƯA MỞ", ConsoleUI::Colors::DIM) << " ] " 
+                          << ConsoleUI::colorize(title, ConsoleUI::Colors::DIM) << "\n";
+            }
+        }
+    }
+
+    ConsoleUI::printDivider('=', 70, ConsoleUI::Colors::CYAN);
+    std::cout << ConsoleUI::colorize("  ĐỊA ĐIỂM ĐÃ ĐI QUA GẦN ĐÂY:", ConsoleUI::Colors::BRIGHT_BLUE) << "\n";
+    size_t showMax = visitedNodes.size() > 8 ? 8 : visitedNodes.size();
+    for (size_t i = 0; i < showMax; ++i) {
+        size_t idx = visitedNodes.size() - 1 - i;
+        const std::string& vId = visitedNodes[idx];
+        std::string nTitle = vId;
+        if (nodes.find(vId) != nodes.end() && !nodes.at(vId).title.empty()) {
+            nTitle = nodes.at(vId).title;
+        }
+        std::cout << "    -> [" << vId << "] " << nTitle << "\n";
+    }
+    if (visitedNodes.size() > 8) {
+        std::cout << "    ... và " << (visitedNodes.size() - 8) << " địa điểm khác.\n";
+    }
+
+    std::cout << "\n";
+    ConsoleUI::pause();
 }
