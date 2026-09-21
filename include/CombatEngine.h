@@ -59,4 +59,5 @@ public:
     static std::string renderBar(int current, int max, int length = 15);
     void displayBattleStatus(std::ostream& out = std::cout) const;
     void runInteractiveBattle(std::istream& in = std::cin, std::ostream& out = std::cout);
+    static void warnUnfinishedFeature(const std::string& featureName, std::ostream& out = std::cout);
 };

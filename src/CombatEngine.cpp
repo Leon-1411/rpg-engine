@@ -171,10 +171,22 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
             return currentState;
         }
         int beforeHp = hero.getHp();
+        int beforeMp = hero.getMp();
         if (inventory->useItem(skillOrItemIndex, hero)) {
-            int healed = hero.getHp() - beforeHp;
-            std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
-                      << healed << " HP! (HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+            int healedHp = hero.getHp() - beforeHp;
+            int restoredMp = hero.getMp() - beforeMp;
+            if (healedHp > 0 && restoredMp > 0) {
+                std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
+                          << healedHp << " HP and " << restoredMp << " MP!\n";
+            } else if (healedHp > 0) {
+                std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
+                          << healedHp << " HP! (HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
+            } else if (restoredMp > 0) {
+                std::cout << hero.getName() << " consumed " << item.getName() << " and restored "
+                          << restoredMp << " MP! (MP: " << hero.getMp() << "/" << hero.getMaxMp() << ")\n";
+            } else {
+                std::cout << hero.getName() << " consumed " << item.getName() << "!\n";
+            }
         } else {
             std::cout << "[ITEM FAILED] Could not use item!\n";
             return currentState;
@@ -189,7 +201,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         currentState = CombatState::FLED;
         return currentState;
     } else {
-        std::cout << "[INVALID ACTION] Choice must be between 1 and 5.\n";
+        warnUnfinishedFeature("Hành động chiến đấu mở rộng (Mã: " + std::to_string(actionChoice) + ")");
         return currentState;
     }
 
@@ -423,7 +435,7 @@ void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
         out << "Actions:\n";
         out << " 1. Normal Attack\n";
         out << " 2. Skill\n";
-        out << " 3. Item (Potions - Mage exclusive)\n";
+        out << " 3. Item (Potions / Dược phẩm)\n";
         out << " 4. Defend (Reduce damage by 50%)\n";
         out << " 5. Flee\n";
         out << "Choose action (1-5): ";
@@ -490,5 +502,12 @@ void CombatEngine::runInteractiveBattle(std::istream& in, std::ostream& out) {
     } else if (currentState == CombatState::FLED) {
         out << "  " << hero.getName() << " successfully escaped from battle.\n";
     }
+    out << "=======================================================\n";
+}
+
+void CombatEngine::warnUnfinishedFeature(const std::string& featureName, std::ostream& out) {
+    out << "\n=======================================================\n";
+    out << " [CẢNH BÁO] Tính năng đang được phát triển: " << featureName << "\n";
+    out << " Vui lòng đón chờ bản cập nhật tiếp theo!\n";
     out << "=======================================================\n";
 }

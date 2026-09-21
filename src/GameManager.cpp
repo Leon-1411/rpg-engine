@@ -395,7 +395,7 @@ void GameManager::handleBattleMode() {
     }
 
     BattleUI battleUI;
-    CombatEngine combat(*playerHero, *enemy);
+    CombatEngine combat(*playerHero, *enemy, &playerHero->getInventory());
     combat.startBattle();
 
     while (!combat.isBattleOver()) {
@@ -403,7 +403,44 @@ void GameManager::handleBattleMode() {
         BattleAction action = battleUI.getPlayerAction();
         
         int actionCode = static_cast<int>(action);
-        combat.executeTurn(actionCode);
+        int subIndex = -1;
+
+        if (action == BattleAction::SKILL) {
+            std::cout << "\n--- Danh Sách Kỹ Năng (" << playerHero->getHeroClassName() << ") ---\n";
+            std::cout << "  1. " << playerHero->getSkillName(1) << " [Hồi chiêu: " << playerHero->getSkillCooldown(1) << " lượt]\n";
+            std::cout << "  2. " << playerHero->getSkillName(2) << " [Hồi chiêu: " << playerHero->getSkillCooldown(2) << " lượt]\n";
+            std::cout << "  3. " << playerHero->getSkillName(3) << " [Hồi chiêu: " << playerHero->getSkillCooldown(3) << " lượt]\n";
+            subIndex = ConsoleUI::getIntInput(1, 3, "Chọn kỹ năng (1-3): ");
+        } else if (action == BattleAction::ITEM) {
+            auto& inv = playerHero->getInventory();
+            std::vector<int> potionIndices;
+            std::cout << "\n--- Danh Sách Dược Phẩm Trong Túi ---\n";
+            for (int i = 0; i < inv.getItemCount(); ++i) {
+                Item itm = inv.getItem(i);
+                if (itm.getType() == ItemType::POTION) {
+                    potionIndices.push_back(i);
+                    std::cout << "  " << potionIndices.size() << ". " << itm.getName()
+                              << " (" << itm.getDescription() << ")\n";
+                }
+            }
+            if (potionIndices.empty()) {
+                ConsoleUI::printWarning("Bạn không có bình dược phẩm nào trong túi đồ!");
+                ConsoleUI::pause();
+                continue;
+            } else {
+                int pSel = ConsoleUI::getIntInput(1, static_cast<int>(potionIndices.size()), "Chọn dược phẩm muốn dùng: ");
+                subIndex = potionIndices[pSel - 1];
+            }
+        } else if (action == BattleAction::RUN) {
+            if (enemy->getType() == EnemyType::BOSS) {
+                ConsoleUI::printWarning("Không thể đào tẩu khỏi trận chiến định mệnh với Trùm Cuối (Boss)!");
+                ConsoleUI::pause();
+                continue;
+            }
+        }
+
+        combat.executeTurn(actionCode, subIndex);
+        ConsoleUI::pause("Nhấn Enter để tiếp tục lượt tiếp theo...");
     }
 
     if (combat.getState() == CombatState::HERO_VICTORY) {

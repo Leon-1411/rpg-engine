@@ -33,7 +33,7 @@ int Enemy::chooseAction(HeroClass targetClass) {
     if (roll < missRate) {
         return 0; // 0 = Hesitate / Miss attack
     }
-    return 1; // 1 = Normal attack
+    return chooseAction(); // Gọi phương thức đa hình của lớp con (Goblin, Skeleton, Orc, Minion)
 }
 
 int Enemy::chooseAction(HeroClass targetClass, int turnCount) {

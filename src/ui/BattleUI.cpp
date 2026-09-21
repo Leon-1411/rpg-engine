@@ -84,13 +84,13 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
         bool isDefending = false;
         if (action == BattleAction::ATTACK) {
             int dmg = engine.calculateDamage(hero.getAttack(), enemy.getDefense());
-            enemy.takeDamage(hero.getAttack());
+            enemy.takeDamage(dmg);
             lastMessage = hero.getName() + " vung vũ khí tấn công " + enemy.getName() + " gây " + std::to_string(dmg) + " sát thương!";
         } else if (action == BattleAction::SKILL) {
             int skillDmg = 0;
             if (hero.useSkill(1, skillDmg)) {
                 int dmg = engine.calculateDamage(skillDmg, enemy.getDefense());
-                enemy.takeDamage(skillDmg);
+                enemy.takeDamage(dmg);
                 lastMessage = hero.getName() + " thi triển KỸ NĂNG TẤT SÁT, oanh tạc " + enemy.getName() + " với " + std::to_string(dmg) + " sát thương cực đại!";
             } else {
                 lastMessage = "Không đủ điểm Mana (MP) để kích hoạt kỹ năng đặc biệt!";
@@ -126,10 +126,8 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
         int enemyDmg = engine.calculateDamage(enemy.getAttack(), hero.getDefense());
         if (isDefending) {
             enemyDmg = std::max(1, enemyDmg / 2);
-            hero.takeDamage(enemy.getAttack() / 2);
-        } else {
-            hero.takeDamage(enemy.getAttack());
         }
+        hero.takeDamage(enemyDmg);
         lastMessage += "\n  " + enemy.getName() + " phản kích dồn dập, gây " + std::to_string(enemyDmg) + " sát thương lên " + hero.getName() + "!";
 
         if (!hero.isAlive()) {

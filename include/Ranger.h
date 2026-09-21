@@ -15,6 +15,7 @@ class Ranger : public Hero {
 public:
     Ranger(const std::string& name, int hp = 90, int mp = 50, int attack = 16, int defense = 5);
     virtual ~Ranger() = default;
+    using Hero::useSkill;
 
     bool useSkill(int skillIndex, int& outDamage) override;
     void levelUp() override;
