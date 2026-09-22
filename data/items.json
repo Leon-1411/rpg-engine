@@ -109,6 +109,13 @@
       "description": "Nhật ký của Công chúa Elena hé lộ sự thật hiến tế linh hồn hoàng gia cho The Core.",
       "type": "KEY_ITEM",
       "statValue": 0
+    },
+    {
+      "id": "IceKey",
+      "name": "Chìa Khóa Băng Bất Hoại",
+      "description": "Cổ vật chạm khắc hoa tuyết, dùng mở phong ấn bí mật trong Đền Băng.",
+      "type": "KEY_ITEM",
+      "statValue": 0
     }
   ]
 }
