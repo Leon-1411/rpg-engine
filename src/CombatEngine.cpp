@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <cstdlib>
 
-CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inv)
-    : hero(hero), enemy(enemy), inventory(inv), currentState(CombatState::ONGOING),
+CombatEngine::CombatEngine(Hero& hero, Enemy& enemy, Inventory* inventory)
+    : hero(hero), enemy(enemy), inventory(inventory), currentState(CombatState::ONGOING),
       turnCount(1), consecutiveZeroDamageTurns(0) {}
 
 void CombatEngine::setInventory(Inventory* inv) {
@@ -232,7 +232,7 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         currentState = CombatState::FLED;
         return currentState;
     } else {
-        std::cout << "[LỰA CHỌN KHÔNG HỢP LỆ] Vui lòng chọn từ 1 đến 5.\n";
+        warnUnfinishedFeature("Hành động chiến đấu mở rộng (Mã: " + std::to_string(actionChoice) + ")");
         return currentState;
     }
 
@@ -531,5 +531,12 @@ void CombatEngine::runBattleLoop(std::istream& in, std::ostream& out) {
     } else if (currentState == CombatState::FLED) {
         out << "  " << hero.getName() << " đã tẩu thoát an toàn khỏi trận đấu.\n";
     }
+    out << "=======================================================\n";
+}
+
+void CombatEngine::warnUnfinishedFeature(const std::string& featureName, std::ostream& out) {
+    out << "\n=======================================================\n";
+    out << " [CẢNH BÁO] Tính năng đang được phát triển: " << featureName << "\n";
+    out << " Vui lòng đón chờ bản cập nhật tiếp theo!\n";
     out << "=======================================================\n";
 }

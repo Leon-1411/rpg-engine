@@ -98,7 +98,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
       attack(attack), defense(defense), armorPenetration(armorPen),
       critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
-      skillCooldowns({0, 0, 0}), maxCooldowns({0, 0, 0}),
+      skillCooldowns{0, 0, 0}, maxCooldowns{0, 0, 0},
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
       poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {}
 
@@ -108,7 +108,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int att
       attack(attack), defense(defense), armorPenetration(armorPen),
       critChance(critChance), critDamage(critDamage), ignoreArmor(ignoreArmor),
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
-      skillCooldowns({0, 0, 0}), maxCooldowns({0, 0, 0}),
+      skillCooldowns{0, 0, 0}, maxCooldowns{0, 0, 0},
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
       poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {}
 
@@ -187,6 +187,7 @@ void Hero::resetCombatStances() {
 void Hero::lockSkills(int turns) {
     skillLockTurns = turns;
 }
+
 
 void Hero::applyPoison(int turns, int damagePerTurn) {
     poisonTurns = turns;

@@ -398,7 +398,7 @@ void GameManager::handleBattleMode() {
     }
 
     BattleUI battleUI;
-    CombatEngine combat(*playerHero, *enemy);
+    CombatEngine combat(*playerHero, *enemy, &playerHero->getInventory());
     combat.startBattle();
 
     std::string lastTurnMsg = "Một kẻ địch đã xuất hiện: " + enemy->getName() + "!";
@@ -414,7 +414,11 @@ void GameManager::handleBattleMode() {
         int itemOrSkillIndex = -1;
 
         if (action == BattleAction::SKILL) {
-            itemOrSkillIndex = 1;
+            std::cout << "\n--- Danh Sách Kỹ Năng (" << playerHero->getHeroClassName() << ") ---\n";
+            std::cout << "  1. " << playerHero->getSkillName(1) << " [Hồi chiêu: " << playerHero->getSkillCooldown(1) << " lượt]\n";
+            std::cout << "  2. " << playerHero->getSkillName(2) << " [Hồi chiêu: " << playerHero->getSkillCooldown(2) << " lượt]\n";
+            std::cout << "  3. " << playerHero->getSkillName(3) << " [Hồi chiêu: " << playerHero->getSkillCooldown(3) << " lượt]\n";
+            itemOrSkillIndex = ConsoleUI::getIntInput(1, 3, "Chọn kỹ năng (1-3): ");
         } else if (action == BattleAction::ITEM) {
             auto& inv = playerHero->getInventory();
             std::vector<int> potionIndices;
@@ -447,6 +451,12 @@ void GameManager::handleBattleMode() {
                     continue;
                 }
                 itemOrSkillIndex = potionIndices[pChoice - 1];
+            }
+        } else if (action == BattleAction::RUN) {
+            if (enemy->getType() == EnemyType::BOSS) {
+                ConsoleUI::printWarning("Không thể đào tẩu khỏi trận chiến định mệnh với Trùm Cuối (Boss)!");
+                ConsoleUI::pause();
+                continue;
             }
         }
 
