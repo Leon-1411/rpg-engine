@@ -73,6 +73,8 @@ echo [RPG Engine] Running Tests...
 .\test_ui.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_hero.cpp -o test_hero.exe
 .\test_hero.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_level_system.cpp -o test_level_system.exe
+.\test_level_system.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_boss.cpp -o test_boss.exe
 .\test_boss.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_shop.cpp -o test_shop.exe

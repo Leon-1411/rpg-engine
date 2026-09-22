@@ -117,7 +117,14 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
         }
 
         if (action == BattleAction::SKILL) {
-            itemOrSkillIndex = 1;
+            std::cout << "\n" << ConsoleUI::colorize("✦ DANH SÁCH KỸ NĂNG - " + hero.getName() + " [MP: " + std::to_string(hero.getMp()) + "/" + std::to_string(hero.getMaxMp()) + "]:", ConsoleUI::Colors::BRIGHT_CYAN) << "\n";
+            hero.displaySkills();
+            std::cout << "  0. Quay lại\n";
+            int sChoice = ConsoleUI::getIntInput(0, 3, "Chọn kỹ năng muốn sử dụng [1-3, hoặc 0 để hủy]: ", in);
+            if (sChoice == 0) {
+                continue;
+            }
+            itemOrSkillIndex = sChoice;
         } else if (action == BattleAction::ITEM) {
             auto& inv = hero.getInventory();
             std::vector<int> potionIndices;

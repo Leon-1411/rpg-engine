@@ -255,8 +255,12 @@ void GameManager::handleStoryMode() {
                 giveItemById(itmId);
             }
             if (current.rewardExp > 0 && playerHero) {
-                playerHero->setExp(playerHero->getExp() + current.rewardExp);
+                bool leveled = playerHero->addExp(current.rewardExp);
                 std::cout << "  + " << current.rewardExp << " EXP\n";
+                if (leveled && playerHero->getStatPoints() > 0) {
+                    std::cout << "\n" << ConsoleUI::colorize("★ CHÚC MỪNG BẠN ĐÃ THĂNG CẤP! CÓ " + std::to_string(playerHero->getStatPoints()) + " ĐIỂM TIỀM NĂNG ★", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+                    LevelSystem::promptStatAllocation(*playerHero);
+                }
             }
             if (current.rewardGold > 0 && playerHero) {
                 playerHero->addGold(current.rewardGold);
@@ -431,11 +435,14 @@ void GameManager::handleBattleMode() {
         int itemOrSkillIndex = -1;
 
         if (action == BattleAction::SKILL) {
-            std::cout << "\n--- Danh Sách Kỹ Năng (" << playerHero->getHeroClassName() << ") ---\n";
-            std::cout << "  1. " << playerHero->getSkillName(1) << " [Hồi chiêu: " << playerHero->getSkillCooldown(1) << " lượt]\n";
-            std::cout << "  2. " << playerHero->getSkillName(2) << " [Hồi chiêu: " << playerHero->getSkillCooldown(2) << " lượt]\n";
-            std::cout << "  3. " << playerHero->getSkillName(3) << " [Hồi chiêu: " << playerHero->getSkillCooldown(3) << " lượt]\n";
-            itemOrSkillIndex = ConsoleUI::getIntInput(1, 3, "Chọn kỹ năng (1-3): ");
+            std::cout << "\n" << ConsoleUI::colorize("✦ DANH SÁCH KỸ NĂNG - " + playerHero->getName() + " [MP: " + std::to_string(playerHero->getMp()) + "/" + std::to_string(playerHero->getMaxMp()) + "]:", ConsoleUI::Colors::BRIGHT_CYAN) << "\n";
+            playerHero->displaySkills();
+            std::cout << "  0. Quay lại\n";
+            int sChoice = ConsoleUI::getIntInput(0, 3, "Chọn kỹ năng muốn dùng [1-3, hoặc 0 để hủy]: ");
+            if (sChoice == 0) {
+                continue;
+            }
+            itemOrSkillIndex = sChoice;
         } else if (action == BattleAction::ITEM) {
             auto& inv = playerHero->getInventory();
             std::vector<int> potionIndices;
@@ -483,6 +490,10 @@ void GameManager::handleBattleMode() {
 
     if (combat.getState() == CombatState::HERO_VICTORY) {
         battleUI.showVictory(*enemy, combat.getLastLootDrops());
+        if (playerHero && playerHero->getStatPoints() > 0) {
+            std::cout << "\n" << ConsoleUI::colorize("★ BẠN CÓ ĐIỂM TIỀM NĂNG CHƯA PHÂN BỔ (" + std::to_string(playerHero->getStatPoints()) + " ĐIỂM)! ★", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+            LevelSystem::promptStatAllocation(*playerHero);
+        }
         if (!currentWinNodeId.empty()) {
             story.moveToNode(currentWinNodeId);
         }
