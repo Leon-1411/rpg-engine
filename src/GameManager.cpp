@@ -414,8 +414,8 @@ void GameManager::handleBattleMode() {
     }
 
     if (!enemy) {
-        enemy = MinionFactory::createFromJson("goblin", "data/enemies.json");
-        if (!enemy) enemy = std::make_shared<Goblin>();
+        enemy = MinionFactory::createFromJson("Wild_Mercenary", "data/enemies.json");
+        if (!enemy) enemy = std::make_shared<WildMercenary>();
     }
 
     BattleUI battleUI;

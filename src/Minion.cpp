@@ -1,6 +1,6 @@
 /**
  * @file Minion.cpp
- * @brief Implementation of Minion base class, subclasses, and MinionFactory.
+ * @brief Implementation of Minion base class, 3 canon subclasses (WildMercenary, DemonScout, DemonBerserker), and MinionFactory.
  */
 
 #include "Minion.h"
@@ -11,6 +11,9 @@
 
 std::string minionTypeToString(MinionType type) {
     switch (type) {
+        case MinionType::WILD_MERCENARY: return "WILD_MERCENARY";
+        case MinionType::DEMON_SCOUT: return "DEMON_SCOUT";
+        case MinionType::DEMON_BERSERKER: return "DEMON_BERSERKER";
         case MinionType::GOBLIN: return "GOBLIN";
         case MinionType::SKELETON: return "SKELETON";
         case MinionType::ORC: return "ORC";
@@ -22,6 +25,9 @@ std::string minionTypeToString(MinionType type) {
 MinionType stringToMinionType(const std::string& str) {
     std::string s = str;
     std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+    if (s == "WILD_MERCENARY" || s == "WILDMERCENARY" || s == "MERCENARY") return MinionType::WILD_MERCENARY;
+    if (s == "DEMON_SCOUT" || s == "DEMONSCOUT") return MinionType::DEMON_SCOUT;
+    if (s == "DEMON_BERSERKER" || s == "DEMONBERSERKER") return MinionType::DEMON_BERSERKER;
     if (s == "GOBLIN") return MinionType::GOBLIN;
     if (s == "SKELETON") return MinionType::SKELETON;
     if (s == "ORC") return MinionType::ORC;
@@ -80,9 +86,80 @@ std::string Minion::getId() const { return id; }
 MinionType Minion::getMinionType() const { return minionType; }
 std::string Minion::getDescription() const { return description; }
 
-// ==================== Subclasses ====================
+// ==================== 3 Canon Minions Subclasses ====================
 
-// 1. Goblin
+// 1. Wild Mercenary: Agile nomad ambush hunter, casts Wild Ambush on even turns
+WildMercenary::WildMercenary(const std::string& id,
+                             const std::string& name,
+                             int hp,
+                             int attack,
+                             int defense,
+                             int expReward,
+                             int goldReward,
+                             const std::string& description,
+                             const std::string& specialSkill)
+    : Minion(id, name, MinionType::WILD_MERCENARY, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
+
+int WildMercenary::chooseAction() {
+    actionCounter++;
+    // Wild Mercenary strikes swiftly with Wild Ambush every 2nd turn
+    if (actionCounter % 2 == 0) {
+        return 2;
+    }
+    return 1;
+}
+
+// 2. Demon Scout: Ranged shadow scout using Shadow Dart every 3rd turn
+DemonScout::DemonScout(const std::string& id,
+                       const std::string& name,
+                       int hp,
+                       int attack,
+                       int defense,
+                       int expReward,
+                       int goldReward,
+                       const std::string& description,
+                       const std::string& specialSkill)
+    : Minion(id, name, MinionType::DEMON_SCOUT, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
+
+int DemonScout::chooseAction() {
+    actionCounter++;
+    // Demon Scout fires Shadow Dart on every 3rd turn
+    if (actionCounter % 3 == 0) {
+        return 2;
+    }
+    return 1;
+}
+
+// 3. Demon Berserker: Savage brute entering Demonic Frenzy when HP <= 50%
+DemonBerserker::DemonBerserker(const std::string& id,
+                               const std::string& name,
+                               int hp,
+                               int attack,
+                               int defense,
+                               int expReward,
+                               int goldReward,
+                               const std::string& description,
+                               const std::string& specialSkill)
+    : Minion(id, name, MinionType::DEMON_BERSERKER, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
+
+int DemonBerserker::chooseAction() {
+    actionCounter++;
+    // If enraged (HP <= 50%), Demon Berserker enters Demonic Frenzy every 2 turns
+    if (hp <= maxHp / 2) {
+        if (actionCounter % 2 == 0) {
+            return 2;
+        }
+    } else {
+        // Normal mode uses Demonic Frenzy every 4 turns
+        if (actionCounter % 4 == 0) {
+            return 2;
+        }
+    }
+    return 1;
+}
+
+// ==================== Legacy Subclasses ====================
+
 Goblin::Goblin(const std::string& id,
                const std::string& name,
                int hp,
@@ -96,14 +173,10 @@ Goblin::Goblin(const std::string& id,
 
 int Goblin::chooseAction() {
     actionCounter++;
-    // Goblin is nimble and attacks rapidly with Quick Strike on even turns
-    if (actionCounter % 2 == 0) {
-        return 2;
-    }
+    if (actionCounter % 2 == 0) return 2;
     return 1;
 }
 
-// 2. Skeleton
 Skeleton::Skeleton(const std::string& id,
                    const std::string& name,
                    int hp,
@@ -117,14 +190,10 @@ Skeleton::Skeleton(const std::string& id,
 
 int Skeleton::chooseAction() {
     actionCounter++;
-    // Skeleton prepares and pierces with bone strike on every 3rd turn
-    if (actionCounter % 3 == 0) {
-        return 2;
-    }
+    if (actionCounter % 3 == 0) return 2;
     return 1;
 }
 
-// 3. Orc
 Orc::Orc(const std::string& id,
          const std::string& name,
          int hp,
@@ -138,20 +207,14 @@ Orc::Orc(const std::string& id,
 
 int Orc::chooseAction() {
     actionCounter++;
-    // If enraged (HP <= 50%), Orc uses Heavy Slam more frequently
     if (hp <= maxHp / 2) {
-        if (actionCounter % 2 == 0) {
-            return 2;
-        }
+        if (actionCounter % 2 == 0) return 2;
     } else {
-        if (actionCounter % 4 == 0) {
-            return 2;
-        }
+        if (actionCounter % 4 == 0) return 2;
     }
     return 1;
 }
 
-// 4. Dark Knight
 DarkKnight::DarkKnight(const std::string& id,
                        const std::string& name,
                        int hp,
@@ -165,10 +228,7 @@ DarkKnight::DarkKnight(const std::string& id,
 
 int DarkKnight::chooseAction() {
     actionCounter++;
-    // Alternates strategic heavy attacks
-    if (actionCounter % 2 == 0) {
-        return 2;
-    }
+    if (actionCounter % 2 == 0) return 2;
     return 1;
 }
 
@@ -192,6 +252,15 @@ std::shared_ptr<Minion> MinionFactory::createFromJsonObject(const std::string& i
 
     std::shared_ptr<Minion> minion = nullptr;
     switch (mType) {
+        case MinionType::WILD_MERCENARY:
+            minion = std::make_shared<WildMercenary>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
+        case MinionType::DEMON_SCOUT:
+            minion = std::make_shared<DemonScout>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
+        case MinionType::DEMON_BERSERKER:
+            minion = std::make_shared<DemonBerserker>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
+            break;
         case MinionType::GOBLIN:
             minion = std::make_shared<Goblin>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
             break;
@@ -229,6 +298,9 @@ std::shared_ptr<Minion> MinionFactory::createFromJson(const std::string& id, con
     if (!file.is_open()) {
         std::cerr << "[MinionFactory] Failed to open " << filepath << ". Using default stats.\n";
         // Fallback default instances based on id
+        if (id == "Wild_Mercenary" || id == "wild_mercenary") return std::make_shared<WildMercenary>();
+        if (id == "Demon_Scout" || id == "demon_scout") return std::make_shared<DemonScout>();
+        if (id == "Demon_Berserker" || id == "demon_berserker") return std::make_shared<DemonBerserker>();
         if (id == "goblin") return std::make_shared<Goblin>();
         if (id == "skeleton") return std::make_shared<Skeleton>();
         if (id == "orc") return std::make_shared<Orc>();
