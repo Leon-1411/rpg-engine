@@ -51,6 +51,7 @@ struct SavedGameState {
     // Story progress
     std::string currentStoryNodeId;
     std::unordered_map<std::string, bool> storyFlags;
+    std::vector<std::string> visitedStoryNodes;
 
     // Inventory state
     int inventoryCapacity = 20;
