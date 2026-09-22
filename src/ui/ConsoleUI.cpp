@@ -65,12 +65,63 @@ void pause(const std::string& prompt, std::istream& in) {
     std::getline(in, line);
 }
 
-void printHeader(const std::string& title, int width, const std::string& color) {
-    if (width < 10) width = 10;
-    std::string topBorder    = "╔" + std::string(width - 2, '=') + "╗";
-    std::string bottomBorder = "╚" + std::string(width - 2, '=') + "╝";
+size_t getDisplayWidth(const std::string& str) {
+    size_t width = 0;
+    size_t i = 0;
+    while (i < str.length()) {
+        unsigned char c = static_cast<unsigned char>(str[i]);
+        // Handle ANSI escape sequences like \033[31m or \033[0m
+        if (c == '\033' && i + 1 < str.length() && str[i + 1] == '[') {
+            i += 2;
+            while (i < str.length() && str[i] != 'm') {
+                i++;
+            }
+            if (i < str.length() && str[i] == 'm') {
+                i++;
+            }
+            continue;
+        }
 
-    int padding = static_cast<int>(width - 2 - title.length());
+        // UTF-8 decoding
+        if ((c & 0x80) == 0) {
+            // Standard 1-byte ASCII
+            width += 1;
+            i += 1;
+        } else if ((c & 0xE0) == 0xC0) {
+            // 2-byte UTF-8 character (Vietnamese accents)
+            width += 1;
+            i += (i + 2 <= str.length()) ? 2 : 1;
+        } else if ((c & 0xF0) == 0xE0) {
+            // 3-byte UTF-8 character (Vietnamese compound vowels & symbols)
+            width += 1;
+            i += (i + 3 <= str.length()) ? 3 : 1;
+        } else if ((c & 0xF8) == 0xF0) {
+            // 4-byte UTF-8 character (Emoji/wide chars)
+            width += 2;
+            i += (i + 4 <= str.length()) ? 4 : 1;
+        } else {
+            // Continuation or invalid byte
+            i += 1;
+        }
+    }
+    return width;
+}
+
+void printHeader(const std::string& title, int width, const std::string& color) {
+    size_t titleWidth = getDisplayWidth(title);
+    if (width < static_cast<int>(titleWidth + 4)) {
+        width = static_cast<int>(titleWidth + 4);
+    }
+    if (width < 10) width = 10;
+
+    std::string hBorder;
+    for (int i = 0; i < width - 2; ++i) {
+        hBorder += "═";
+    }
+    std::string topBorder    = "╔" + hBorder + "╗";
+    std::string bottomBorder = "╚" + hBorder + "╝";
+
+    int padding = static_cast<int>(width - 2 - titleWidth);
     int padLeft = (padding > 0) ? padding / 2 : 0;
     int padRight = (padding > 0) ? (padding - padLeft) : 0;
 
@@ -89,6 +140,19 @@ void printDivider(char ch, int length, const std::string& color) {
 }
 
 void printBox(const std::vector<std::string>& lines, int width, const std::string& borderColor) {
+    size_t maxLineWidth = 0;
+    for (const auto& line : lines) {
+        size_t lw = getDisplayWidth(line);
+        if (lw > maxLineWidth) {
+            maxLineWidth = lw;
+        }
+    }
+
+    if (width < static_cast<int>(maxLineWidth + 4)) {
+        width = static_cast<int>(maxLineWidth + 4);
+    }
+    if (width < 10) width = 10;
+
     std::string hBorder;
     for (int i = 0; i < width - 2; ++i) {
         hBorder += "─";
@@ -98,7 +162,8 @@ void printBox(const std::vector<std::string>& lines, int width, const std::strin
 
     std::cout << colorize(topBorder, borderColor) << "\n";
     for (const auto& line : lines) {
-        int padding = static_cast<int>(width - 4 - line.length());
+        size_t lineWidth = getDisplayWidth(line);
+        int padding = static_cast<int>(width - 4 - lineWidth);
         if (padding < 0) padding = 0;
         std::cout << colorize("│ ", borderColor)
                   << line
