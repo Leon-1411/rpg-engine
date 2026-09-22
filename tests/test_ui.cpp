@@ -143,6 +143,20 @@ int main() {
         assert(state == CombatState::HERO_VICTORY);
     }
 
+    // 9e. Bug Fix Verification: Defense mitigation applied in BattleUI::runBattle
+    {
+        // Hero ATK = 20, Enemy DEF = 15, Enemy HP = 10 -> Sát thương thực = 20 - 15 = 5.
+        // Nếu dính lỗi cũ (takeDamage(20)), quái sẽ chết ngay lượt 1.
+        // Với bản sửa lỗi (takeDamage(5)), quái còn 5 HP và tiếp tục trận đấu!
+        Hero hero("ArmorTester", HeroClass::WARRIOR, 100, 20, 20, 0);
+        Enemy tankEnemy("ArmoredGolem", EnemyType::MINION, 10, 0, 15, 10, 5);
+        BattleUI battleUI;
+        std::istringstream stream("1\n1\n"); // Lượt 1: trừ 5 máu (còn 5 HP); Lượt 2: trừ tiếp 5 máu (hạ gục)
+        CombatState state = battleUI.runBattle(hero, tankEnemy, stream);
+        assert(state == CombatState::HERO_VICTORY);
+        assert(!tankEnemy.isAlive());
+    }
+
     std::cout << "[PASS] UI Console, Battle HUD & ASCII Art unit tests successful!\n";
     return 0;
 }

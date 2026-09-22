@@ -15,6 +15,7 @@ class Mage : public Hero {
 public:
     Mage(const std::string& name, int hp = 80, int mp = 100, int attack = 24, int defense = 3);
     virtual ~Mage() = default;
+    using Hero::useSkill;
 
     bool useSkill(int skillIndex, int& outDamage, std::string& outMessage) override;
     bool useSkill(int skillIndex, int& outDamage) override;

@@ -414,7 +414,7 @@ void GameManager::handleBattleMode() {
     }
 
     BattleUI battleUI;
-    CombatEngine combat(*playerHero, *enemy);
+    CombatEngine combat(*playerHero, *enemy, &playerHero->getInventory());
     combat.startBattle();
 
     std::string lastTurnMsg = "Một kẻ địch đã xuất hiện: " + enemy->getName() + "!";
@@ -470,6 +470,12 @@ void GameManager::handleBattleMode() {
                     continue;
                 }
                 itemOrSkillIndex = potionIndices[pChoice - 1];
+            }
+        } else if (action == BattleAction::RUN) {
+            if (enemy->getType() == EnemyType::BOSS) {
+                ConsoleUI::printWarning("Không thể đào tẩu khỏi trận chiến định mệnh với Trùm Cuối (Boss)!");
+                ConsoleUI::pause();
+                continue;
             }
         }
 

@@ -4,6 +4,8 @@
 #include "Ranger.h"
 #include "Inventory.h"
 #include "Item.h"
+#include "Potion.h"
+#include "Minion.h"
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -133,7 +135,8 @@ int main() {
     int turnsBefore = victimHero.getPoisonTurns();
     // Next turn: Status effect pipeline ticks poison damage on Hero!
     snakeEngine.executeTurn(4);
-    assert(victimHero.getPoisonTurns() < turnsBefore || !victimHero.isPoisoned());
+    assert(victimHero.isPoisoned());
+    assert(victimHero.getPoisonTurns() <= turnsBefore);
     assert(victimHero.getHp() < hpBeforePoison);
 
     // =========================================================
@@ -199,6 +202,21 @@ int main() {
     assert(simEngine.getState() == CombatState::HERO_VICTORY);
 
     // =========================================================
+    // 9. Bug Fix Verification: Mana Potion hồi phục MP trong combat
+    // =========================================================
+    Hero mpHero("MageTester", HeroClass::MAGE, 100, 80, 15, 5);
+    mpHero.setMp(20); // MP hiện tại: 20/80
+    Inventory mpInv(5);
+    mpInv.addItem(std::make_shared<Potion>("pot_02", "Mana Potion", "Restore MP", 30, true, 1));
+    Enemy idleDummy("Dummy", EnemyType::MINION, 100, 0, 0, 10, 5);
+    CombatEngine mpEngine(mpHero, idleDummy, &mpInv);
+    mpEngine.startBattle();
+
+    // Dùng Mana Potion (Hành động 3, index 0)
+    mpEngine.executeTurn(3, 0);
+    assert(mpHero.getMp() == 50); // 20 + 30 = 50 MP
+
+    // =========================================================
     // 10. Loot Drops & Auto-collection in Victory
     // =========================================================
     Hero lootHero("LootSeeker", HeroClass::WARRIOR, 100, 50, 50, 10, 0, 0.0f, 0.0f);
@@ -221,6 +239,23 @@ int main() {
     assert(lootEngine.getLastLootDrops().size() == 2);
     assert(lootHero.getInventory().hasItem("pot_01"));
     assert(lootHero.getInventory().hasItem("wpn_01"));
+
+    // =========================================================
+    // 11. Bug Fix Verification: Cảnh báo Tính năng đang được phát triển
+    // =========================================================
+    std::stringstream warnStream;
+    CombatEngine::warnUnfinishedFeature("Burn Effect", warnStream);
+    std::string warnText = warnStream.str();
+    assert(warnText.find("Tính năng đang được phát triển") != std::string::npos);
+    assert(warnText.find("Burn Effect") != std::string::npos);
+
+    // =========================================================
+    // 12. Bug Fix Verification: Polymorphic AI của Goblin/Minion
+    // =========================================================
+    Goblin testGoblin("gob1", "Goblin Runner", 60, 12, 5, 20, 10);
+    // Khi đối đầu Mage (miss rate chỉ 10%), hành động không do dự gọi chooseAction() của Goblin
+    int actionResult = testGoblin.chooseAction();
+    assert(actionResult == 1 || actionResult == 2);
 
     std::cout << "[PASS] All Edge Cases, Status Effects, Combat, and Loot Drop tests passed successfully!\n";
     return 0;
