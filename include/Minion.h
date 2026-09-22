@@ -7,6 +7,9 @@
 #include <vector>
 
 enum class MinionType {
+    WILD_MERCENARY,
+    DEMON_SCOUT,
+    DEMON_BERSERKER,
     GOBLIN,
     SKELETON,
     ORC,
@@ -48,7 +51,58 @@ public:
     std::string getDescription() const;
 };
 
-// 1. Goblin: Agile minion with chance for Quick Strike
+// ==================== 3 Canon Minions (Fractured Crown Lore) ====================
+
+// 1. Wild Mercenary: Nomad hunter of Free People, ambushing enemies with Wild Ambush
+class WildMercenary : public Minion {
+public:
+    explicit WildMercenary(const std::string& id = "Wild_Mercenary",
+                           const std::string& name = "Wild Mercenary",
+                           int hp = 90,
+                           int attack = 20,
+                           int defense = 8,
+                           int expReward = 75,
+                           int goldReward = 25,
+                           const std::string& description = "Lính đánh thuê và thợ săn du mục của Bộ Tộc Tự Do, canh giữ ranh giới Rừng Rậm Huyết Nguyệt.",
+                           const std::string& specialSkill = "Wild Ambush");
+
+    int chooseAction() override;
+};
+
+// 2. Demon Scout: Agile shadow demon scouting borders with Shadow Dart
+class DemonScout : public Minion {
+public:
+    explicit DemonScout(const std::string& id = "Demon_Scout",
+                        const std::string& name = "Demon Scout",
+                        int hp = 85,
+                        int attack = 22,
+                        int defense = 6,
+                        int expReward = 80,
+                        int goldReward = 30,
+                        const std::string& description = "Trinh sát quỷ nhanh nhẹn của Ma tộc tuần tra vùng biên giới Trăng Máu.",
+                        const std::string& specialSkill = "Shadow Dart");
+
+    int chooseAction() override;
+};
+
+// 3. Demon Berserker: Savage frontline demon fighter entering Demonic Frenzy
+class DemonBerserker : public Minion {
+public:
+    explicit DemonBerserker(const std::string& id = "Demon_Berserker",
+                            const std::string& name = "Demon Berserker",
+                            int hp = 140,
+                            int attack = 30,
+                            int defense = 14,
+                            int expReward = 130,
+                            int goldReward = 50,
+                            const std::string& description = "Chiến binh quỷ cuồng nộ canh giữ lối vào Ma Điện khi người chơi đột kích trực diện.",
+                            const std::string& specialSkill = "Demonic Frenzy");
+
+    int chooseAction() override;
+};
+
+// ==================== Legacy / Prototype Minions ====================
+
 class Goblin : public Minion {
 public:
     explicit Goblin(const std::string& id = "goblin",
@@ -64,7 +118,6 @@ public:
     int chooseAction() override;
 };
 
-// 2. Skeleton: Undead warrior using piercing attacks
 class Skeleton : public Minion {
 public:
     explicit Skeleton(const std::string& id = "skeleton",
@@ -80,7 +133,6 @@ public:
     int chooseAction() override;
 };
 
-// 3. Orc: Brute attacker that goes berserk when low on HP
 class Orc : public Minion {
 public:
     explicit Orc(const std::string& id = "orc",
@@ -96,7 +148,6 @@ public:
     int chooseAction() override;
 };
 
-// 4. Dark Knight: Armored elite minion with dark magic strike
 class DarkKnight : public Minion {
 public:
     explicit DarkKnight(const std::string& id = "dark_knight",

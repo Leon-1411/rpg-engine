@@ -16,6 +16,9 @@ namespace ASCIIArt {
   void printHeroArt(HeroClass heroClass);
 
   // Monster & Boss Avatars
+  void printWildMercenaryArt();
+  void printDemonScoutArt();
+  void printDemonBerserkerArt();
   void printGoblinArt();
   void printSkeletonArt();
   void printOrcArt();

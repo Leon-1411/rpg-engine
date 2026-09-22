@@ -259,4 +259,13 @@ void printInfo(const std::string& message) {
     std::cout << colorize("  [i] " + message, Colors::CYAN) << "\n";
 }
 
+void printWIPWarning(const std::string& featureName) {
+    std::string msg = "⚠️ [THÔNG BÁO] Tính năng đang được phát triển (Feature under development)";
+    if (!featureName.empty()) {
+        msg += ": " + featureName;
+    }
+    std::cout << "\n" << colorize(msg, Colors::BRIGHT_YELLOW) << "\n";
+    pause("Nhấn Enter để quay lại...");
+}
+
 } // namespace ConsoleUI

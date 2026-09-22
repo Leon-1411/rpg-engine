@@ -60,6 +60,44 @@ R"(
 )", BRIGHT_GREEN) << "\n";
 }
 
+void printWildMercenaryArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+      [ WILD MERCENARY ]
+           (\_/)
+          ( . .)       <--- (Dual Daggers)
+         c(") (")>==--
+          / | \
+         (_/ \_)
+)", BRIGHT_YELLOW) << "\n";
+}
+
+void printDemonScoutArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+       [ DEMON SCOUT ]
+          ^___^
+         ( 'o' )  )~~   <--- (Shadow Darts)
+         /(   )\//
+          d   b
+)", BRIGHT_MAGENTA) << "\n";
+}
+
+void printDemonBerserkerArt() {
+    using namespace ConsoleUI::Colors;
+    std::cout << ConsoleUI::colorize(
+R"(
+      [ DEMON BERSERKER ]
+          \m/     \m/
+          (  >皿<  )   <--- (Blood Great-Axe)
+         / |======| \====[]
+        /  |      |  \
+          (________)
+)", BRIGHT_RED) << "\n";
+}
+
 void printGoblinArt() {
     using namespace ConsoleUI::Colors;
     std::cout << ConsoleUI::colorize(
@@ -210,8 +248,20 @@ void printHeroArt(HeroClass heroClass) {
 
 void printEnemyArt(const Enemy& enemy) {
     std::string name = enemy.getName();
-    if (name.find("Malakor") != std::string::npos || name.find("Demon_King") != std::string::npos || name.find("Demon Berserker") != std::string::npos) {
+    if (name.find("Malakor") != std::string::npos || name.find("Demon_King") != std::string::npos) {
         printDemonMalakorArt();
+        return;
+    }
+    if (name.find("Demon Berserker") != std::string::npos || name.find("Demon_Berserker") != std::string::npos) {
+        printDemonBerserkerArt();
+        return;
+    }
+    if (name.find("Demon Scout") != std::string::npos || name.find("Demon_Scout") != std::string::npos) {
+        printDemonScoutArt();
+        return;
+    }
+    if (name.find("Wild Mercenary") != std::string::npos || name.find("Wild_Mercenary") != std::string::npos || name.find("Mercenary") != std::string::npos) {
+        printWildMercenaryArt();
         return;
     }
     if (name.find("Aldric") != std::string::npos) {
@@ -238,10 +288,10 @@ void printEnemyArt(const Enemy& enemy) {
 
     if (name.find("Skeleton") != std::string::npos || name.find("Xuong") != std::string::npos) {
         printSkeletonArt();
-    } else if (name.find("Orc") != std::string::npos || name.find("Mercenary") != std::string::npos) {
+    } else if (name.find("Orc") != std::string::npos) {
         printOrcArt();
-    } else if (name.find("Demon") != std::string::npos || name.find("Scout") != std::string::npos) {
-        printDemonMalakorArt();
+    } else if (name.find("Demon") != std::string::npos) {
+        printDemonScoutArt();
     } else {
         printGoblinArt();
     }

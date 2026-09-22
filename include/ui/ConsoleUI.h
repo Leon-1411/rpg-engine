@@ -79,5 +79,6 @@ void printSuccess(const std::string& message);
 void printError(const std::string& message);
 void printWarning(const std::string& message);
 void printInfo(const std::string& message);
+void printWIPWarning(const std::string& featureName = "");
 
 } // namespace ConsoleUI

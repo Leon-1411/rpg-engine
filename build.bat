@@ -1,6 +1,12 @@
 @echo off
 set GXX=g++
 
+where docker >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    docker info >nul 2>nul
+    if %ERRORLEVEL% equ 0 goto use_docker
+)
+
 where g++ >nul 2>nul
 if %ERRORLEVEL% equ 0 goto found_compiler
 
@@ -14,30 +20,33 @@ if exist "C:\Program Files\Git\mingw64\bin\g++.exe" (
     goto found_compiler
 )
 
-where docker >nul 2>nul
-if %ERRORLEVEL% equ 0 goto use_docker
-
 goto found_compiler
 
 :use_docker
-echo [RPG Engine] Compiler not found in Windows PATH, using Docker environment...
-set DOCKER_CORE=src/Hero.cpp src/Warrior.cpp src/Mage.cpp src/Ranger.cpp src/LevelSystem.cpp src/Enemy.cpp src/Minion.cpp src/BossMonster.cpp src/Item.cpp src/Inventory.cpp src/Shop.cpp src/CombatEngine.cpp src/StoryGraph.cpp src/SaveManager.cpp src/DataLoader.cpp src/GameManager.cpp src/ui/ConsoleUI.cpp src/ui/ASCIIArt.cpp src/ui/MainMenu.cpp src/ui/BattleUI.cpp src/ui/InventoryUI.cpp
 if "%1"=="test" (
-    docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_item.cpp -o test_item && ./test_item && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_inventory.cpp -o test_inventory && ./test_inventory && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_combat.cpp -o test_combat && ./test_combat && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_save.cpp -o test_save && ./test_save && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_story.cpp -o test_story && ./test_story && g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% tests/test_shop.cpp -o test_shop && ./test_shop"
+    echo [RPG Engine] Running ultra-fast parallel test suite via Docker CTest...
+    docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build && ctest --test-dir build --output-on-failure"
     goto end
 )
 if "%1"=="clean" (
-    del /q *.exe *.o test_save test_story test_shop test_item test_inventory test_combat 2>nul
+    del /q *.exe *.o 2>nul
+    docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "rm -rf build" 2>nul
     echo [RPG Engine] Cleaned build artifacts.
     goto end
 )
-docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "g++ -std=c++17 -Iinclude -Iinclude/ui -Iinclude/nlohmann %DOCKER_CORE% src/main.cpp -o rpg_engine"
+if "%1"=="run" (
+    docker run --rm -it -v "%cd%":/app -w /app rpg-engine:dev bash -c "cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build && ./build/rpg_engine"
+    goto end
+)
+echo [RPG Engine] Building project via Docker (Ninja)...
+docker run --rm -v "%cd%":/app -w /app rpg-engine:dev bash -c "cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build"
 if %ERRORLEVEL% equ 0 (
-    echo [RPG Engine] Build SUCCESS! Output: rpg_engine
+    echo [RPG Engine] Build SUCCESS! Binary located in build/
 ) else (
     echo [RPG Engine] Build FAILED!
 )
 goto end
+
 
 :found_compiler
 set INCLUDES=-Iinclude -Iinclude/ui -Iinclude/nlohmann

@@ -536,7 +536,7 @@ void CombatEngine::runBattleLoop(std::istream& in, std::ostream& out) {
 
 void CombatEngine::warnUnfinishedFeature(const std::string& featureName, std::ostream& out) {
     out << "\n=======================================================\n";
-    out << " [CẢNH BÁO] Tính năng đang được phát triển: " << featureName << "\n";
+    out << " ⚠️ [THÔNG BÁO] Tính năng đang được phát triển (Feature under development): " << featureName << "\n";
     out << " Vui lòng đón chờ bản cập nhật tiếp theo!\n";
     out << "=======================================================\n";
 }
