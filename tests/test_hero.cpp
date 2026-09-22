@@ -203,7 +203,36 @@ int main() {
     assert(warrior->isPoisoned() == false);
     assert(warrior->hasRegen() == false);
 
-    std::cout << "  [PASS] Status effects (Poison & Regen) verified.\n";
+    // -------------------------------------------------------------
+    // 8. Test Skill Names and Display
+    // -------------------------------------------------------------
+    assert(warrior->getSkillName(1) == "Power Slash");
+    assert(warrior->getSkillName(2) == "Shield Block");
+    assert(warrior->getSkillName(3) == "Berserk");
+
+    assert(mage->getSkillName(1) == "Fireball");
+    assert(mage->getSkillName(2) == "Ice Blast");
+    assert(mage->getSkillName(3) == "Meteor");
+
+    assert(ranger->getSkillName(1) == "Double Shot");
+    assert(ranger->getSkillName(2) == "Poison Arrow");
+    assert(ranger->getSkillName(3) == "Rain of Arrows");
+
+    // Cooldown management & Skill lock
+    warrior->lockSkills(2);
+    assert(warrior->isSkillReady(1) == false);
+    warrior->reduceCooldowns();
+    assert(warrior->isSkillReady(1) == false);
+    warrior->reduceCooldowns();
+    assert(warrior->isSkillReady(1) == true);
+
+    // Multi-level up via addExp
+    bool leveled = warrior->addExp(400); // Level 1 -> 3
+    assert(leveled == true);
+    assert(warrior->getLevel() == 3);
+    assert(warrior->getStatPoints() >= 6); // 3 points per level
+
+    std::cout << "  [PASS] Skill names, cooldown management, and multi-level progression verified.\n";
 
     std::cout << "\n>>> ALL HERO UNIT TESTS PASSED 100%! <<<\n";
     return 0;
