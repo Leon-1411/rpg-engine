@@ -58,6 +58,7 @@ void clearScreen();
 void pause(const std::string& prompt = "Nhấn Enter để tiếp tục...", std::istream& in = std::cin);
 
 // Visual layout & formatting helpers
+size_t getDisplayWidth(const std::string& str);
 void printHeader(const std::string& title, int width = 60, const std::string& color = Colors::BRIGHT_YELLOW);
 void printDivider(char ch = '=', int length = 60, const std::string& color = Colors::CYAN);
 void printBox(const std::vector<std::string>& lines, int width = 60, const std::string& borderColor = Colors::BLUE);
