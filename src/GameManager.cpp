@@ -362,12 +362,14 @@ void GameManager::handleStoryMode() {
 
     // Utility options
     int optHero = numChoices + 1;
-    int optInv = numChoices + 2;
-    int optSave = numChoices + 3;
-    int optMenu = numChoices + 4;
+    int optCodex = numChoices + 2;
+    int optInv = numChoices + 3;
+    int optSave = numChoices + 4;
+    int optMenu = numChoices + 5;
 
     std::cout << "\n--- Tiện ích ---\n";
     std::cout << "  " << optHero << ". Thông tin Anh Hùng & Phân bổ điểm (Hero Stats)\n";
+    std::cout << "  " << optCodex << ". Tiến độ cốt truyện & Kết cục (Story Codex)\n";
     std::cout << "  " << optInv << ". Mở túi đồ (Inventory)\n";
     std::cout << "  " << optSave << ". Lưu game (Save Game Slot 1)\n";
     std::cout << "  " << optMenu << ". Quay về Menu chính\n";
@@ -378,6 +380,7 @@ void GameManager::handleStoryMode() {
         story.selectChoice(choice - 1);
     } else if (choice == optHero) {
         if (playerHero) {
+            ConsoleUI::clearScreen();
             playerHero->displayStats();
             if (playerHero->getStatPoints() > 0) {
                 LevelSystem::promptStatAllocation(*playerHero);
@@ -385,6 +388,8 @@ void GameManager::handleStoryMode() {
                 ConsoleUI::pause();
             }
         }
+    } else if (choice == optCodex) {
+        story.printStoryProgress();
     } else if (choice == optInv) {
         changeState(GameState::INVENTORY_MODE);
     } else if (choice == optSave) {
