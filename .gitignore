@@ -36,6 +36,10 @@ test_combat
 test_inventory
 test_item
 
+# Allow distribution bundle
+!dist/
+!dist/**
+
 # ==========================================
 # Debugging & Symbol files
 # ==========================================
