@@ -256,6 +256,59 @@ int main() {
     int actionResult = testMerc.chooseAction();
     assert(actionResult == 1 || actionResult == 2);
 
+    // =========================================================
+    // 13. Speed / Agility Turn Initiative
+    // =========================================================
+    Hero fastHero("FastRanger", HeroClass::RANGER, 100, 50, 20, 5);
+    fastHero.setSpeed(20);
+    Enemy slowEnemy("SlowTroll", EnemyType::MINION, 100, 10, 0, 50, 20);
+    slowEnemy.setSpeed(5);
+    CombatEngine initEngine(fastHero, slowEnemy);
+    assert(initEngine.isHeroFirst() == true);
+
+    // Khi quái vật có tốc độ cao hơn (Speed = 25 > 20) -> Quái chiếm quyền đánh trước
+    slowEnemy.setSpeed(25);
+    assert(initEngine.isHeroFirst() == false);
+
+    // =========================================================
+    // 14. Status Effect Stacking (Poison) & Refresh Duration (Stun & Poison)
+    // =========================================================
+    Hero stackHero("StackTarget", HeroClass::WARRIOR, 100, 30, 10, 5);
+    // Lần 1: Dính 1 tầng độc 5 dmg/lượt trong 2 lượt
+    stackHero.applyPoison(2, 5, 1);
+    assert(stackHero.isPoisoned());
+    assert(stackHero.getPoisonStacks() == 1);
+    assert(stackHero.getPoisonTurns() == 2);
+
+    // Lần 2: Cộng dồn thêm 1 tầng độc và làm mới thời lượng lên 3 lượt
+    stackHero.applyPoison(3, 5, 1);
+    assert(stackHero.getPoisonStacks() == 2);
+    assert(stackHero.getPoisonTurns() == 3);
+
+    // Lần 3: Cộng dồn lên tối đa 3 tầng độc (MAX_STACKS)
+    stackHero.applyPoison(2, 5, 1);
+    assert(stackHero.getPoisonStacks() == 3);
+
+    // Lần 4: Vượt giới hạn tầng -> Giữ nguyên kẹp tại 3 tầng
+    stackHero.applyPoison(2, 5, 1);
+    assert(stackHero.getPoisonStacks() == 3);
+
+    // Kiểm tra sát thương DoT theo số tầng: 5 dmg * 3 stacks = 15 dmg!
+    int hpBeforeTick = stackHero.getHp();
+    int tickDmg = stackHero.takePoisonDamage();
+    assert(tickDmg == 15);
+    assert(stackHero.getHp() == hpBeforeTick - 15);
+    assert(stackHero.getPoisonTurns() == 2);
+
+    // Kiểm tra cơ chế Refresh Max Duration cho Stun
+    Enemy stunTarget("StunEnemy", EnemyType::MINION, 100, 10, 0, 50, 20);
+    stunTarget.applyStun(1);
+    assert(stunTarget.getStunTurns() == 1);
+    stunTarget.applyStun(3); // Làm mới lên thời lượng lớn hơn
+    assert(stunTarget.getStunTurns() == 3);
+    stunTarget.applyStun(2); // Nhận hiệu ứng ngắn hơn -> Giữ nguyên 3 lượt
+    assert(stunTarget.getStunTurns() == 3);
+
     std::cout << "[PASS] All Edge Cases, Status Effects, Combat, and Loot Drop tests passed successfully!\n";
     return 0;
 }

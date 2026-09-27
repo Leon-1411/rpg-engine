@@ -56,6 +56,7 @@ public:
     bool isBattleOver() const;
     CombatState getState() const;
     int getTurnCount() const;
+    bool isHeroFirst() const;
     const std::vector<std::shared_ptr<Item>>& getLastLootDrops() const;
 
     // UI and Interactive Console Battle Helpers

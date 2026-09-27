@@ -40,7 +40,7 @@ std::shared_ptr<Hero> Hero::createHero(HeroClass heroClass, const std::string& n
 Hero::Hero(const std::string& name, HeroClass heroClass)
     : name(name), heroClass(heroClass), level(1), exp(0), gold(0), statPoints(0),
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
-      poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {
+      poisonTurns(0), poisonDamagePerTurn(0), poisonStacks(0), regenTurns(0), regenPerTurn(0), speed(10) {
     
     skillCooldowns = {0, 0, 0};
 
@@ -56,6 +56,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
             critDamage = 0.25f;
             ignoreArmor = false;
             readyArrows = 0;
+            speed = 8;
             maxCooldowns = {0, 0, 0};
             break;
 
@@ -70,6 +71,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
             critDamage = 0.50f;
             ignoreArmor = false;
             readyArrows = 2; // Initial ready arrows
+            speed = 15;
             maxCooldowns = {0, 0, 0};
             break;
 
@@ -84,6 +86,7 @@ Hero::Hero(const std::string& name, HeroClass heroClass)
             critDamage = 0.0f;
             ignoreArmor = true;
             readyArrows = 0;
+            speed = 10;
             maxCooldowns = {0, 0, 0};
             break;
     }
@@ -100,7 +103,8 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int attack, int
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns{0, 0, 0}, maxCooldowns{0, 0, 0},
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
-      poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {}
+      poisonTurns(0), poisonDamagePerTurn(0), poisonStacks(0), regenTurns(0), regenPerTurn(0),
+      speed(heroClass == HeroClass::RANGER ? 15 : (heroClass == HeroClass::WARRIOR ? 8 : 10)) {}
 
 Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int attack, int defense,
            int armorPen, float critChance, float critDamage, bool ignoreArmor)
@@ -110,7 +114,8 @@ Hero::Hero(const std::string& name, HeroClass heroClass, int hp, int mp, int att
       readyArrows(heroClass == HeroClass::RANGER ? 2 : 0),
       skillCooldowns{0, 0, 0}, maxCooldowns{0, 0, 0},
       isParrying(false), isBlocking(false), isEvading(false), isDefending(false), skillLockTurns(0),
-      poisonTurns(0), poisonDamagePerTurn(0), regenTurns(0), regenPerTurn(0) {}
+      poisonTurns(0), poisonDamagePerTurn(0), poisonStacks(0), regenTurns(0), regenPerTurn(0),
+      speed(heroClass == HeroClass::RANGER ? 15 : (heroClass == HeroClass::WARRIOR ? 8 : 10)) {}
 
 int Hero::normalAttack() {
     return getEffectiveAttack();
@@ -189,18 +194,27 @@ void Hero::lockSkills(int turns) {
 }
 
 
-void Hero::applyPoison(int turns, int damagePerTurn) {
-    poisonTurns = turns;
-    poisonDamagePerTurn = damagePerTurn;
+void Hero::applyPoison(int turns, int damagePerTurn, int stackInc) {
+    if (poisonTurns > 0) {
+        // Stacking up to 3 stacks and Refresh duration
+        poisonStacks = std::min(3, poisonStacks + stackInc);
+        poisonTurns = std::max(poisonTurns, turns);
+        poisonDamagePerTurn = std::max(poisonDamagePerTurn, damagePerTurn);
+    } else {
+        poisonStacks = std::min(3, std::max(1, stackInc));
+        poisonTurns = turns;
+        poisonDamagePerTurn = damagePerTurn;
+    }
 }
 
 int Hero::takePoisonDamage() {
     if (poisonTurns > 0) {
-        int dmg = poisonDamagePerTurn;
+        int dmg = poisonDamagePerTurn * std::max(1, poisonStacks);
         takeDirectDamage(dmg);
         poisonTurns--;
         if (poisonTurns == 0) {
             poisonDamagePerTurn = 0;
+            poisonStacks = 0;
         }
         return dmg;
     }
@@ -217,6 +231,10 @@ int Hero::getPoisonTurns() const {
 
 int Hero::getPoisonDamagePerTurn() const {
     return poisonDamagePerTurn;
+}
+
+int Hero::getPoisonStacks() const {
+    return poisonStacks;
 }
 
 void Hero::applyRegen(int turns, int healPerTurn) {
@@ -252,6 +270,7 @@ int Hero::getRegenPerTurn() const {
 void Hero::clearStatusEffects() {
     poisonTurns = 0;
     poisonDamagePerTurn = 0;
+    poisonStacks = 0;
     regenTurns = 0;
     regenPerTurn = 0;
     resetCombatStances();
@@ -406,4 +425,12 @@ bool Hero::allocateVitality(int points) {
     hp += points * 15;
     defense += points * 1;
     return true;
+}
+
+int Hero::getSpeed() const {
+    return speed;
+}
+
+void Hero::setSpeed(int value) {
+    speed = std::max(1, value);
 }

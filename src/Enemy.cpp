@@ -13,7 +13,9 @@ Enemy::Enemy(const std::string& name, EnemyType type, int hp, int attack, int de
     : name(name), type(type), hp(hp), maxHp(hp), attack(attack), defense(defense),
       armorPenetration(armorPen), critChance(critChance), critDamage(critDamage),
       expReward(expReward), goldReward(goldReward),
-      poisonTurns(0), poisonDamagePerTurn(0), stunTurns(0),
+      poisonTurns(0), poisonDamagePerTurn(0), poisonStacks(0),
+      speed(type == EnemyType::BOSS ? 14 : 8),
+      stunTurns(0),
       isPoisonous(false), poisonInflictTurns(0), poisonInflictDmg(0),
       regenTurns(0), regenPerTurn(0),
       dropChance(1.0f) {}
@@ -69,16 +71,27 @@ bool Enemy::isAlive() const {
     return hp > 0;
 }
 
-void Enemy::applyPoison(int turns, int damagePerTurn) {
-    poisonTurns = turns;
-    poisonDamagePerTurn = damagePerTurn;
+void Enemy::applyPoison(int turns, int damagePerTurn, int stackInc) {
+    if (poisonTurns > 0) {
+        poisonStacks = std::min(3, poisonStacks + stackInc);
+        poisonTurns = std::max(poisonTurns, turns);
+        poisonDamagePerTurn = std::max(poisonDamagePerTurn, damagePerTurn);
+    } else {
+        poisonStacks = std::min(3, std::max(1, stackInc));
+        poisonTurns = turns;
+        poisonDamagePerTurn = damagePerTurn;
+    }
 }
 
 int Enemy::takePoisonDamage() {
     if (poisonTurns <= 0) return 0;
-    int dmg = poisonDamagePerTurn;
+    int dmg = poisonDamagePerTurn * std::max(1, poisonStacks);
     takeDamage(dmg);
     poisonTurns--;
+    if (poisonTurns == 0) {
+        poisonDamagePerTurn = 0;
+        poisonStacks = 0;
+    }
     return dmg;
 }
 
@@ -110,6 +123,15 @@ int Enemy::takeStunTurn() {
     return 0;
 }
 
+void Enemy::clearStatusEffects() {
+    poisonTurns = 0;
+    poisonDamagePerTurn = 0;
+    poisonStacks = 0;
+    stunTurns = 0;
+    regenTurns = 0;
+    regenPerTurn = 0;
+}
+
 void Enemy::displayStats() const {
     std::cout << "--- " << name << " ---\n"
               << "HP: " << hp << "/" << maxHp << " | ATK: " << attack << " | DEF: " << defense << "\n"
@@ -117,7 +139,8 @@ void Enemy::displayStats() const {
               << " | Crit: " << static_cast<int>(critChance * 100) << "% (+"
               << static_cast<int>(critDamage * 100) << "%)\n";
     if (poisonTurns > 0) {
-        std::cout << "[STATUS] Poisoned for " << poisonTurns << " more turn(s) (" << poisonDamagePerTurn << " dmg/turn)\n";
+        std::string stackStr = (poisonStacks > 1) ? (" (x" + std::to_string(poisonStacks) + " Stacks)") : "";
+        std::cout << "[STATUS] Poisoned for " << poisonTurns << " more turn(s) (" << (poisonDamagePerTurn * std::max(1, poisonStacks)) << " dmg/turn)" << stackStr << "\n";
     }
     if (stunTurns > 0) {
         std::cout << "[STATUS] Choáng (Stunned) trong " << stunTurns << " lượt!\n";

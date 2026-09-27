@@ -507,6 +507,12 @@ void GameManager::handleBattleMode() {
                 ConsoleUI::pause();
                 continue;
             }
+        } else if (action == BattleAction::RUN) {
+            if (enemy->getType() == EnemyType::BOSS) {
+                ConsoleUI::printWarning("Không thể đào tẩu khỏi trận chiến định mệnh với Trùm Cuối (Boss)!");
+                ConsoleUI::pause();
+                continue;
+            }
         }
 
         combat.executeTurn(actionCode, itemOrSkillIndex);
