@@ -250,11 +250,10 @@ int main() {
     assert(warnText.find("Burn Effect") != std::string::npos);
 
     // =========================================================
-    // 12. Bug Fix Verification: Polymorphic AI của Goblin/Minion
+    // 12. Bug Fix Verification: Polymorphic AI của Minion (Wild Mercenary)
     // =========================================================
-    Goblin testGoblin("gob1", "Goblin Runner", 60, 12, 5, 20, 10);
-    // Khi đối đầu Mage (miss rate chỉ 10%), hành động không do dự gọi chooseAction() của Goblin
-    int actionResult = testGoblin.chooseAction();
+    WildMercenary testMerc("merc1", "Wild Mercenary Runner", 90, 20, 8, 75, 25);
+    int actionResult = testMerc.chooseAction();
     assert(actionResult == 1 || actionResult == 2);
 
     std::cout << "[PASS] All Edge Cases, Status Effects, Combat, and Loot Drop tests passed successfully!\n";

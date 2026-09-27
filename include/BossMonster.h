@@ -88,7 +88,7 @@ public:
     // Enrage and healing mechanics
     bool checkEnrage();
     void triggerEnrage();
-    void heal(int amount);
+    void heal(int amount) override;
     void regenerate();
     void resetEnrage();
 

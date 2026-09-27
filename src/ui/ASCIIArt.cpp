@@ -286,14 +286,10 @@ void printEnemyArt(const Enemy& enemy) {
         return;
     }
 
-    if (name.find("Skeleton") != std::string::npos || name.find("Xuong") != std::string::npos) {
-        printSkeletonArt();
-    } else if (name.find("Orc") != std::string::npos) {
-        printOrcArt();
-    } else if (name.find("Demon") != std::string::npos) {
+    if (name.find("Demon") != std::string::npos) {
         printDemonScoutArt();
     } else {
-        printGoblinArt();
+        printWildMercenaryArt();
     }
 }
 
@@ -306,7 +302,7 @@ void printBattleVersus(const Hero& hero, const Enemy& enemy) {
 
     std::cout << ConsoleUI::colorize("  KẺ ĐỊCH:", ConsoleUI::Colors::BRIGHT_RED) 
               << " " << ConsoleUI::colorize(enemy.getName(), ConsoleUI::Colors::BRIGHT_WHITE)
-              << (enemy.getType() == EnemyType::BOSS ? ConsoleUI::colorize(" [BOSS TỐI CAO]", ConsoleUI::Colors::BRIGHT_RED) : "") << "\n";
+              << (enemy.getType() == EnemyType::BOSS ? ConsoleUI::colorize(" [BOSS TỐI CAO]", ConsoleUI::Colors::BRIGHT_RED) : ConsoleUI::colorize(" [Minion]", ConsoleUI::Colors::BRIGHT_GREEN)) << "\n";
     printEnemyArt(enemy);
 }
 

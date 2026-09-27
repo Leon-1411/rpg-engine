@@ -57,11 +57,13 @@ std::string colorize(const std::string& text, const std::string& ansiCode);
 void clearScreen();
 void pause(const std::string& prompt = "Nhấn Enter để tiếp tục...", std::istream& in = std::cin);
 
-// Visual layout & formatting helpers
+// Visual layout & formatting helpers (Responsive Terminal)
+int getTerminalWidth();
 size_t getDisplayWidth(const std::string& str);
-void printHeader(const std::string& title, int width = 60, const std::string& color = Colors::BRIGHT_YELLOW);
-void printDivider(char ch = '=', int length = 60, const std::string& color = Colors::CYAN);
-void printBox(const std::vector<std::string>& lines, int width = 60, const std::string& borderColor = Colors::BLUE);
+std::vector<std::string> wrapText(const std::string& text, size_t maxWidth);
+void printHeader(const std::string& title, int width = 0, const std::string& color = Colors::BRIGHT_YELLOW);
+void printDivider(char ch = '=', int length = 0, const std::string& color = Colors::CYAN);
+void printBox(const std::vector<std::string>& lines, int width = 0, const std::string& borderColor = Colors::BLUE);
 
 // Progress bars (HP, MP, EXP)
 std::string formatProgressBar(int current, int max, int width = 20, 

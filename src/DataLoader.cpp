@@ -4,6 +4,8 @@
  */
 
 #include "DataLoader.h"
+#include "Minion.h"
+#include "BossMonster.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
@@ -158,4 +160,31 @@ std::vector<Enemy> DataLoader::loadEnemies(const std::string& filePath) {
     }
 
     return enemies;
+}
+
+std::shared_ptr<Enemy> DataLoader::loadEnemyById(const std::string& filePath, const std::string& enemyId) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "[DataLoader] Lỗi: Không thể mở file enemies: " << filePath << "\n";
+        return nullptr;
+    }
+
+    try {
+        json data;
+        file >> data;
+        file.close();
+
+        if (data.contains(enemyId)) {
+            std::string type = data[enemyId].value("type", "MINION");
+            if (type == "BOSS") {
+                return BossFactory::createFromJsonObject(enemyId, data[enemyId]);
+            } else {
+                return MinionFactory::createFromJsonObject(enemyId, data[enemyId]);
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[DataLoader] Lỗi parse JSON enemy: " << e.what() << "\n";
+    }
+
+    return nullptr;
 }
