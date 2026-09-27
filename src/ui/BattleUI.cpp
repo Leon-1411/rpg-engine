@@ -22,7 +22,7 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     // Display Hero, VS, and Enemy/Boss ASCII Art
     ASCIIArt::printBattleVersus(hero, enemy);
 
-    ConsoleUI::printDivider('=', 64, ConsoleUI::Colors::BRIGHT_RED);
+    ConsoleUI::printDivider('=', 0, ConsoleUI::Colors::BRIGHT_RED);
 
     // Hero Status (Left side) & Enemy Status (Right side)
     std::string heroHeader = hero.getName() + " (" + heroClassToString(hero.getHeroClass()) + " Lv." + std::to_string(hero.getLevel()) + ")";
@@ -73,13 +73,13 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
                            + std::to_string(hero.getGold()) + " Vàng";
     std::cout << "  " << ConsoleUI::colorize(invSummary, ConsoleUI::Colors::BRIGHT_MAGENTA) << "\n";
 
-    ConsoleUI::printDivider('-', 64, ConsoleUI::Colors::DIM);
+    ConsoleUI::printDivider('-', 0, ConsoleUI::Colors::DIM);
 
     // Event/Log message
     if (!battleMessage.empty()) {
         std::cout << "\n  " << ConsoleUI::colorize("▶ ", ConsoleUI::Colors::BRIGHT_YELLOW)
                   << battleMessage << "\n\n";
-        ConsoleUI::printDivider('-', 64, ConsoleUI::Colors::DIM);
+        ConsoleUI::printDivider('-', 0, ConsoleUI::Colors::DIM);
     }
 
     // Battle Actions Menu

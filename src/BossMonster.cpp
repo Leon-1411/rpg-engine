@@ -334,6 +334,10 @@ std::shared_ptr<BossMonster> BossFactory::createFromJson(const std::string& id, 
         nlohmann::json data;
         file >> data;
         if (data.contains(id)) {
+            std::string type = data[id].value("type", "");
+            if (type == "MINION") {
+                return nullptr;
+            }
             return createFromJsonObject(id, data[id]);
         } else {
             std::cerr << "[BossFactory] Boss ID '" << id << "' not found in " << filepath << "\n";

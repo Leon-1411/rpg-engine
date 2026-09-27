@@ -14,10 +14,6 @@ std::string minionTypeToString(MinionType type) {
         case MinionType::WILD_MERCENARY: return "WILD_MERCENARY";
         case MinionType::DEMON_SCOUT: return "DEMON_SCOUT";
         case MinionType::DEMON_BERSERKER: return "DEMON_BERSERKER";
-        case MinionType::GOBLIN: return "GOBLIN";
-        case MinionType::SKELETON: return "SKELETON";
-        case MinionType::ORC: return "ORC";
-        case MinionType::DARK_KNIGHT: return "DARK_KNIGHT";
         default: return "CUSTOM";
     }
 }
@@ -28,10 +24,6 @@ MinionType stringToMinionType(const std::string& str) {
     if (s == "WILD_MERCENARY" || s == "WILDMERCENARY" || s == "MERCENARY") return MinionType::WILD_MERCENARY;
     if (s == "DEMON_SCOUT" || s == "DEMONSCOUT") return MinionType::DEMON_SCOUT;
     if (s == "DEMON_BERSERKER" || s == "DEMONBERSERKER") return MinionType::DEMON_BERSERKER;
-    if (s == "GOBLIN") return MinionType::GOBLIN;
-    if (s == "SKELETON") return MinionType::SKELETON;
-    if (s == "ORC") return MinionType::ORC;
-    if (s == "DARK_KNIGHT" || s == "DARKKNIGHT") return MinionType::DARK_KNIGHT;
     return MinionType::UNKNOWN;
 }
 
@@ -158,80 +150,6 @@ int DemonBerserker::chooseAction() {
     return 1;
 }
 
-// ==================== Legacy Subclasses ====================
-
-Goblin::Goblin(const std::string& id,
-               const std::string& name,
-               int hp,
-               int attack,
-               int defense,
-               int expReward,
-               int goldReward,
-               const std::string& description,
-               const std::string& specialSkill)
-    : Minion(id, name, MinionType::GOBLIN, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
-
-int Goblin::chooseAction() {
-    actionCounter++;
-    if (actionCounter % 2 == 0) return 2;
-    return 1;
-}
-
-Skeleton::Skeleton(const std::string& id,
-                   const std::string& name,
-                   int hp,
-                   int attack,
-                   int defense,
-                   int expReward,
-                   int goldReward,
-                   const std::string& description,
-                   const std::string& specialSkill)
-    : Minion(id, name, MinionType::SKELETON, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
-
-int Skeleton::chooseAction() {
-    actionCounter++;
-    if (actionCounter % 3 == 0) return 2;
-    return 1;
-}
-
-Orc::Orc(const std::string& id,
-         const std::string& name,
-         int hp,
-         int attack,
-         int defense,
-         int expReward,
-         int goldReward,
-         const std::string& description,
-         const std::string& specialSkill)
-    : Minion(id, name, MinionType::ORC, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
-
-int Orc::chooseAction() {
-    actionCounter++;
-    if (hp <= maxHp / 2) {
-        if (actionCounter % 2 == 0) return 2;
-    } else {
-        if (actionCounter % 4 == 0) return 2;
-    }
-    return 1;
-}
-
-DarkKnight::DarkKnight(const std::string& id,
-                       const std::string& name,
-                       int hp,
-                       int attack,
-                       int defense,
-                       int expReward,
-                       int goldReward,
-                       const std::string& description,
-                       const std::string& specialSkill)
-    : Minion(id, name, MinionType::DARK_KNIGHT, hp, attack, defense, expReward, goldReward, description, specialSkill) {}
-
-int DarkKnight::chooseAction() {
-    actionCounter++;
-    if (actionCounter % 2 == 0) return 2;
-    return 1;
-}
-
 // ==================== MinionFactory ====================
 
 std::shared_ptr<Minion> MinionFactory::createFromJsonObject(const std::string& id, const nlohmann::json& j) {
@@ -242,11 +160,11 @@ std::shared_ptr<Minion> MinionFactory::createFromJsonObject(const std::string& i
         mType = stringToMinionType(id);
     }
 
-    int hp = j.value("hp", 50);
-    int attack = j.value("attack", 10);
-    int defense = j.value("defense", 5);
-    int expReward = j.value("expReward", 30);
-    int goldReward = j.value("goldReward", 10);
+    int hp = j.value("hp", 90);
+    int attack = j.value("attack", 20);
+    int defense = j.value("defense", 8);
+    int expReward = j.value("expReward", 75);
+    int goldReward = j.value("goldReward", 25);
     std::string desc = j.value("description", "");
     std::string skill = j.value("specialSkill", "");
 
@@ -260,18 +178,6 @@ std::shared_ptr<Minion> MinionFactory::createFromJsonObject(const std::string& i
             break;
         case MinionType::DEMON_BERSERKER:
             minion = std::make_shared<DemonBerserker>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
-            break;
-        case MinionType::GOBLIN:
-            minion = std::make_shared<Goblin>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
-            break;
-        case MinionType::SKELETON:
-            minion = std::make_shared<Skeleton>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
-            break;
-        case MinionType::ORC:
-            minion = std::make_shared<Orc>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
-            break;
-        case MinionType::DARK_KNIGHT:
-            minion = std::make_shared<DarkKnight>(id, name, hp, attack, defense, expReward, goldReward, desc, skill);
             break;
         default:
             minion = std::make_shared<Minion>(id, name, mType, hp, attack, defense, expReward, goldReward, desc, skill);
@@ -301,10 +207,6 @@ std::shared_ptr<Minion> MinionFactory::createFromJson(const std::string& id, con
         if (id == "Wild_Mercenary" || id == "wild_mercenary") return std::make_shared<WildMercenary>();
         if (id == "Demon_Scout" || id == "demon_scout") return std::make_shared<DemonScout>();
         if (id == "Demon_Berserker" || id == "demon_berserker") return std::make_shared<DemonBerserker>();
-        if (id == "goblin") return std::make_shared<Goblin>();
-        if (id == "skeleton") return std::make_shared<Skeleton>();
-        if (id == "orc") return std::make_shared<Orc>();
-        if (id == "dark_knight") return std::make_shared<DarkKnight>();
         return nullptr;
     }
 
@@ -312,6 +214,10 @@ std::shared_ptr<Minion> MinionFactory::createFromJson(const std::string& id, con
         nlohmann::json data;
         file >> data;
         if (data.contains(id)) {
+            std::string t = data[id].value("type", "MINION");
+            if (t == "BOSS") {
+                return nullptr; // Not a minion
+            }
             return createFromJsonObject(id, data[id]);
         } else {
             std::cerr << "[MinionFactory] Minion ID '" << id << "' not found in " << filepath << "\n";

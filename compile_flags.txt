@@ -1,7 +1,11 @@
 --target=x86_64-w64-mingw32
 -xc++
--std=c++14
+-std=c++17
+-DJSON_HAS_CPP_17=0
 -D__float128=double
+-D_IA32INTRIN_H_INCLUDED
+-D_X86INTRIN_H_INCLUDED
+-Wno-everything
 -Iinclude
 -Iinclude/ui
 -Iinclude/nlohmann

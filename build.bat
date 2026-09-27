@@ -2,11 +2,11 @@
 set GXX=g++
 
 where docker >nul 2>nul
-if %ERRORLEVEL% equ 0 (
-    docker info >nul 2>nul
-    if %ERRORLEVEL% equ 0 goto use_docker
-)
+if %ERRORLEVEL% neq 0 goto check_gcc
+docker info >nul 2>nul
+if %ERRORLEVEL% equ 0 goto use_docker
 
+:check_gcc
 where g++ >nul 2>nul
 if %ERRORLEVEL% equ 0 goto found_compiler
 
@@ -50,7 +50,7 @@ goto end
 
 :found_compiler
 set INCLUDES=-Iinclude -Iinclude/ui -Iinclude/nlohmann
-set CXXFLAGS=-std=c++14 %INCLUDES%
+set CXXFLAGS=-std=c++17 %INCLUDES%
 set CORE_SOURCES=src/Hero.cpp src/Warrior.cpp src/Mage.cpp src/Ranger.cpp src/LevelSystem.cpp src/Enemy.cpp src/Minion.cpp src/BossMonster.cpp src/Item.cpp src/Inventory.cpp src/Shop.cpp src/CombatEngine.cpp src/StoryGraph.cpp src/SaveManager.cpp src/DataLoader.cpp src/GameManager.cpp src/ui/ConsoleUI.cpp src/ui/ASCIIArt.cpp src/ui/MainMenu.cpp src/ui/BattleUI.cpp src/ui/InventoryUI.cpp
 
 if "%1"=="clean" goto clean
@@ -69,25 +69,33 @@ goto end
 :test
 echo [RPG Engine] Running Tests...
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_item.cpp -o test_item.exe
-.\test_item.exe
+if %ERRORLEVEL% equ 0 .\test_item.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_inventory.cpp -o test_inventory.exe
-.\test_inventory.exe
+if %ERRORLEVEL% equ 0 .\test_inventory.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_combat.cpp -o test_combat.exe
-.\test_combat.exe
+if %ERRORLEVEL% equ 0 .\test_combat.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_save.cpp -o test_save.exe
-.\test_save.exe
+if %ERRORLEVEL% equ 0 .\test_save.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_story.cpp -o test_story.exe
-.\test_story.exe
+if %ERRORLEVEL% equ 0 .\test_story.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_ui.cpp -o test_ui.exe
-.\test_ui.exe
+if %ERRORLEVEL% equ 0 .\test_ui.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_hero.cpp -o test_hero.exe
-.\test_hero.exe
+if %ERRORLEVEL% equ 0 .\test_hero.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_level_system.cpp -o test_level_system.exe
-.\test_level_system.exe
+if %ERRORLEVEL% equ 0 .\test_level_system.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_minion.cpp -o test_minion.exe
+if %ERRORLEVEL% equ 0 .\test_minion.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_boss.cpp -o test_boss.exe
-.\test_boss.exe
+if %ERRORLEVEL% equ 0 .\test_boss.exe
 %GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_shop.cpp -o test_shop.exe
-.\test_shop.exe
+if %ERRORLEVEL% equ 0 .\test_shop.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_enemy.cpp -o test_enemy.exe
+if %ERRORLEVEL% equ 0 .\test_enemy.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_fractured_crown_e2e.cpp -o test_fractured_crown_e2e.exe
+if %ERRORLEVEL% equ 0 .\test_fractured_crown_e2e.exe
+%GXX% %CXXFLAGS% %CORE_SOURCES% tests/test_responsive_ui_and_canon.cpp -o test_responsive_ui_and_canon.exe
+if %ERRORLEVEL% equ 0 .\test_responsive_ui_and_canon.exe
 goto end
 
 :run

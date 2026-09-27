@@ -77,8 +77,12 @@ compile_commands.json
 # ==========================================
 saves/*.json
 !saves/.gitkeep
+dist/saves/*.json
+!dist/saves/.gitkeep
 data/*_test*.json
 saves_test/
+*Sao chép*
+*.rar
 *.log
 
 # ==========================================

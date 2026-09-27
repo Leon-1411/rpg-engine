@@ -176,7 +176,7 @@ void GameManager::handleStoryMode() {
     }
 
     std::string headerTitle = current.title.empty() ? ("CỐT TRUYỆN - " + current.id) : current.title;
-    ConsoleUI::printHeader(headerTitle, 65, ConsoleUI::Colors::BRIGHT_MAGENTA);
+    ConsoleUI::printHeader(headerTitle, 0, ConsoleUI::Colors::BRIGHT_MAGENTA);
 
     // 1. Check if Node is ENDING or GAME_OVER
     if (current.type == EventType::ENDING || current.rawType == "ENDING" || current.id == "GameOver") {
@@ -186,13 +186,13 @@ void GameManager::handleStoryMode() {
             current.text
         };
         if (current.id == "End5") {
-            ConsoleUI::printBox(endingBox, 65, ConsoleUI::Colors::BRIGHT_GREEN);
+            ConsoleUI::printBox(endingBox, 0, ConsoleUI::Colors::BRIGHT_GREEN);
             ConsoleUI::printSuccess("\n★ CHÚC MỪNG! BẠN ĐÃ ĐẠT ĐƯỢC TRUE ENDING CỦA FRACTURED CROWN! ★");
         } else if (current.id == "GameOver") {
-            ConsoleUI::printBox(endingBox, 65, ConsoleUI::Colors::BRIGHT_RED);
+            ConsoleUI::printBox(endingBox, 0, ConsoleUI::Colors::BRIGHT_RED);
             ConsoleUI::printError("\nBạn đã thất bại trong hành trình...");
         } else {
-            ConsoleUI::printBox(endingBox, 65, ConsoleUI::Colors::BRIGHT_YELLOW);
+            ConsoleUI::printBox(endingBox, 0, ConsoleUI::Colors::BRIGHT_YELLOW);
             std::cout << "\nBạn đã hoàn thành kết cục của cốt truyện!\n";
         }
         ConsoleUI::pause();
@@ -206,7 +206,7 @@ void GameManager::handleStoryMode() {
             current.title,
             current.text
         };
-        ConsoleUI::printBox(checkLines, 65, ConsoleUI::Colors::BRIGHT_CYAN);
+        ConsoleUI::printBox(checkLines, 0, ConsoleUI::Colors::BRIGHT_CYAN);
         std::cout << "\n[Hệ Thống] Đang kiểm tra điều kiện kích hoạt...\n";
 
         bool passed = true;
@@ -247,7 +247,7 @@ void GameManager::handleStoryMode() {
             current.title,
             current.text
         };
-        ConsoleUI::printBox(rewardBox, 65, ConsoleUI::Colors::BRIGHT_GREEN);
+        ConsoleUI::printBox(rewardBox, 0, ConsoleUI::Colors::BRIGHT_GREEN);
 
         if (!current.rewardItems.empty() || current.rewardExp > 0 || current.rewardGold > 0) {
             std::cout << "\n" << ConsoleUI::colorize("★ PHẦN THƯỞNG NHẬN ĐƯỢC:", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
@@ -282,7 +282,7 @@ void GameManager::handleStoryMode() {
             "",
             current.text
         };
-        ConsoleUI::printBox(storyBox, 65, ConsoleUI::Colors::BRIGHT_MAGENTA);
+        ConsoleUI::printBox(storyBox, 0, ConsoleUI::Colors::BRIGHT_MAGENTA);
     }
 
     // 3.1. Check if Node is IN DIALOGUE (Branching Dialogue Tree)
@@ -295,7 +295,7 @@ void GameManager::handleStoryMode() {
             "[" + dNode.speaker + "]:",
             "\"" + dNode.text + "\""
         };
-        ConsoleUI::printBox(dialogueBox, 65, ConsoleUI::Colors::BRIGHT_CYAN);
+        ConsoleUI::printBox(dialogueBox, 0, ConsoleUI::Colors::BRIGHT_CYAN);
 
         if (dNode.choices.empty()) {
             ConsoleUI::pause();
@@ -407,14 +407,11 @@ void GameManager::handleBattleMode() {
     std::shared_ptr<Enemy> enemy = nullptr;
 
     if (!currentEnemyId.empty()) {
-        enemy = BossFactory::createFromJson(currentEnemyId, "data/enemies.json");
-        if (!enemy) {
-            enemy = MinionFactory::createFromJson(currentEnemyId, "data/enemies.json");
-        }
+        enemy = DataLoader::loadEnemyById("data/enemies.json", currentEnemyId);
     }
 
     if (!enemy) {
-        enemy = MinionFactory::createFromJson("Wild_Mercenary", "data/enemies.json");
+        enemy = DataLoader::loadEnemyById("data/enemies.json", "Wild_Mercenary");
         if (!enemy) enemy = std::make_shared<WildMercenary>();
     }
 
@@ -422,7 +419,7 @@ void GameManager::handleBattleMode() {
     CombatEngine combat(*playerHero, *enemy, &playerHero->getInventory());
     combat.startBattle();
 
-    std::string lastTurnMsg = "Một kẻ địch đã xuất hiện: " + enemy->getName() + "!";
+    std::string lastTurnMsg = "Một kẻ địch đã xuất hiện: " + enemy->getName() + " [" + (enemy->getType() == EnemyType::BOSS ? "BOSS TỐI CAO" : "Minion") + "]!";
     if (enemy->getType() == EnemyType::BOSS) {
         lastTurnMsg = "CẢNH BÁO NGUY HIỂM: TRẬN CHIẾN BOSS TỐI CAO - " + enemy->getName() + " BẮT ĐẦU!";
     }
@@ -458,24 +455,52 @@ void GameManager::handleBattleMode() {
                 continue;
             }
 
-            if (potionIndices.size() == 1) {
-                itemOrSkillIndex = potionIndices[0];
-            } else {
-                std::cout << "\n" << ConsoleUI::colorize("Danh sách thuốc trong túi:", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
-                for (size_t p = 0; p < potionIndices.size(); ++p) {
-                    auto itm = inv.getItemPtr(potionIndices[p]);
-                    auto pot = std::dynamic_pointer_cast<Potion>(itm);
-                    std::string qtyStr = pot ? (" (x" + std::to_string(pot->getQuantity()) + ")") : "";
-                    std::string statDesc = (pot && pot->isMana()) ? ("Hồi " + std::to_string(itm->getStatValue()) + " MP") : ("Hồi " + std::to_string(itm->getStatValue()) + " HP");
-                    std::cout << "  " << (p + 1) << ". " << itm->getName() << qtyStr << " [" << statDesc << "]\n";
-                }
-                std::cout << "  0. Quay lại\n";
-                int pChoice = ConsoleUI::getIntInput(0, static_cast<int>(potionIndices.size()), "Chọn bình thuốc muốn dùng: ");
-                if (pChoice == 0) {
+            std::cout << "\n" << ConsoleUI::colorize("✦ DANH SÁCH DƯỢC PHẨM TRONG TÚI (HÀNH ĐỘNG TỰ DO - KHÔNG MẤT LƯỢT ĐÁNH):", ConsoleUI::Colors::BRIGHT_YELLOW) << "\n";
+            for (size_t p = 0; p < potionIndices.size(); ++p) {
+                auto itm = inv.getItemPtr(potionIndices[p]);
+                auto pot = std::dynamic_pointer_cast<Potion>(itm);
+                std::string qtyStr = pot ? (" (x" + std::to_string(pot->getQuantity()) + ")") : "";
+                std::string statDesc = (pot && pot->isMana()) ? ("Hồi " + std::to_string(itm->getStatValue()) + " MP") : ("Hồi " + std::to_string(itm->getStatValue()) + " HP");
+                std::cout << "  " << (p + 1) << ". " << itm->getName() << qtyStr << " [" << statDesc << "]\n";
+            }
+            std::cout << "  0. Quay lại\n";
+            int pChoice = ConsoleUI::getIntInput(0, static_cast<int>(potionIndices.size()), "Chọn bình thuốc muốn dùng: ");
+            if (pChoice == 0) {
+                continue;
+            }
+
+            int selectedInvIdx = potionIndices[pChoice - 1];
+            auto itm = inv.getItemPtr(selectedInvIdx);
+            auto pot = std::dynamic_pointer_cast<Potion>(itm);
+
+            if (pot && pot->isMana()) {
+                if (playerHero->getMp() >= playerHero->getMaxMp()) {
+                    lastTurnMsg = "[!] Năng lượng (MP) của bạn đã đầy 100%, không cần dùng!";
                     continue;
                 }
-                itemOrSkillIndex = potionIndices[pChoice - 1];
+            } else {
+                if (playerHero->getHp() >= playerHero->getMaxHp()) {
+                    lastTurnMsg = "[!] Máu (HP) của bạn đã đầy 100%, không cần dùng!";
+                    continue;
+                }
             }
+
+            int beforeHp = playerHero->getHp();
+            int beforeMp = playerHero->getMp();
+            std::string itemName = itm ? itm->getName() : "Dược phẩm";
+            if (inv.useItem(selectedInvIdx, *playerHero)) {
+                int healedHp = playerHero->getHp() - beforeHp;
+                int restoredMp = playerHero->getMp() - beforeMp;
+                std::string resMsg = "Bạn đã dùng " + itemName;
+                if (healedHp > 0) resMsg += ", hồi phục +" + std::to_string(healedHp) + " HP";
+                if (restoredMp > 0) resMsg += ", hồi phục +" + std::to_string(restoredMp) + " MP";
+                resMsg += "! (Hành động tức thời - Bạn vẫn giữ lượt)";
+                lastTurnMsg = resMsg;
+            } else {
+                lastTurnMsg = "Không thể sử dụng dược phẩm lúc này!";
+            }
+            // Free Action: user keeps their turn and can use more potions or attack/skill!
+            continue;
         } else if (action == BattleAction::RUN) {
             if (enemy->getType() == EnemyType::BOSS) {
                 ConsoleUI::printWarning("Không thể đào tẩu khỏi trận chiến định mệnh với Trùm Cuối (Boss)!");

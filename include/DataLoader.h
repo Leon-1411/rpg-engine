@@ -23,5 +23,7 @@ public:
 
     // Load enemies list from JSON file
     static std::vector<Enemy> loadEnemies(const std::string& filePath);
-};
 
+    // Load single enemy (Minion or BossMonster) polymorphically by ID from JSON file
+    static std::shared_ptr<Enemy> loadEnemyById(const std::string& filePath, const std::string& enemyId);
+};

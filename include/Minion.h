@@ -10,10 +10,6 @@ enum class MinionType {
     WILD_MERCENARY,
     DEMON_SCOUT,
     DEMON_BERSERKER,
-    GOBLIN,
-    SKELETON,
-    ORC,
-    DARK_KNIGHT,
     UNKNOWN
 };
 
@@ -97,68 +93,6 @@ public:
                             int goldReward = 50,
                             const std::string& description = "Chiến binh quỷ cuồng nộ canh giữ lối vào Ma Điện khi người chơi đột kích trực diện.",
                             const std::string& specialSkill = "Demonic Frenzy");
-
-    int chooseAction() override;
-};
-
-// ==================== Legacy / Prototype Minions ====================
-
-class Goblin : public Minion {
-public:
-    explicit Goblin(const std::string& id = "goblin",
-                    const std::string& name = "Goblin",
-                    int hp = 60,
-                    int attack = 12,
-                    int defense = 5,
-                    int expReward = 40,
-                    int goldReward = 10,
-                    const std::string& description = "A small, cunning creature that strikes quickly from the shadows.",
-                    const std::string& specialSkill = "Quick Strike");
-
-    int chooseAction() override;
-};
-
-class Skeleton : public Minion {
-public:
-    explicit Skeleton(const std::string& id = "skeleton",
-                      const std::string& name = "Skeleton Warrior",
-                      int hp = 80,
-                      int attack = 18,
-                      int defense = 8,
-                      int expReward = 65,
-                      int goldReward = 20,
-                      const std::string& description = "An undead soldier wielding a rusty sword with relentless determination.",
-                      const std::string& specialSkill = "Bone Pierce");
-
-    int chooseAction() override;
-};
-
-class Orc : public Minion {
-public:
-    explicit Orc(const std::string& id = "orc",
-                 const std::string& name = "Orc Berserker",
-                 int hp = 120,
-                 int attack = 25,
-                 int defense = 12,
-                 int expReward = 100,
-                 int goldReward = 35,
-                 const std::string& description = "A muscular beast fueled by bloodlust, hitting harder when enraged.",
-                 const std::string& specialSkill = "Heavy Slam");
-
-    int chooseAction() override;
-};
-
-class DarkKnight : public Minion {
-public:
-    explicit DarkKnight(const std::string& id = "dark_knight",
-                        const std::string& name = "Dark Knight",
-                        int hp = 160,
-                        int attack = 32,
-                        int defense = 18,
-                        int expReward = 150,
-                        int goldReward = 60,
-                        const std::string& description = "A fallen warrior encased in cursed armor, wielding dark magic.",
-                        const std::string& specialSkill = "Shadow Slash");
 
     int chooseAction() override;
 };
