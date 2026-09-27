@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
+#include <cstdlib>
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -14,6 +15,9 @@
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
+#else
+#include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 
 namespace ConsoleUI {
@@ -65,12 +69,232 @@ void pause(const std::string& prompt, std::istream& in) {
     std::getline(in, line);
 }
 
-void printHeader(const std::string& title, int width, const std::string& color) {
-    if (width < 10) width = 10;
-    std::string topBorder    = "╔" + std::string(width - 2, '=') + "╗";
-    std::string bottomBorder = "╚" + std::string(width - 2, '=') + "╝";
+int getTerminalWidth() {
+    int width = 100; // default standard width
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE) {
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        if (GetConsoleScreenBufferInfo(hOut, &csbi)) {
+            int consoleCols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+            if (consoleCols > 0) {
+                width = consoleCols;
+            }
+        }
+    }
+#else
+    struct winsize ws;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0) {
+        width = ws.ws_col;
+    } else {
+        const char* colEnv = std::getenv("COLUMNS");
+        if (colEnv) {
+            try {
+                int cols = std::stoi(colEnv);
+                if (cols > 0) width = cols;
+            } catch (...) {}
+        }
+    }
+#endif
+    // Clamp to [60, 110] for optimal reading experience across all displays
+    if (width < 60) width = 60;
+    if (width > 110) width = 110;
+    return width;
+}
 
-    int padding = static_cast<int>(width - 2 - title.length());
+size_t getDisplayWidth(const std::string& str) {
+    size_t width = 0;
+    size_t i = 0;
+    while (i < str.length()) {
+        unsigned char c = static_cast<unsigned char>(str[i]);
+        // Handle ANSI escape sequences like \033[31m or \033[0m
+        if (c == '\033' && i + 1 < str.length() && str[i + 1] == '[') {
+            i += 2;
+            while (i < str.length() && str[i] != 'm') {
+                i++;
+            }
+            if (i < str.length() && str[i] == 'm') {
+                i++;
+            }
+            continue;
+        }
+
+        // UTF-8 decoding
+        if ((c & 0x80) == 0) {
+            // Standard 1-byte ASCII
+            width += 1;
+            i += 1;
+        } else if ((c & 0xE0) == 0xC0) {
+            // 2-byte UTF-8 character (Vietnamese accents)
+            width += 1;
+            i += (i + 2 <= str.length()) ? 2 : 1;
+        } else if ((c & 0xF0) == 0xE0) {
+            // 3-byte UTF-8 character (Vietnamese compound vowels & symbols)
+            width += 1;
+            i += (i + 3 <= str.length()) ? 3 : 1;
+        } else if ((c & 0xF8) == 0xF0) {
+            // 4-byte UTF-8 character (Emoji/wide chars)
+            width += 2;
+            i += (i + 4 <= str.length()) ? 4 : 1;
+        } else {
+            // Continuation or invalid byte
+            i += 1;
+        }
+    }
+    return width;
+}
+
+std::vector<std::string> wrapText(const std::string& text, size_t maxWidth) {
+    std::vector<std::string> result;
+    if (maxWidth < 1) maxWidth = 1;
+    if (text.empty()) {
+        result.push_back("");
+        return result;
+    }
+
+    size_t startPos = 0;
+    while (startPos <= text.length()) {
+        size_t newlinePos = text.find('\n', startPos);
+        std::string paragraph;
+        if (newlinePos == std::string::npos) {
+            paragraph = text.substr(startPos);
+            startPos = text.length() + 1;
+        } else {
+            paragraph = text.substr(startPos, newlinePos - startPos);
+            startPos = newlinePos + 1;
+        }
+
+        // Tokenize paragraph into words
+        std::vector<std::string> words;
+        size_t i = 0;
+        while (i < paragraph.length()) {
+            while (i < paragraph.length() && (paragraph[i] == ' ' || paragraph[i] == '\t' || paragraph[i] == '\r')) {
+                i++;
+            }
+            if (i >= paragraph.length()) break;
+            size_t wordStart = i;
+            while (i < paragraph.length() && paragraph[i] != ' ' && paragraph[i] != '\t' && paragraph[i] != '\r') {
+                i++;
+            }
+            words.push_back(paragraph.substr(wordStart, i - wordStart));
+        }
+
+        if (words.empty()) {
+            result.push_back("");
+            continue;
+        }
+
+        std::string currentLine = "";
+        size_t currentWidth = 0;
+
+        for (const auto& word : words) {
+            size_t wordWidth = getDisplayWidth(word);
+
+            if (currentLine.empty()) {
+                if (wordWidth <= maxWidth) {
+                    currentLine = word;
+                    currentWidth = wordWidth;
+                } else {
+                    // Single word exceeds maxWidth, break character-by-character
+                    size_t charIdx = 0;
+                    std::string part = "";
+                    size_t partWidth = 0;
+                    while (charIdx < word.length()) {
+                        size_t charBytes = 1;
+                        unsigned char uc = static_cast<unsigned char>(word[charIdx]);
+                        if ((uc & 0x80) == 0) charBytes = 1;
+                        else if ((uc & 0xE0) == 0xC0) charBytes = 2;
+                        else if ((uc & 0xF0) == 0xE0) charBytes = 3;
+                        else if ((uc & 0xF8) == 0xF0) charBytes = 4;
+
+                        if (charIdx + charBytes > word.length()) charBytes = word.length() - charIdx;
+                        std::string ch = word.substr(charIdx, charBytes);
+                        size_t cw = getDisplayWidth(ch);
+
+                        if (partWidth + cw > maxWidth && !part.empty()) {
+                            result.push_back(part);
+                            part = ch;
+                            partWidth = cw;
+                        } else {
+                            part += ch;
+                            partWidth += cw;
+                        }
+                        charIdx += charBytes;
+                    }
+                    if (!part.empty()) {
+                        currentLine = part;
+                        currentWidth = partWidth;
+                    }
+                }
+            } else {
+                if (currentWidth + 1 + wordWidth <= maxWidth) {
+                    currentLine += " " + word;
+                    currentWidth += 1 + wordWidth;
+                } else {
+                    result.push_back(currentLine);
+                    if (wordWidth <= maxWidth) {
+                        currentLine = word;
+                        currentWidth = wordWidth;
+                    } else {
+                        // Word exceeds maxWidth
+                        size_t charIdx = 0;
+                        std::string part = "";
+                        size_t partWidth = 0;
+                        while (charIdx < word.length()) {
+                            size_t charBytes = 1;
+                            unsigned char uc = static_cast<unsigned char>(word[charIdx]);
+                            if ((uc & 0x80) == 0) charBytes = 1;
+                            else if ((uc & 0xE0) == 0xC0) charBytes = 2;
+                            else if ((uc & 0xF0) == 0xE0) charBytes = 3;
+                            else if ((uc & 0xF8) == 0xF0) charBytes = 4;
+
+                            if (charIdx + charBytes > word.length()) charBytes = word.length() - charIdx;
+                            std::string ch = word.substr(charIdx, charBytes);
+                            size_t cw = getDisplayWidth(ch);
+
+                            if (partWidth + cw > maxWidth && !part.empty()) {
+                                result.push_back(part);
+                                part = ch;
+                                partWidth = cw;
+                            } else {
+                                part += ch;
+                                partWidth += cw;
+                            }
+                            charIdx += charBytes;
+                        }
+                        currentLine = part;
+                        currentWidth = partWidth;
+                    }
+                }
+            }
+        }
+
+        if (!currentLine.empty()) {
+            result.push_back(currentLine);
+        }
+    }
+
+    return result;
+}
+
+void printHeader(const std::string& title, int width, const std::string& color) {
+    if (width <= 0) {
+        width = getTerminalWidth();
+    }
+    size_t titleWidth = getDisplayWidth(title);
+    if (width < static_cast<int>(titleWidth + 4)) {
+        width = static_cast<int>(titleWidth + 4);
+    }
+    if (width < 10) width = 10;
+
+    std::string hBorder;
+    for (int i = 0; i < width - 2; ++i) {
+        hBorder += "═";
+    }
+    std::string topBorder    = "╔" + hBorder + "╗";
+    std::string bottomBorder = "╚" + hBorder + "╝";
+
+    int padding = static_cast<int>(width - 2 - titleWidth);
     int padLeft = (padding > 0) ? padding / 2 : 0;
     int padRight = (padding > 0) ? (padding - padLeft) : 0;
 
@@ -84,11 +308,30 @@ void printHeader(const std::string& title, int width, const std::string& color) 
 }
 
 void printDivider(char ch, int length, const std::string& color) {
+    if (length <= 0) {
+        length = getTerminalWidth();
+    }
     std::string div(length, ch);
     std::cout << colorize(div, color) << "\n";
 }
 
 void printBox(const std::vector<std::string>& lines, int width, const std::string& borderColor) {
+    if (width <= 0) {
+        width = getTerminalWidth();
+    }
+    if (width < 20) width = 20;
+
+    int contentWidth = width - 4;
+    if (contentWidth < 1) contentWidth = 1;
+
+    std::vector<std::string> wrappedLines;
+    for (const auto& line : lines) {
+        std::vector<std::string> parts = wrapText(line, contentWidth);
+        for (const auto& p : parts) {
+            wrappedLines.push_back(p);
+        }
+    }
+
     std::string hBorder;
     for (int i = 0; i < width - 2; ++i) {
         hBorder += "─";
@@ -97,8 +340,9 @@ void printBox(const std::vector<std::string>& lines, int width, const std::strin
     std::string bottomBorder = "└" + hBorder + "┘";
 
     std::cout << colorize(topBorder, borderColor) << "\n";
-    for (const auto& line : lines) {
-        int padding = static_cast<int>(width - 4 - line.length());
+    for (const auto& line : wrappedLines) {
+        size_t lineWidth = getDisplayWidth(line);
+        int padding = contentWidth - static_cast<int>(lineWidth);
         if (padding < 0) padding = 0;
         std::cout << colorize("│ ", borderColor)
                   << line
@@ -257,6 +501,15 @@ void printWarning(const std::string& message) {
 
 void printInfo(const std::string& message) {
     std::cout << colorize("  [i] " + message, Colors::CYAN) << "\n";
+}
+
+void printWIPWarning(const std::string& featureName) {
+    std::string msg = "⚠️ [THÔNG BÁO] Tính năng đang được phát triển (Feature under development)";
+    if (!featureName.empty()) {
+        msg += ": " + featureName;
+    }
+    std::cout << "\n" << colorize(msg, Colors::BRIGHT_YELLOW) << "\n";
+    pause("Nhấn Enter để quay lại...");
 }
 
 } // namespace ConsoleUI

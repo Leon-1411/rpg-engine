@@ -109,7 +109,7 @@ int MainMenu::showLoadGameMenu(const std::vector<int>& availableSlots) {
 
 void MainMenu::showHelp() {
     ConsoleUI::clearScreen();
-    ConsoleUI::printHeader("HƯỚNG DẪN CHƠI (HOW TO PLAY)", 60, ConsoleUI::Colors::BRIGHT_GREEN);
+    ConsoleUI::printHeader("HƯỚNG DẪN CHƠI (HOW TO PLAY)", 68, ConsoleUI::Colors::BRIGHT_GREEN);
     
     std::vector<std::string> lines = {
         "1. Lựa chọn hành động bằng cách nhập số hiển thị trên màn hình.",
@@ -119,7 +119,7 @@ void MainMenu::showHelp() {
         "4. Khám phá cốt truyện phân nhánh nạp trực tiếp từ file JSON.",
         "5. Dữ liệu game được lưu và tải theo chuẩn JSON nlohmann."
     };
-    ConsoleUI::printBox(lines, 60, ConsoleUI::Colors::BRIGHT_BLUE);
+    ConsoleUI::printBox(lines, 68, ConsoleUI::Colors::BRIGHT_BLUE);
     
     ConsoleUI::pause();
 }

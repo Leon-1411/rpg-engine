@@ -22,7 +22,7 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
     // Display Hero, VS, and Enemy/Boss ASCII Art
     ASCIIArt::printBattleVersus(hero, enemy);
 
-    ConsoleUI::printDivider('=', 64, ConsoleUI::Colors::BRIGHT_RED);
+    ConsoleUI::printDivider('=', 0, ConsoleUI::Colors::BRIGHT_RED);
 
     // Hero Status (Left side) & Enemy Status (Right side)
     std::string heroHeader = hero.getName() + " (" + heroClassToString(hero.getHeroClass()) + " Lv." + std::to_string(hero.getLevel()) + ")";
@@ -73,13 +73,13 @@ void BattleUI::renderBattleScreen(const Hero& hero, const Enemy& enemy, const st
                            + std::to_string(hero.getGold()) + " Vàng";
     std::cout << "  " << ConsoleUI::colorize(invSummary, ConsoleUI::Colors::BRIGHT_MAGENTA) << "\n";
 
-    ConsoleUI::printDivider('-', 64, ConsoleUI::Colors::DIM);
+    ConsoleUI::printDivider('-', 0, ConsoleUI::Colors::DIM);
 
     // Event/Log message
     if (!battleMessage.empty()) {
         std::cout << "\n  " << ConsoleUI::colorize("▶ ", ConsoleUI::Colors::BRIGHT_YELLOW)
                   << battleMessage << "\n\n";
-        ConsoleUI::printDivider('-', 64, ConsoleUI::Colors::DIM);
+        ConsoleUI::printDivider('-', 0, ConsoleUI::Colors::DIM);
     }
 
     // Battle Actions Menu
@@ -117,7 +117,14 @@ CombatState BattleUI::runBattle(Hero& hero, Enemy& enemy, std::istream& in) {
         }
 
         if (action == BattleAction::SKILL) {
-            itemOrSkillIndex = 1;
+            std::cout << "\n" << ConsoleUI::colorize("✦ DANH SÁCH KỸ NĂNG - " + hero.getName() + " [MP: " + std::to_string(hero.getMp()) + "/" + std::to_string(hero.getMaxMp()) + "]:", ConsoleUI::Colors::BRIGHT_CYAN) << "\n";
+            hero.displaySkills();
+            std::cout << "  0. Quay lại\n";
+            int sChoice = ConsoleUI::getIntInput(0, 3, "Chọn kỹ năng muốn sử dụng [1-3, hoặc 0 để hủy]: ", in);
+            if (sChoice == 0) {
+                continue;
+            }
+            itemOrSkillIndex = sChoice;
         } else if (action == BattleAction::ITEM) {
             auto& inv = hero.getInventory();
             std::vector<int> potionIndices;

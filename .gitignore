@@ -36,6 +36,10 @@ test_combat
 test_inventory
 test_item
 
+# Allow distribution bundle
+!dist/
+!dist/**
+
 # ==========================================
 # Debugging & Symbol files
 # ==========================================
@@ -77,8 +81,12 @@ compile_commands.json
 # ==========================================
 saves/*.json
 !saves/.gitkeep
+dist/saves/*.json
+!dist/saves/.gitkeep
 data/*_test*.json
 saves_test/
+*Sao chép*
+*.rar
 *.log
 
 # ==========================================

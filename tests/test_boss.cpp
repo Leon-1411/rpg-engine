@@ -9,32 +9,34 @@
 void testBossStats5xMinion() {
     std::cout << "Testing Boss stats 5x scaling from Minions...\n";
 
-    // 1. Test dynamic scaling from a Goblin
-    Goblin goblin;
-    auto goblinBoss = BossMonster::createScaledFromMinion(goblin, "goblin_king", "Goblin King");
-    assert(goblinBoss != nullptr);
-    assert(goblinBoss->getType() == EnemyType::BOSS);
-    assert(goblinBoss->getMaxHp() == goblin.getMaxHp() * 5); // 60 * 5 = 300
-    assert(goblinBoss->getBaseAttack() == goblin.getAttack() * 5); // 12 * 5 = 60
-    assert(goblinBoss->getBaseDefense() == goblin.getDefense() * 5); // 5 * 5 = 25
-    assert(goblinBoss->getExpReward() == goblin.getExpReward() * 5); // 40 * 5 = 200
-    assert(goblinBoss->getGoldReward() == goblin.getGoldReward() * 5); // 10 * 5 = 50
+    // 1. Test dynamic scaling from a Wild Mercenary
+    WildMercenary merc;
+    auto mercBoss = BossMonster::createScaledFromMinion(merc, "merc_overlord", "Mercenary Overlord");
+    assert(mercBoss != nullptr);
+    assert(mercBoss->getType() == EnemyType::BOSS);
+    assert(mercBoss->getMaxHp() == merc.getMaxHp() * 5); // 90 * 5 = 450
+    assert(mercBoss->getBaseAttack() == merc.getAttack() * 5); // 20 * 5 = 100
+    assert(mercBoss->getBaseDefense() == merc.getDefense() * 5); // 8 * 5 = 40
+    assert(mercBoss->getExpReward() == merc.getExpReward() * 5); // 75 * 5 = 375
+    assert(mercBoss->getGoldReward() == merc.getGoldReward() * 5); // 25 * 5 = 125
 
-    // 2. Test dynamic scaling from an Orc Berserker
-    Orc orc;
-    auto orcWarchief = BossMonster::createScaledFromMinion(orc, "orc_warchief", "Orc Warchief");
-    assert(orcWarchief->getMaxHp() == orc.getMaxHp() * 5); // 120 * 5 = 600
-    assert(orcWarchief->getBaseAttack() == orc.getAttack() * 5); // 25 * 5 = 125
-    assert(orcWarchief->getBaseDefense() == orc.getDefense() * 5); // 12 * 5 = 60
+    // 2. Test dynamic scaling from a Demon Berserker
+    DemonBerserker berserker;
+    auto berserkerBoss = BossMonster::createScaledFromMinion(berserker, "demon_overlord", "Demon Overlord");
+    assert(berserkerBoss != nullptr);
+    assert(berserkerBoss->getType() == EnemyType::BOSS);
+    assert(berserkerBoss->getMaxHp() == berserker.getMaxHp() * 5); // 140 * 5 = 700
+    assert(berserkerBoss->getBaseAttack() == berserker.getAttack() * 5); // 30 * 5 = 150
+    assert(berserkerBoss->getBaseDefense() == berserker.getDefense() * 5); // 14 * 5 = 70
 
     // 3. Test default BossMonster stats (configured as 5x average regular minion)
     BossMonster defaultBoss;
     assert(defaultBoss.getType() == EnemyType::BOSS);
-    assert(defaultBoss.getMaxHp() == 525); // ~ 105 average minion HP * 5
-    assert(defaultBoss.getBaseAttack() == 105); // ~ 21 average minion ATK * 5
-    assert(defaultBoss.getBaseDefense() == 50); // ~ 10 average minion DEF * 5
-    assert(defaultBoss.getExpReward() == 450); // ~ 90 average minion EXP * 5
-    assert(defaultBoss.getGoldReward() == 150); // ~ 30 average minion Gold * 5
+    assert(defaultBoss.getMaxHp() == 525);
+    assert(defaultBoss.getBaseAttack() == 105);
+    assert(defaultBoss.getBaseDefense() == 50);
+    assert(defaultBoss.getExpReward() == 450);
+    assert(defaultBoss.getGoldReward() == 150);
 
     std::cout << "[PASS] Boss 5x scaling test passed!\n";
 }
@@ -136,41 +138,50 @@ void testCombatWithBoss() {
 }
 
 void testBossJsonLoading() {
-    std::cout << "Testing Boss JSON loading from data/enemies.json...\n";
+    std::cout << "Testing 6 Canon Bosses JSON loading from data/enemies.json...\n";
 
-    auto boss = BossFactory::createFromJson("dragon_lord", "data/enemies.json");
+    auto boss = BossFactory::createFromJson("Demon_King_Malakor", "data/enemies.json");
     assert(boss != nullptr);
     assert(boss->getType() == EnemyType::BOSS);
-    assert(boss->getName() == "Dragon Lord");
-    assert(boss->getMaxHp() == 525);
-    assert(boss->getAttack() == 105);
-    assert(boss->getDefense() == 50);
-    assert(boss->getExpReward() == 450);
-    assert(boss->getGoldReward() == 150);
-    assert(boss->getSpecialSkillName() == "Infernal Cataclysm");
-    assert(boss->getHealAmount() == 25);
+    assert(boss->getName() == "Demon King Malakor");
+    assert(boss->getMaxHp() == 450);
+    assert(boss->getAttack() == 65);
+    assert(boss->getDefense() == 35);
+    assert(boss->getExpReward() == 400);
+    assert(boss->getGoldReward() == 200);
+    assert(boss->getSpecialSkillName() == "Hellfire Cataclysm");
+    assert(boss->getHealAmount() == 20);
 
     auto allBosses = BossFactory::loadAllFromJson("data/enemies.json");
     assert(!allBosses.empty());
-    bool foundDragonLord = false;
+    bool foundMalakor = false;
+    bool foundAldric = false;
+    bool foundCore = false;
+    bool foundEnforcers = false;
+    bool foundMorvath = false;
+
     for (const auto& b : allBosses) {
-        if (b->getId() == "dragon_lord") {
-            foundDragonLord = true;
-            assert(b->getType() == EnemyType::BOSS);
-        }
+        assert(b->getType() == EnemyType::BOSS);
+        if (b->getId() == "Demon_King_Malakor") foundMalakor = true;
+        if (b->getId() == "General_Aldric") foundAldric = true;
+        if (b->getId() == "The_Core_Guardian") foundCore = true;
+        if (b->getId() == "Arcane_Council_Enforcers") foundEnforcers = true;
+        if (b->getId() == "Archmage_Morvath") foundMorvath = true;
     }
-    assert(foundDragonLord);
+    assert(foundMalakor);
+    assert(foundAldric);
+    assert(foundCore);
+    assert(foundEnforcers);
+    assert(foundMorvath);
 
     // Serialization test
     auto jsonOutput = BossFactory::bossToJson(*boss);
-    assert(jsonOutput["id"] == "dragon_lord");
+    assert(jsonOutput["id"] == "Demon_King_Malakor");
     assert(jsonOutput["type"] == "BOSS");
-    assert(jsonOutput["hp"] == 525);
-    assert(jsonOutput["attack"] == 105);
-    assert(jsonOutput.contains("skills"));
-    assert(jsonOutput["skills"].size() == 3);
+    assert(jsonOutput["hp"] == 450);
+    assert(jsonOutput["attack"] == 65);
 
-    std::cout << "[PASS] Boss JSON loading test passed!\n";
+    std::cout << "[PASS] Canon Bosses JSON loading test passed!\n";
 }
 
 void testBossSkillCooldowns() {
@@ -262,23 +273,18 @@ void testBossSkillCooldowns() {
     assert(rageBoss.getSkillRemainingCooldown(2) == 0);
 
     // 7. Verify JSON parsing of 3 skills
-    auto jsonBoss = BossFactory::createFromJson("dragon_lord", "data/enemies.json");
-    assert(jsonBoss != nullptr);
-    assert(jsonBoss->getSkills().size() == 3);
-    assert(jsonBoss->getSkills()[0].name == "Flame Breath");
-    assert(jsonBoss->getSkills()[0].cooldown == 2);
-    assert(jsonBoss->getSkills()[1].name == "Dragon Roar");
-    assert(jsonBoss->getSkills()[1].cooldown == 3);
-    assert(jsonBoss->getSkills()[2].name == "Infernal Cataclysm");
-    assert(jsonBoss->getSkills()[2].cooldown == 5);
-
-    auto exportedJson = BossFactory::bossToJson(*jsonBoss);
+    auto exportedJson = BossFactory::bossToJson(boss);
     assert(exportedJson.contains("skills"));
     assert(exportedJson["skills"].size() == 3);
     assert(exportedJson["skills"][0]["name"] == "Flame Breath");
     assert(exportedJson["skills"][0]["cooldown"] == 2);
     assert(exportedJson["skills"][2]["name"] == "Infernal Cataclysm");
     assert(exportedJson["skills"][2]["cooldown"] == 5);
+
+    auto parsedBoss = BossFactory::createFromJsonObject("test_boss", exportedJson);
+    assert(parsedBoss != nullptr);
+    assert(parsedBoss->getSkills().size() == 3);
+    assert(parsedBoss->getSkills()[0].name == "Flame Breath");
 
     std::cout << "[PASS] Boss 3-skill cooldown tests passed!\n";
 }

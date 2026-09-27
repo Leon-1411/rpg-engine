@@ -7,10 +7,9 @@
 #include <vector>
 
 enum class MinionType {
-    GOBLIN,
-    SKELETON,
-    ORC,
-    DARK_KNIGHT,
+    WILD_MERCENARY,
+    DEMON_SCOUT,
+    DEMON_BERSERKER,
     UNKNOWN
 };
 
@@ -48,66 +47,52 @@ public:
     std::string getDescription() const;
 };
 
-// 1. Goblin: Agile minion with chance for Quick Strike
-class Goblin : public Minion {
+// ==================== 3 Canon Minions (Fractured Crown Lore) ====================
+
+// 1. Wild Mercenary: Nomad hunter of Free People, ambushing enemies with Wild Ambush
+class WildMercenary : public Minion {
 public:
-    explicit Goblin(const std::string& id = "goblin",
-                    const std::string& name = "Goblin",
-                    int hp = 60,
-                    int attack = 12,
-                    int defense = 5,
-                    int expReward = 40,
-                    int goldReward = 10,
-                    const std::string& description = "A small, cunning creature that strikes quickly from the shadows.",
-                    const std::string& specialSkill = "Quick Strike");
+    explicit WildMercenary(const std::string& id = "Wild_Mercenary",
+                           const std::string& name = "Wild Mercenary",
+                           int hp = 90,
+                           int attack = 20,
+                           int defense = 8,
+                           int expReward = 75,
+                           int goldReward = 25,
+                           const std::string& description = "Lính đánh thuê và thợ săn du mục của Bộ Tộc Tự Do, canh giữ ranh giới Rừng Rậm Huyết Nguyệt.",
+                           const std::string& specialSkill = "Wild Ambush");
 
     int chooseAction() override;
 };
 
-// 2. Skeleton: Undead warrior using piercing attacks
-class Skeleton : public Minion {
+// 2. Demon Scout: Agile shadow demon scouting borders with Shadow Dart
+class DemonScout : public Minion {
 public:
-    explicit Skeleton(const std::string& id = "skeleton",
-                      const std::string& name = "Skeleton Warrior",
-                      int hp = 80,
-                      int attack = 18,
-                      int defense = 8,
-                      int expReward = 65,
-                      int goldReward = 20,
-                      const std::string& description = "An undead soldier wielding a rusty sword with relentless determination.",
-                      const std::string& specialSkill = "Bone Pierce");
+    explicit DemonScout(const std::string& id = "Demon_Scout",
+                        const std::string& name = "Demon Scout",
+                        int hp = 85,
+                        int attack = 22,
+                        int defense = 6,
+                        int expReward = 80,
+                        int goldReward = 30,
+                        const std::string& description = "Trinh sát quỷ nhanh nhẹn của Ma tộc tuần tra vùng biên giới Trăng Máu.",
+                        const std::string& specialSkill = "Shadow Dart");
 
     int chooseAction() override;
 };
 
-// 3. Orc: Brute attacker that goes berserk when low on HP
-class Orc : public Minion {
+// 3. Demon Berserker: Savage frontline demon fighter entering Demonic Frenzy
+class DemonBerserker : public Minion {
 public:
-    explicit Orc(const std::string& id = "orc",
-                 const std::string& name = "Orc Berserker",
-                 int hp = 120,
-                 int attack = 25,
-                 int defense = 12,
-                 int expReward = 100,
-                 int goldReward = 35,
-                 const std::string& description = "A muscular beast fueled by bloodlust, hitting harder when enraged.",
-                 const std::string& specialSkill = "Heavy Slam");
-
-    int chooseAction() override;
-};
-
-// 4. Dark Knight: Armored elite minion with dark magic strike
-class DarkKnight : public Minion {
-public:
-    explicit DarkKnight(const std::string& id = "dark_knight",
-                        const std::string& name = "Dark Knight",
-                        int hp = 160,
-                        int attack = 32,
-                        int defense = 18,
-                        int expReward = 150,
-                        int goldReward = 60,
-                        const std::string& description = "A fallen warrior encased in cursed armor, wielding dark magic.",
-                        const std::string& specialSkill = "Shadow Slash");
+    explicit DemonBerserker(const std::string& id = "Demon_Berserker",
+                            const std::string& name = "Demon Berserker",
+                            int hp = 140,
+                            int attack = 30,
+                            int defense = 14,
+                            int expReward = 130,
+                            int goldReward = 50,
+                            const std::string& description = "Chiến binh quỷ cuồng nộ canh giữ lối vào Ma Điện khi người chơi đột kích trực diện.",
+                            const std::string& specialSkill = "Demonic Frenzy");
 
     int chooseAction() override;
 };

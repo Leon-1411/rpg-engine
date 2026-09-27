@@ -33,9 +33,16 @@ This repository uses Antigravity IDE and AI Coding Assistants. All agents intera
 ## 3. Tech Stack & Build Conventions
 
 - **Language**: C++17 / C++20 Standard.
-- **Compiler**: MinGW GCC (`g++`).
-- **Build Script**: `build.bat` (or custom g++ target compilation).
+- **Testing & Verification Standard (MANDATORY)**:
+  - The Agent **MUST ALWAYS** prioritize running tests and builds via **Docker** (`rpg-engine:dev` with CMake + Ninja + CTest) for maximum speed (~1-2s):
+    ```powershell
+    docker run --rm -v "${PWD}:/app" -w /app rpg-engine:dev bash -c "cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build && ctest --test-dir build --output-on-failure"
+    ```
+  - **Cache & Branch Preservation**: Always stay and run verification on the current working branch in-place. Avoid creating and checking out unnecessary temporary branches that invalidate CMake/Ninja object caches (`build/`), ensuring fast incremental builds (~1s).
+  - Fallback to `build.bat` or local `g++` only if Docker daemon is not active.
+- **Compiler**: MinGW GCC / GCC Linux (via Docker).
 - **Encoding**: UTF-8 without BOM.
 - **Code Style**:
   - Clear separation of concerns between Engine (`src/`, `include/`), Tools (`tools/`), and Tests (`tests/`).
   - Keep documentation integrity: do not delete existing comments or documentation headers unless instructed.
+

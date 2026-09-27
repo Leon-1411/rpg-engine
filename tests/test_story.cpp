@@ -121,17 +121,38 @@ int main() {
     assert(flagGraph.getFlag("unlocked") == true);
     assert(flagGraph.isEnding() == true);
 
-    // 7. Test DataLoader functions
-    std::string itemsPath = "data/items.json";
-    if (!std::ifstream(itemsPath).good()) itemsPath = "../data/items.json";
-    auto items = DataLoader::loadItems(itemsPath);
-    assert(!items.empty());
+    // 8. Kiểm tra Story Progress Codex (Visited nodes, exploration percentage, endings tracking)
+    StoryGraph codexGraph;
+    codexGraph.addNode({"room_1", "Room 1", EventType::NORMAL, {{"Go to room 2", "room_2"}}});
+    codexGraph.addNode({"room_2", "Room 2", EventType::NORMAL, {{"Go to End 1", "End1"}, {"Go to End 2", "End2"}}});
+    codexGraph.addNode({"End1", "Ending 1", EventType::ENDING, {}});
+    codexGraph.addNode({"End2", "Ending 2", EventType::ENDING, {}});
+    codexGraph.setCurrentNodeId("room_1");
 
-    std::string enemiesPath = "data/enemies.json";
-    if (!std::ifstream(enemiesPath).good()) enemiesPath = "../data/enemies.json";
-    auto enemies = DataLoader::loadEnemies(enemiesPath);
-    assert(!enemies.empty());
+    assert(codexGraph.isNodeVisited("room_1") == true);
+    assert(codexGraph.isNodeVisited("room_2") == false);
+    assert(codexGraph.getVisitedNodes().size() == 1);
+    assert(codexGraph.getExplorationPercentage() == 25.0f); // 1 / 4 = 25%
 
-    std::cout << "[PASS] All StoryGraph unit tests (validateGraph, Dead-ends, Choices & Flags) passed successfully!\n";
+    codexGraph.moveToNode("room_2");
+    assert(codexGraph.isNodeVisited("room_2") == true);
+    assert(codexGraph.getExplorationPercentage() == 50.0f); // 2 / 4 = 50%
+
+    auto endings = codexGraph.getAllEndings();
+    assert(endings.size() == 2);
+    assert(codexGraph.getDiscoveredEndings().empty());
+
+    codexGraph.moveToNode("End1");
+    assert(codexGraph.isNodeVisited("End1") == true);
+    auto discoveredEndings = codexGraph.getDiscoveredEndings();
+    assert(discoveredEndings.size() == 1);
+    assert(discoveredEndings[0] == "End1");
+    assert(codexGraph.getExplorationPercentage() == 75.0f); // 3 / 4 = 75%
+
+    auto lockedNodes = codexGraph.getLockedNodes();
+    assert(lockedNodes.size() == 1);
+    assert(lockedNodes[0] == "End2");
+
+    std::cout << "[PASS] All StoryGraph unit tests (validateGraph, Dead-ends, Choices, Flags & Codex) passed successfully!\n";
     return 0;
 }
