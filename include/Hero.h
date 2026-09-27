@@ -43,8 +43,11 @@ protected:
     // Status Effects (Poison DoT & Regeneration HoT)
     int poisonTurns;
     int poisonDamagePerTurn;
+    int poisonStacks;
     int regenTurns;
     int regenPerTurn;
+
+    int speed;                        // Combat speed / agility for turn order
 
     Inventory inventory;
 
@@ -84,11 +87,12 @@ public:
     void lockSkills(int turns);
 
     // Status Effects
-    void applyPoison(int turns, int damagePerTurn);
+    void applyPoison(int turns, int damagePerTurn, int stackInc = 1);
     int takePoisonDamage();
     bool isPoisoned() const;
     int getPoisonTurns() const;
     int getPoisonDamagePerTurn() const;
+    int getPoisonStacks() const;
 
     void applyRegen(int turns, int healPerTurn);
     int processRegen();
@@ -154,6 +158,8 @@ public:
     void setName(const std::string& newName);
     void setHeroClass(HeroClass newClass);
     void setArmorPenetration(int value);
+    int getSpeed() const;
+    void setSpeed(int value);
     void setCritChance(float value);
     void setCritDamage(float value);
     void setIgnoreArmor(bool value);

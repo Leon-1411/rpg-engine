@@ -18,4 +18,6 @@ struct StatusEffect {
     std::string name;
     int duration = 0; // Number of turns remaining
     int value = 0;    // Damage or healing amount per turn
+    int stacks = 1;   // Number of stacks (Cộng dồn số tầng hiệu ứng)
+    static constexpr int MAX_STACKS = 3; // Giới hạn tối đa 3 tầng cộng dồn
 };

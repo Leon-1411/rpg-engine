@@ -63,9 +63,11 @@ int CombatEngine::calculateDamage(int attackerAtk, int defenderDef) const {
 void CombatEngine::processStatusEffects() {
     // 1. Hero Poison DoT
     if (hero.isPoisoned()) {
+        int stacks = hero.getPoisonStacks();
         int poisonDmg = hero.takePoisonDamage();
+        std::string stackStr = (stacks > 1) ? (" (x" + std::to_string(stacks) + " Stacks)") : "";
         std::cout << "[HERO POISON] " << hero.getName() << " suffers "
-                  << poisonDmg << " poison damage! (" << hero.getPoisonTurns()
+                  << poisonDmg << " poison damage!" << stackStr << " (" << hero.getPoisonTurns()
                   << " turns remaining, HP: " << hero.getHp() << "/" << hero.getMaxHp() << ")\n";
     }
 
@@ -79,9 +81,11 @@ void CombatEngine::processStatusEffects() {
 
     // 3. Enemy Poison DoT
     if (enemy.isPoisoned()) {
+        int stacks = enemy.getPoisonStacks();
         int poisonDmg = enemy.takePoisonDamage();
+        std::string stackStr = (stacks > 1) ? (" (x" + std::to_string(stacks) + " Stacks)") : "";
         std::cout << "[ENEMY POISON] " << enemy.getName() << " takes "
-                  << poisonDmg << " poison damage! (" << enemy.getPoisonTurns()
+                  << poisonDmg << " poison damage!" << stackStr << " (" << enemy.getPoisonTurns()
                   << " turns remaining, HP: " << enemy.getHp() << "/" << enemy.getMaxHp() << ")\n";
     }
 
@@ -143,6 +147,20 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
 
     int heroHpBefore = hero.getHp();
     int enemyHpBefore = enemy.getHp();
+
+    // Speed Initiative check: If enemy has strictly higher speed, enemy takes initiative first!
+    bool enemyPreemptive = (enemy.getSpeed() > hero.getSpeed());
+    if (enemyPreemptive) {
+        std::cout << "[TỐC ĐỘ / SPEED INITIATIVE] " << enemy.getName() << " (Speed: " << enemy.getSpeed()
+                  << ") nhanh hơn " << hero.getName() << " (Speed: " << hero.getSpeed()
+                  << ") và chiếm ưu thế ra đòn trước!\n";
+        processEnemyTurn();
+        if (!hero.isAlive()) {
+            std::cout << hero.getName() << " đã gục ngã trước đòn đánh phủ đầu!\n";
+            currentState = CombatState::ENEMY_VICTORY;
+            return currentState;
+        }
+    }
 
     // 1. Player action
     if (actionChoice == 1) { // Normal Attack
@@ -244,8 +262,10 @@ CombatState CombatEngine::executeTurn(int actionChoice, int skillOrItemIndex) {
         return currentState;
     }
 
-    // 2. Enemy Turn
-    processEnemyTurn();
+    // 2. Enemy Turn (if not already acted preemptively)
+    if (!enemyPreemptive) {
+        processEnemyTurn();
+    }
 
     // Check if hero or enemy defeated
     if (!enemy.isAlive()) {
@@ -419,6 +439,10 @@ CombatState CombatEngine::getState() const {
 
 int CombatEngine::getTurnCount() const {
     return turnCount;
+}
+
+bool CombatEngine::isHeroFirst() const {
+    return hero.getSpeed() >= enemy.getSpeed();
 }
 
 std::string CombatEngine::renderBar(int current, int max, int length) {

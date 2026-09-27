@@ -26,6 +26,10 @@ protected:
     // Poison DoT status
     int poisonTurns;
     int poisonDamagePerTurn;
+    int poisonStacks;
+
+    // Speed / Agility
+    int speed;
 
     // Stun status (Choáng mất lượt)
     int stunTurns;
@@ -67,11 +71,16 @@ public:
     std::vector<std::string> generateLootDrops() const;
 
     // Poison mechanisms (Suffering poison)
-    void applyPoison(int turns, int damagePerTurn);
+    void applyPoison(int turns, int damagePerTurn, int stackInc = 1);
     int takePoisonDamage();
     bool isPoisoned() const;
     int getPoisonTurns() const;
     int getPoisonDamagePerTurn() const { return poisonDamagePerTurn; }
+    int getPoisonStacks() const { return poisonStacks; }
+
+    // Speed / Agility methods
+    int getSpeed() const { return speed; }
+    void setSpeed(int value) { speed = value; }
 
     // Stun mechanisms (Choáng)
     void applyStun(int turns = 1);
